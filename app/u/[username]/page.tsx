@@ -1,11 +1,16 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/db/supabase/server';
+import { getSessionUser } from '@/lib/auth/session';
 import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
 import { TripCard } from '@/components/trip/trip-card';
+import { FollowButton } from '@/components/profile/follow-button';
+import { CoverArt } from '@/components/ui/cover-art';
+import { formatCompact } from '@/lib/utils/format';
+import { publicEnv } from '@/lib/public-env';
 
-export const revalidate = 300;
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({
   params,
@@ -13,7 +18,11 @@ export async function generateMetadata({
   params: Promise<{ username: string }>;
 }): Promise<Metadata> {
   const { username } = await params;
-  return { title: `@${username}`, description: `Trips shared by @${username}.` };
+  return {
+    title: `@${username}`,
+    description: `Trips shared by @${username}.`,
+    alternates: { canonical: `${publicEnv.siteUrl}/u/${username}` },
+  };
 }
 
 export default async function ProfilePage({
@@ -23,34 +32,81 @@ export default async function ProfilePage({
 }) {
   const { username } = await params;
   const supabase = await createClient();
+  const viewer = await getSessionUser();
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('id, username, display_name, avatar_url, bio')
+    .select('id, username, display_name, avatar_url, bio, follower_count, following_count, trip_count')
     .eq('username', username)
     .maybeSingle();
 
   if (!profile) notFound();
 
-  const { data: trips } = await supabase
-    .from('trips')
-    .select('id, slug, title, subtitle, duration_days, currency, estimated_cost_total, hero_image_url, clone_count, like_count, interests, travel_style, profiles:owner_id(username, display_name, avatar_url)')
-    .eq('owner_id', profile.id)
-    .eq('visibility', 'public')
-    .eq('moderation_state', 'approved')
-    .is('deleted_at', null)
-    .order('published_at', { ascending: false })
-    .limit(24);
+  const [{ data: trips }, { data: follow }] = await Promise.all([
+    supabase
+      .from('trips')
+      .select('id, slug, title, subtitle, duration_days, currency, estimated_cost_total, hero_image_url, hero_credit, clone_count, like_count, interests, travel_style, profiles:owner_id(username, display_name, avatar_url)')
+      .eq('owner_id', profile.id)
+      .eq('visibility', 'public')
+      .eq('moderation_state', 'approved')
+      .is('deleted_at', null)
+      .order('published_at', { ascending: false })
+      .limit(24),
+    viewer
+      ? supabase
+          .from('follows')
+          .select('follower_id')
+          .eq('follower_id', viewer.id)
+          .eq('followee_id', profile.id)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
+  ]);
 
   return (
     <>
       <SiteHeader />
       <main className="mx-auto max-w-5xl px-5 py-12">
-        <h1 className="font-display text-display-sm">
-          {profile.display_name ?? `@${profile.username}`}
-        </h1>
-        <p className="mt-2 text-ink-faint">@{profile.username}</p>
-        {profile.bio && <p className="mt-4 max-w-xl text-ink-muted">{profile.bio}</p>}
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex items-start gap-4">
+            <span className="relative size-16 shrink-0 overflow-hidden rounded-full bg-paper-sunk">
+              {/* Generated rather than a grey circle with an initial in it. */}
+              <CoverArt seed={profile.username} label={profile.username} />
+            </span>
+            <div className="min-w-0">
+              <h1 className="font-display text-display-sm">
+                {profile.display_name ?? `@${profile.username}`}
+              </h1>
+              <p className="mt-1 text-ink-faint">@{profile.username}</p>
+              {profile.bio && <p className="mt-3 max-w-xl text-ink-muted">{profile.bio}</p>}
+
+              <dl className="mt-4 flex gap-6 text-sm">
+                <div className="flex gap-1.5">
+                  <dt className="sr-only">Trips</dt>
+                  <dd className="font-medium">{formatCompact(profile.trip_count)}</dd>
+                  <span className="text-ink-faint">trips</span>
+                </div>
+                <div className="flex gap-1.5">
+                  <dt className="sr-only">Followers</dt>
+                  <dd className="font-medium">{formatCompact(profile.follower_count)}</dd>
+                  <span className="text-ink-faint">
+                    {profile.follower_count === 1 ? 'follower' : 'followers'}
+                  </span>
+                </div>
+                <div className="flex gap-1.5">
+                  <dt className="sr-only">Following</dt>
+                  <dd className="font-medium">{formatCompact(profile.following_count)}</dd>
+                  <span className="text-ink-faint">following</span>
+                </div>
+              </dl>
+            </div>
+          </div>
+
+          <FollowButton
+            username={profile.username}
+            initiallyFollowing={follow !== null}
+            isSelf={viewer?.id === profile.id}
+          />
+        </div>
 
         {trips && trips.length > 0 ? (
           <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

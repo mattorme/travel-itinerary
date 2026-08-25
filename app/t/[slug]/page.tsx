@@ -8,6 +8,8 @@ import { TripView } from '@/components/trip/trip-view';
 import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
 import { PublicTripActions } from '@/components/trip/public-trip-actions';
+import { Comments } from '@/components/trip/comments';
+import { createClient } from '@/lib/db/supabase/server';
 import { publicEnv } from '@/lib/public-env';
 import { formatCurrency } from '@/lib/utils/format';
 
@@ -79,6 +81,29 @@ export default async function PublicTripPage({
   const user = await getSessionUser();
   const isOwner = user !== null && itinerary.creator?.id === user.id;
 
+  const supabase = await createClient();
+
+  // Viewer state and the comment thread in one pass, so the page is a single
+  // round of queries rather than a waterfall.
+  const [liked, saved, commentRows] = await Promise.all([
+    user
+      ? supabase.from('trip_likes').select('trip_id').eq('trip_id', itinerary.id).eq('profile_id', user.id).maybeSingle()
+      : Promise.resolve({ data: null }),
+    user
+      ? supabase.from('trip_saves').select('trip_id').eq('trip_id', itinerary.id).eq('profile_id', user.id).maybeSingle()
+      : Promise.resolve({ data: null }),
+    supabase.rpc('trip_comments', { p_trip_id: itinerary.id }),
+  ]);
+
+  const comments = (commentRows.data ?? []).map((row) => ({
+    id: row.id,
+    body: row.body,
+    createdAt: row.created_at,
+    authorId: row.author_id,
+    username: row.username,
+    displayName: row.display_name,
+  }));
+
   const headerList = await headers();
   await recordTripView({
     tripId: itinerary.id,
@@ -93,7 +118,23 @@ export default async function PublicTripPage({
       <main className="pt-8">
         <TripView
           itinerary={itinerary}
-          actions={<PublicTripActions itinerary={itinerary} isOwner={isOwner} />}
+          actions={
+            <PublicTripActions
+              itinerary={itinerary}
+              isOwner={isOwner}
+              initiallyLiked={liked.data !== null}
+              initiallySaved={saved.data !== null}
+            />
+          }
+          footer={
+            <Comments
+              tripId={itinerary.id}
+              tripSlug={itinerary.slug}
+              comments={comments}
+              viewerId={user?.id ?? null}
+              canComment={user !== null && !user.isAnonymous}
+            />
+          }
         />
       </main>
       <SiteFooter />

@@ -29,9 +29,14 @@ export default async function MyTripsPage() {
       <main className="mx-auto max-w-3xl px-5 py-12">
         <div className="flex items-end justify-between gap-4">
           <h1 className="font-display text-display-sm">My trips</h1>
-          <Link href="/plan">
-            <Button variant="accent">New trip</Button>
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link href="/me/saved" className="text-sm text-ink-muted underline underline-offset-4 hover:text-ink">
+              Saved
+            </Link>
+            <Link href="/plan">
+              <Button variant="accent">New trip</Button>
+            </Link>
+          </div>
         </div>
 
         {user.isAnonymous && (trips?.length ?? 0) > 0 && (

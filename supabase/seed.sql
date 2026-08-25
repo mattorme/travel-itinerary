@@ -180,3 +180,162 @@ begin
      '12:30', '13:45', 75, 150,
      '{"mode":"walking","minutes":11,"meters":850,"polyline":null,"source":"routes"}'::jsonb);
 end $$;
+
+-- ---------------------------------------------------------------------------
+-- A couple more public trips, so Explore has a grid rather than one card and
+-- the generated covers can be seen as a set. Plus a comment thread, so the
+-- moderation and threading paths have something to render in development.
+-- ---------------------------------------------------------------------------
+do $$
+declare
+  demo_user uuid := '00000000-0000-0000-0000-0000000dee00';
+  second    uuid := '00000000-0000-0000-0000-0000000dee01';
+  trip_id   uuid;
+  day_id    uuid;
+  spec      record;
+begin
+  if exists (select 1 from public.trips where slug = 'lisbon-on-foot') then
+    return;
+  end if;
+
+  insert into auth.users (
+    id, instance_id, aud, role, email, encrypted_password,
+    email_confirmed_at, created_at, updated_at,
+    raw_app_meta_data, raw_user_meta_data, is_anonymous
+  ) values (
+    second, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
+    'sam@wayfare.local', '', now(), now(), now(), '{}'::jsonb,
+    '{"full_name":"Sam Okafor"}'::jsonb, false
+  );
+  update public.profiles
+     set username = 'sam', display_name = 'Sam Okafor',
+         bio = 'Walks everywhere. Books nothing.'
+   where id = second;
+
+  for spec in
+    select * from (values
+      ('lisbon-on-foot', 'Lisbon on foot', 'Four days, one pair of shoes, no metro',
+       'lisbon-pt', 4, 1180.00, second,
+       array['A morning in Graça before the trams fill up','Lunch standing at a counter','The long way down to the river'],
+       'Lisbon punishes a packed schedule — it is all hills and stairs. This one is built around walking down rather than up, with a long lunch in the middle of every day and nothing booked before ten.'),
+      ('mexico-city-eating', 'Five days eating in Mexico City', 'Planned around meals, with the neighbourhoods following',
+       'mexico-city-mx', 5, 980.00, demo_user,
+       array['Breakfast at a market counter','An afternoon of nothing in Coyoacán','One very good taco'],
+       'Most Mexico City itineraries are museums with meals wedged between them. This is the other way round: the meals are the plan, and the walking connects them.')
+    ) as t(slug, title, subtitle, dest_slug, days, cost, owner, highlights, summary)
+  loop
+    insert into public.trips (
+      owner_id, slug, title, subtitle, status, visibility, moderation_state,
+      duration_days, date_mode, party, currency, budget_total, travel_style, pace,
+      interests, transport_modes, food_prefs, summary, highlights,
+      estimated_cost_total, published_at
+    ) values (
+      spec.owner, spec.slug, spec.title, spec.subtitle, 'ready', 'public', 'approved',
+      spec.days, 'flexible', '{"adults":2,"children":[]}'::jsonb, 'AUD', spec.cost,
+      'balanced', 'relaxed',
+      array['food','local_experiences'], array['walking']::public.transport_mode[],
+      array['local_food'], spec.summary, spec.highlights, spec.cost, now()
+    )
+    returning id into trip_id;
+
+    insert into public.trip_destinations (trip_id, destination_id, order_index, first_day_index, nights)
+    select trip_id, d.id, 0, 1, greatest(1, spec.days - 1)
+      from public.destinations d where d.slug = spec.dest_slug;
+
+    for i in 1..spec.days loop
+      insert into public.trip_days (trip_id, day_index, title, summary, estimated_cost)
+      values (trip_id, i, format('Day %s', i),
+              'A short day with room in it, ending somewhere worth sitting down.',
+              round((spec.cost / spec.days)::numeric, 2))
+      returning id into day_id;
+
+      insert into public.activities
+        (trip_day_id, order_index, kind, custom_name, title, description, reason,
+         start_time, end_time, duration_minutes, estimated_cost)
+      values
+        (day_id, 1, 'activity', format('Morning walk %s', i), format('Morning walk %s', i),
+         'An hour on foot before anything opens, which is when the place is at its best.',
+         'Free, quiet, and the right way to start a relaxed day.',
+         '09:30', '10:45', 75, 0),
+        (day_id, 2, 'meal', format('Lunch %s', i), format('Lunch %s', i),
+         'A long sit-down lunch at a counter, ordered by pointing.',
+         'The meal this trip is actually built around.',
+         '12:30', '13:45', 75, round((spec.cost / spec.days / 4)::numeric, 2)),
+        (day_id, 3, 'meal', format('Dinner %s', i), format('Dinner %s', i),
+         'Neighbourhood dinner, no reservation, cash preferred.',
+         'Close enough to walk back from.',
+         '19:00', '20:30', 90, round((spec.cost / spec.days / 3)::numeric, 2));
+    end loop;
+  end loop;
+
+  -- A short thread on the demo trip.
+  insert into public.comments (trip_id, author_id, body, moderation_state)
+  select t.id, second,
+         'Did this last spring and the Yanaka morning is exactly right — go before 9 and you get the whole street to yourself.',
+         'approved'
+    from public.trips t where t.slug = 'three-slow-days-in-tokyo';
+
+  insert into public.comments (trip_id, author_id, body, moderation_state)
+  select t.id, demo_user,
+         'Worth adding: the soba place is cash only and shuts when it runs out, which on a weekday is about two.',
+         'approved'
+    from public.trips t where t.slug = 'three-slow-days-in-tokyo';
+end $$;
+
+-- ---------------------------------------------------------------------------
+-- Coordinates for the demo trip, so the map has something to draw locally.
+--
+-- These are hand-authored from public geography, not fetched from Google — but
+-- they live in place_cache because that is the only place hydration reads
+-- coordinates from, and they carry a normal TTL so the expiry behaviour is
+-- exercised rather than bypassed. Development data only; nothing here ships.
+-- ---------------------------------------------------------------------------
+do $$
+declare
+  tokyo   uuid;
+  pid     uuid;
+  spec    record;
+  act     record;
+begin
+  select id into tokyo from public.destinations where slug = 'tokyo-jp';
+  if exists (select 1 from public.places where google_place_id = 'seed-yanaka-cemetery') then
+    return;
+  end if;
+
+  for spec in
+    select * from (values
+      ('seed-yanaka-cemetery', 'Yanaka Cemetery walk',            35.7268, 139.7669, 'park'),
+      ('seed-yanaka-ginza',    'Yanaka Ginza',                    35.7276, 139.7654, 'market'),
+      ('seed-nezu-soba',       'Soba lunch in Nezu',              35.7204, 139.7615, 'restaurant'),
+      ('seed-nezu-shrine',     'Nezu Shrine',                     35.7203, 139.7594, 'place_of_worship'),
+      ('seed-nezu-izakaya',    'Dinner at a neighbourhood izakaya',35.7189, 139.7628, 'restaurant'),
+      ('seed-kiyosumi-coffee', 'Coffee in Kiyosumi',              35.6811, 139.7996, 'coffee_shop'),
+      ('seed-kiyosumi-teien',  'Kiyosumi Teien',                  35.6807, 139.7975, 'garden'),
+      ('seed-monzen-lunch',    'Lunch in Monzen-Nakacho',         35.6714, 139.7967, 'restaurant'),
+      ('seed-takao',           'Mount Takao',                     35.6250, 139.2436, 'hiking_area'),
+      ('seed-tsukiji',         'Tsukiji Outer Market',            35.6654, 139.7707, 'market'),
+      ('seed-hamarikyu',       'Hama-rikyu Gardens',              35.6597, 139.7634, 'garden'),
+      ('seed-tsukiji-sushi',   'Sushi lunch back at Tsukiji',     35.6660, 139.7699, 'restaurant')
+    ) as t(gid, title, lat, lng, ptype)
+  loop
+    insert into public.places (google_place_id, destination_id, primary_type, types, tags)
+    values (spec.gid, tokyo, spec.ptype, array[spec.ptype], array['landmark'])
+    returning id into pid;
+
+    insert into public.place_cache
+      (place_id, display_name, formatted_address, lat, lng, rating, user_rating_count,
+       price_level, business_status, fetched_at, expires_at)
+    values
+      (pid, spec.title, 'Tokyo, Japan', spec.lat, spec.lng, 4.4, 1200,
+       'PRICE_LEVEL_MODERATE', 'OPERATIONAL', now(), now() + interval '20 days');
+
+    -- Attach to the matching activity on the demo trip by its authored title.
+    update public.activities a
+       set place_id = pid
+      from public.trip_days d
+      join public.trips t on t.id = d.trip_id
+     where a.trip_day_id = d.id
+       and t.slug = 'three-slow-days-in-tokyo'
+       and a.title = spec.title;
+  end loop;
+end $$;

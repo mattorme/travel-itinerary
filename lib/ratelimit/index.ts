@@ -70,11 +70,19 @@ function all(): Record<string, Limiter> {
     autocomplete: build('autocomplete', 60, '1 m', 60_000),
     clone: build('clone', 20, '1 h', 3_600_000),
     mutation: build('mutation', 120, '1 m', 60_000),
+    // Comments are a public surface and a spam vector; deliberately tight.
+    comment: build('comment', 10, '10 m', 600_000),
   };
   return limiters;
 }
 
-export type LimiterName = 'generateByUser' | 'generateByIp' | 'autocomplete' | 'clone' | 'mutation';
+export type LimiterName =
+  | 'generateByUser'
+  | 'generateByIp'
+  | 'autocomplete'
+  | 'clone'
+  | 'mutation'
+  | 'comment';
 
 export interface LimitResult {
   readonly allowed: boolean;

@@ -641,10 +641,13 @@ export type Database = {
           country_code: string | null
           created_at: string
           display_name: string | null
+          follower_count: number
+          following_count: number
           id: string
           is_anonymous: boolean
           is_public: boolean
           subscription_tier: Database["public"]["Enums"]["subscription_tier"]
+          trip_count: number
           updated_at: string
           username: string
         }
@@ -654,10 +657,13 @@ export type Database = {
           country_code?: string | null
           created_at?: string
           display_name?: string | null
+          follower_count?: number
+          following_count?: number
           id: string
           is_anonymous?: boolean
           is_public?: boolean
           subscription_tier?: Database["public"]["Enums"]["subscription_tier"]
+          trip_count?: number
           updated_at?: string
           username: string
         }
@@ -667,10 +673,13 @@ export type Database = {
           country_code?: string | null
           created_at?: string
           display_name?: string | null
+          follower_count?: number
+          following_count?: number
           id?: string
           is_anonymous?: boolean
           is_public?: boolean
           subscription_tier?: Database["public"]["Enums"]["subscription_tier"]
+          trip_count?: number
           updated_at?: string
           username?: string
         }
@@ -1121,6 +1130,7 @@ export type Database = {
           budget_daily: number | null
           budget_total: number | null
           clone_count: number
+          comment_count: number
           created_at: string
           currency: string
           date_mode: Database["public"]["Enums"]["date_mode"]
@@ -1172,6 +1182,7 @@ export type Database = {
           budget_daily?: number | null
           budget_total?: number | null
           clone_count?: number
+          comment_count?: number
           created_at?: string
           currency?: string
           date_mode?: Database["public"]["Enums"]["date_mode"]
@@ -1223,6 +1234,7 @@ export type Database = {
           budget_daily?: number | null
           budget_total?: number | null
           clone_count?: number
+          comment_count?: number
           created_at?: string
           currency?: string
           date_mode?: Database["public"]["Enums"]["date_mode"]
@@ -1323,6 +1335,18 @@ export type Database = {
       slugify: { Args: { input: string }; Returns: string }
       spend_today_usd: { Args: never; Returns: number }
       sweep_expired_cache: { Args: never; Returns: number }
+      trip_comments: {
+        Args: { p_trip_id: string }
+        Returns: {
+          author_id: string
+          avatar_url: string
+          body: string
+          created_at: string
+          display_name: string
+          id: string
+          username: string
+        }[]
+      }
       trip_id_for_day: { Args: { d: string }; Returns: string }
       unaccent_fallback: { Args: { input: string }; Returns: string }
       unique_trip_slug: { Args: { base: string }; Returns: string }
