@@ -1315,6 +1315,32 @@ export type Database = {
       can_edit_trip: { Args: { t: string }; Returns: boolean }
       can_read_trip: { Args: { t: string }; Returns: boolean }
       clone_trip: { Args: { source_trip_id: string }; Returns: string }
+      destination_stats: {
+        Args: { p_destination_id: string }
+        Returns: {
+          common_pace: string
+          common_style: string
+          currency: string
+          max_days: number
+          median_cost: number
+          median_days: number
+          min_days: number
+          top_interests: string[]
+          trip_count: number
+        }[]
+      }
+      destination_top_places: {
+        Args: { p_destination_id: string; p_limit?: number }
+        Returns: {
+          maps_url: string
+          name: string
+          place_id: string
+          rating: number
+          tags: string[]
+          trips: number
+          user_rating_count: number
+        }[]
+      }
       ensure_trip_events_partition: {
         Args: { target: string }
         Returns: undefined
