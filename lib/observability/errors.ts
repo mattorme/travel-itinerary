@@ -49,7 +49,7 @@ const DEFAULT_USER_MESSAGE: Record<FailureKind, string> = {
   invalid_request: 'Something about that request did not look right.',
   upstream_unavailable: 'One of our data providers is down. Please try again shortly.',
   timeout: 'That took too long. Please try again.',
-  auth: 'We could not authenticate with one of our providers.',
+  auth: 'One of the services we rely on turned us away. This is on our side — please try again shortly.',
   unknown: 'Something went wrong on our end.',
 };
 

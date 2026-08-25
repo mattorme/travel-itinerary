@@ -89,6 +89,14 @@ function mapStatus(status: number, provider: GoogleRequest['provider'], detail: 
   const base = { provider, status, message: `${provider} returned ${status}: ${detail.slice(0, 400)}` };
   if (status === 429) return new ServiceError({ ...base, kind: 'rate_limited' });
   if (status === 401 || status === 403) return new ServiceError({ ...base, kind: 'auth' });
+
+  // Google returns 400 — not 401 — for a missing, invalid or unauthorised API
+  // key. Without this, a configuration fault on our side is classified as a bad
+  // request and the traveller is told their input looked wrong.
+  if (status === 400 && /API_KEY|API key not valid|not authorized to use this API/i.test(detail)) {
+    return new ServiceError({ ...base, kind: 'auth' });
+  }
+
   if (status === 400 || status === 422) return new ServiceError({ ...base, kind: 'invalid_request' });
   if (status === 404) return new ServiceError({ ...base, kind: 'not_found' });
   if (status >= 500) return new ServiceError({ ...base, kind: 'upstream_unavailable' });

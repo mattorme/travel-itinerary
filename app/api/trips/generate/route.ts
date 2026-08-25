@@ -6,6 +6,7 @@ import { checkLimit } from '@/lib/ratelimit';
 import { createGenerationJob, runGenerationJob } from '@/lib/itinerary/jobs';
 import { clientIp } from '@/lib/utils/request';
 import { verifyTurnstile } from '@/lib/auth/turnstile';
+import { generationProvidersReady } from '@/lib/env';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300;
@@ -33,6 +34,23 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         fields: parsed.error.flatten().fieldErrors,
       },
       { status: 400 },
+    );
+  }
+
+  // Fail before creating a job: a placeholder key should read as "not
+  // configured", not as a trip that mysteriously failed to build.
+  const providers = generationProvidersReady();
+  if (!providers.ready) {
+    console.error('[generate] providers not configured:', providers.missing.join(', '));
+    return NextResponse.json(
+      {
+        error:
+          process.env.NODE_ENV === 'development'
+            ? `Generation is not configured. Set ${providers.missing.join(' and ')} in .env.local.`
+            : 'Trip generation is temporarily unavailable.',
+        missing: process.env.NODE_ENV === 'development' ? providers.missing : undefined,
+      },
+      { status: 503 },
     );
   }
 

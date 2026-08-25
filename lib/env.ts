@@ -20,6 +20,10 @@ const serverSchema = z.object({
 
   GOOGLE_MAPS_SERVER_KEY: z.string().min(1),
 
+  // Optional. Without it, trips fall back to generated cover art rather than
+  // going without imagery entirely.
+  UNSPLASH_ACCESS_KEY: z.string().optional().or(z.literal('')),
+
   UPSTASH_REDIS_REST_URL: z.string().url().optional().or(z.literal('')),
   UPSTASH_REDIS_REST_TOKEN: z.string().optional().or(z.literal('')),
   TURNSTILE_SECRET_KEY: z.string().optional().or(z.literal('')),
@@ -52,4 +56,48 @@ let cached: ServerEnv | null = null;
 export function serverEnv(): ServerEnv {
   cached ??= loadServerEnv();
   return cached;
+}
+
+/**
+ * Placeholder values from `.env.example`, plus the shapes a copied-but-unfilled
+ * key tends to take.
+ *
+ * The schema only requires these keys to be non-empty, which is right — the app
+ * runs fine without real ones for everything except generation. But without this
+ * check a placeholder produces a job that fails at the first provider call, and
+ * the traveller sees a generic failure instead of the actual problem.
+ */
+function looksUnconfigured(value: string): boolean {
+  const v = value.trim().toLowerCase();
+  return (
+    v === '' ||
+    v.includes('placeholder') ||
+    v.includes('your-') ||
+    v.includes('changeme') ||
+    v === 'ci-openai-key' ||
+    v === 'ci-google-key' ||
+    v === 'test-openai-key' ||
+    v === 'test-google-key'
+  );
+}
+
+export interface ProviderReadiness {
+  readonly ready: boolean;
+  /** Env var names that still hold a placeholder. */
+  readonly missing: readonly string[];
+}
+
+/**
+ * Whether the providers a generation actually needs are configured.
+ *
+ * Checked before a job is created, so a misconfiguration is reported as a
+ * misconfiguration rather than burning a job row and a page transition to
+ * discover it.
+ */
+export function generationProvidersReady(): ProviderReadiness {
+  const env = serverEnv();
+  const missing: string[] = [];
+  if (looksUnconfigured(env.OPENAI_API_KEY)) missing.push('OPENAI_API_KEY');
+  if (looksUnconfigured(env.GOOGLE_MAPS_SERVER_KEY)) missing.push('GOOGLE_MAPS_SERVER_KEY');
+  return { ready: missing.length === 0, missing };
 }
