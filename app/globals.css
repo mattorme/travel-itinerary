@@ -15,7 +15,10 @@
 
   --color-ink: #17150f;
   --color-ink-muted: #57534a;
-  --color-ink-faint: #8a857a;
+  /* 4.99:1 on paper, 5.16:1 on cards, 4.54:1 on sunk — clears AA on every
+     surface it is used against. The previous #8a857a was 3.55:1 and failed on
+     all three. Do not lighten without re-checking all three. */
+  --color-ink-faint: #726d5f;
 
   --color-line: #e6e0d4;
   --color-line-strong: #d4ccbb;

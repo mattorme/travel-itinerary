@@ -43,17 +43,22 @@ export function BudgetPanel({
           const value = breakdown[row.key];
           if (value <= 0) return null;
           return (
-            <div key={row.key} className="grid grid-cols-[1fr_auto] items-center gap-3">
-              <div className="min-w-0">
-                <dt className="text-sm text-ink-muted">{row.label}</dt>
-                <div className="mt-1 h-1 rounded-full bg-paper-sunk" aria-hidden>
-                  <div
-                    className="h-1 rounded-full bg-ink/70"
+            /* dt and dd must be the only children of a div inside a dl, so the
+               bar lives inside the dd rather than in a layout wrapper. */
+            <div key={row.key} className="grid grid-cols-[1fr_auto] items-baseline gap-3">
+              <dt className="min-w-0 text-sm text-ink-muted">{row.label}</dt>
+              <dd className="text-sm tabular-nums">
+                {formatCurrency(value, currency)}
+                <span
+                  className="mt-1 block h-1 rounded-full bg-paper-sunk"
+                  aria-hidden
+                >
+                  <span
+                    className="block h-1 rounded-full bg-ink/70"
                     style={{ width: `${Math.round((value / max) * 100)}%` }}
                   />
-                </div>
-              </div>
-              <dd className="text-sm tabular-nums">{formatCurrency(value, currency)}</dd>
+                </span>
+              </dd>
             </div>
           );
         })}

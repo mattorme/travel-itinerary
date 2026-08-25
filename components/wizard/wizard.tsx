@@ -75,7 +75,14 @@ export function Wizard({ initialQuery }: { initialQuery: string | null }) {
       {/* Progress. A bar rather than "Step 3 of 7" — the count is discouraging
           before you have started, and the bar tells you the same thing. */}
       <div className="sticky top-0 z-10 -mx-5 bg-paper/90 px-5 pt-6 pb-4 backdrop-blur-md">
-        <div className="flex gap-1.5" role="progressbar" aria-valuenow={stepIndex + 1} aria-valuemin={1} aria-valuemax={STEPS.length}>
+        <div
+          className="flex gap-1.5"
+          role="progressbar"
+          aria-label={`Step ${stepIndex + 1} of ${STEPS.length}`}
+          aria-valuenow={stepIndex + 1}
+          aria-valuemin={1}
+          aria-valuemax={STEPS.length}
+        >
           {STEPS.map((s, i) => (
             <span
               key={s}

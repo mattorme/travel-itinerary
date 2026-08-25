@@ -79,24 +79,23 @@ export default async function ProfilePage({
               <p className="mt-1 text-ink-faint">@{profile.username}</p>
               {profile.bio && <p className="mt-3 max-w-xl text-ink-muted">{profile.bio}</p>}
 
+              {/* A div inside a dl may contain only dt and dd, so the unit is
+                  the term itself rather than a third element. Reversed so it
+                  still reads "12 followers". */}
               <dl className="mt-4 flex gap-6 text-sm">
-                <div className="flex gap-1.5">
-                  <dt className="sr-only">Trips</dt>
-                  <dd className="font-medium">{formatCompact(profile.trip_count)}</dd>
-                  <span className="text-ink-faint">trips</span>
-                </div>
-                <div className="flex gap-1.5">
-                  <dt className="sr-only">Followers</dt>
-                  <dd className="font-medium">{formatCompact(profile.follower_count)}</dd>
-                  <span className="text-ink-faint">
-                    {profile.follower_count === 1 ? 'follower' : 'followers'}
-                  </span>
-                </div>
-                <div className="flex gap-1.5">
-                  <dt className="sr-only">Following</dt>
-                  <dd className="font-medium">{formatCompact(profile.following_count)}</dd>
-                  <span className="text-ink-faint">following</span>
-                </div>
+                {[
+                  { term: 'trips', value: profile.trip_count },
+                  {
+                    term: profile.follower_count === 1 ? 'follower' : 'followers',
+                    value: profile.follower_count,
+                  },
+                  { term: 'following', value: profile.following_count },
+                ].map((stat) => (
+                  <div key={stat.term} className="flex flex-row-reverse gap-1.5">
+                    <dt className="text-ink-faint">{stat.term}</dt>
+                    <dd className="font-medium">{formatCompact(stat.value)}</dd>
+                  </div>
+                ))}
               </dl>
             </div>
           </div>

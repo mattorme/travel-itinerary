@@ -31,6 +31,13 @@ export const metadata: Metadata = {
     locale: 'en_AU',
   },
   twitter: { card: 'summary_large_image' },
+  // Installable from a browser, for everyone the native shell will not reach.
+  manifest: '/manifest.webmanifest',
+  appleWebApp: {
+    capable: true,
+    title: 'Wayfare',
+    statusBarStyle: 'default',
+  },
   robots: { index: true, follow: true },
 };
 
