@@ -86,4 +86,11 @@ test.describe('accessibility', () => {
     await page.goto('/signin');
     await scan(page);
   });
+
+  test('the legal pages', async ({ page }) => {
+    for (const path of ['/privacy', '/terms']) {
+      await page.goto(path);
+      await scan(page);
+    }
+  });
 });
