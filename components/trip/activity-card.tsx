@@ -4,6 +4,7 @@ import { formatMinute } from '@/domain/sequencing/schedule';
 import { formatCurrency, formatDuration } from '@/lib/utils/format';
 import { cn } from '@/lib/utils/cn';
 import { TravelLegRow } from './travel-leg';
+import { PlacePhoto } from './place-photo';
 
 /**
  * One stop on a day.
@@ -27,6 +28,7 @@ export function ActivityCard({
 }) {
   const hydrated = activity.place?.hydrated ?? null;
   const isMeal = activity.kind === 'meal';
+  const hasPhoto = (hydrated?.photoNames.length ?? 0) > 0 && activity.place !== null;
 
   return (
     <li className="relative">
@@ -44,7 +46,15 @@ export function ActivityCard({
           {!isLast && <span className="mt-1 w-px flex-1 bg-line" />}
         </div>
 
-        <div className="min-w-0 flex-1 pb-8">
+        <div
+          id={`activity-${activity.id}`}
+          className={cn(
+            'min-w-0 flex-1 scroll-mt-28 rounded-xl pb-8 transition-shadow',
+            // Set by the map when a marker is clicked, so the two views stay in
+            // agreement about what you are looking at.
+            'data-[map-focus=true]:ring-2 data-[map-focus=true]:ring-accent data-[map-focus=true]:ring-offset-4 data-[map-focus=true]:ring-offset-paper',
+          )}
+        >
           <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
             {activity.startMinute !== null && (
               <time className="text-sm font-medium tabular-nums text-ink-muted">
@@ -75,6 +85,18 @@ export function ActivityCard({
             <p className="mt-2 text-[0.9375rem] leading-relaxed text-ink-muted">
               {activity.description}
             </p>
+          )}
+
+          {/* Google Place Photos are billed per fetch, so they appear here — on
+              the card, where they add something — and never behind a hero on a
+              page built to be shared. Served through our proxy so the server key
+              stays server-side and expired cache entries stop resolving. */}
+          {hasPhoto && (
+            <PlacePhoto
+              placeId={activity.place!.placeId}
+              alt={activity.title}
+              className="mt-4"
+            />
           )}
 
           {hydrated && (

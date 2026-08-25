@@ -60,7 +60,7 @@ export default async function DestinationPage({
 
   const { data: trips } = await supabase
     .from('trips')
-    .select('id, slug, title, subtitle, duration_days, currency, estimated_cost_total, hero_image_url, clone_count, like_count, interests, travel_style, profiles:owner_id(username, display_name, avatar_url), trip_destinations!inner(destination_id)')
+    .select('id, slug, title, subtitle, duration_days, currency, estimated_cost_total, hero_image_url, hero_credit, clone_count, like_count, interests, travel_style, profiles:owner_id(username, display_name, avatar_url), trip_destinations!inner(destination_id)')
     .eq('trip_destinations.destination_id', destination.id)
     .eq('visibility', 'public')
     .eq('moderation_state', 'approved')

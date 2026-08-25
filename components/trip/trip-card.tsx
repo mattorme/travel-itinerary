@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import Image from 'next/image';
 import { Copy, Heart } from 'lucide-react';
+import { Cover } from '@/components/ui/cover';
 import { formatCurrency } from '@/lib/utils/format';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -13,6 +13,7 @@ export interface TripCardData {
   currency: string;
   estimated_cost_total: number | string | null;
   hero_image_url: string | null;
+  hero_credit?: unknown;
   clone_count: number;
   like_count: number;
   interests: string[] | null;
@@ -31,19 +32,14 @@ export function TripCard({ trip }: { trip: TripCardData }) {
       className="group block overflow-hidden rounded-card border border-line bg-paper-raised transition-colors hover:border-line-strong"
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-paper-sunk">
-        {trip.hero_image_url ? (
-          <Image
-            src={trip.hero_image_url}
-            alt=""
-            fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center">
-            <span className="font-display text-5xl text-line-strong">{trip.duration_days}</span>
-          </div>
-        )}
+        <Cover
+          imageUrl={trip.hero_image_url}
+          credit={trip.hero_credit as never}
+          seed={trip.slug}
+          label={trip.title}
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          className="transition-transform duration-500 group-hover:scale-[1.03]"
+        />
         <div className="absolute top-3 left-3 rounded-full bg-ink/80 px-2.5 py-1 text-xs font-medium text-paper backdrop-blur-sm">
           {trip.duration_days} {trip.duration_days === 1 ? 'day' : 'days'}
         </div>

@@ -4,6 +4,7 @@ import type { OpeningHours, TravelLeg } from '@/domain/types/itinerary';
 import type { ExperienceTag } from '@/domain/types/taxonomy';
 import type { CostInputs } from '@/domain/cost/model';
 import type { ResolvedDestination } from './destination';
+import type { CoverImage } from '@/lib/images/types';
 
 /**
  * The pipeline's working representation.
@@ -52,6 +53,7 @@ export interface DraftDay {
 }
 
 export interface DraftItinerary {
+  readonly cover: CoverImage | null;
   readonly title: string;
   readonly subtitle: string;
   readonly summary: string;

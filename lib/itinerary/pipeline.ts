@@ -38,6 +38,7 @@ import { mapWithConcurrency } from '@/lib/google/places/cache';
 import type { DraftActivity, DraftDay, DraftItinerary } from './draft';
 import { validateAndRepair } from './repair';
 import { ServiceError } from '@/lib/observability/errors';
+import { tripCover } from '@/lib/images';
 import { STAGE_COPY, STAGE_PROGRESS, type Stage } from './stage-names';
 
 export { STAGE_COPY, type Stage };
@@ -214,12 +215,22 @@ export async function generateItinerary(
   }
 
   // -- Stage 10 [AI]: narrative --------------------------------------------
+  // Imagery is resolved alongside it: neither depends on the other, and the
+  // cover search is a network round trip we would otherwise wait on twice.
   await stage(context, 'writing');
-  const narrative = await buildNarrative(llm, request, destinations, timedDays);
+  const [narrative, cover] = await Promise.all([
+    buildNarrative(llm, request, destinations, timedDays),
+    tripCover({
+      destinationName: destination.name,
+      countryName: destination.countryName,
+      interests: request.interests,
+    }).catch(() => null),
+  ]);
 
   await stage(context, 'finalising');
 
   return {
+    cover,
     title: plan.title,
     subtitle: plan.subtitle,
     summary: narrative.summary,

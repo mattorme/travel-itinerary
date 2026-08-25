@@ -32,7 +32,7 @@ export default async function ExplorePage({
   const supabase = await createClient();
   let query = supabase
     .from('trips')
-    .select('id, slug, title, subtitle, duration_days, currency, estimated_cost_total, hero_image_url, clone_count, like_count, interests, travel_style, profiles:owner_id(username, display_name, avatar_url)')
+    .select('id, slug, title, subtitle, duration_days, currency, estimated_cost_total, hero_image_url, hero_credit, clone_count, like_count, interests, travel_style, profiles:owner_id(username, display_name, avatar_url)')
     .eq('visibility', 'public')
     .eq('moderation_state', 'approved')
     .eq('status', 'ready')

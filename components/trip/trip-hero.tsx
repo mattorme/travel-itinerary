@@ -1,5 +1,5 @@
-import Image from 'next/image';
 import Link from 'next/link';
+import { Cover } from '@/components/ui/cover';
 import type { Itinerary } from '@/domain/types/itinerary';
 import { formatCurrency, formatDateRange, humanise } from '@/lib/utils/format';
 
@@ -17,18 +17,20 @@ export function TripHero({ itinerary }: { itinerary: Itinerary }) {
 
   return (
     <header className="relative">
-      {itinerary.heroImageUrl && (
-        <div className="relative -mx-5 mb-8 aspect-[3/2] overflow-hidden sm:mx-0 sm:aspect-[21/9] sm:rounded-card">
-          <Image
-            src={itinerary.heroImageUrl}
-            alt=""
-            fill
-            priority
-            sizes="(max-width: 640px) 100vw, 768px"
-            className="object-cover"
-          />
-        </div>
-      )}
+      {/* Always rendered. Generated art when there is no photograph, because a
+          missing hero makes the page that has to make the first impression look
+          broken. */}
+      <div className="relative -mx-5 mb-8 aspect-[3/2] overflow-hidden bg-paper-sunk sm:mx-0 sm:aspect-[21/9] sm:rounded-card">
+        <Cover
+          imageUrl={itinerary.heroImageUrl}
+          credit={itinerary.heroCredit}
+          seed={itinerary.slug}
+          label={route[0] ?? itinerary.title}
+          priority
+          showLabel
+          sizes="(max-width: 640px) 100vw, 768px"
+        />
+      </div>
 
       <p className="text-xs font-medium tracking-widest text-ink-faint uppercase">
         {itinerary.request.dates.durationDays}{' '}

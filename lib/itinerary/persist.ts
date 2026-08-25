@@ -125,6 +125,10 @@ export async function persistItinerary(
       subtitle: draft.subtitle,
       summary: draft.summary,
       highlights: [...draft.highlights],
+      hero_image_url: draft.cover?.url ?? null,
+      hero_credit: draft.cover
+        ? JSON.parse(JSON.stringify({ ...draft.cover.credit, colour: draft.cover.colour, altText: draft.cover.altText }))
+        : null,
       estimated_cost_total: breakdown.total,
       estimated_cost_breakdown: JSON.parse(JSON.stringify(breakdown)),
       status: 'ready',
