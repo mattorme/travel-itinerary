@@ -78,6 +78,40 @@
   }
 }
 
+@layer base {
+  /*
+   * Native shell adjustments.
+   *
+   * Scoped to [data-native] — set by <NativeShell /> — so the browser build is
+   * byte-for-byte unaffected. There is one codebase and one deploy; this is the
+   * only place the two targets differ visually.
+   */
+  [data-native] body {
+    /* No browser chrome to hide behind: own the notch and home indicator. */
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    /* A webview that rubber-bands over the page edges looks like a broken app. */
+    overscroll-behavior-y: none;
+  }
+
+  /* Sticky elements must sit below the status bar, not under it. */
+  [data-native] .sticky {
+    top: calc(var(--sticky-top, 0px) + env(safe-area-inset-top));
+  }
+
+  /* Text selection on a long-press feels wrong on native; inputs keep it. */
+  [data-native] body {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  [data-native] input,
+  [data-native] textarea,
+  [data-native] [contenteditable] {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+}
+
 @layer utilities {
   .font-display {
     font-family: var(--font-display);

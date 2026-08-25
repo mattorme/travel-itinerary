@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 import { Check, Copy, Image as ImageIcon, MessageCircle, Send, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { recordShare } from '@/app/actions/trip-actions';
+import { shareLink } from '@/lib/native/share';
+import { useCanShare } from '@/lib/native/use-native';
 import { formatCurrency } from '@/lib/utils/format';
 import type { Itinerary } from '@/domain/types/itinerary';
 
@@ -23,6 +25,11 @@ export function ShareSheet({
 }) {
   const [copied, setCopied] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
+
+  // `navigator.share` does not exist during SSR, so this is read through a
+  // store rather than during render (hydration mismatch) or in an effect
+  // (cascading render).
+  const canUseShareSheet = useCanShare();
 
   // Derived during render rather than set in an effect. This component only ever
   // mounts in response to a click, so `window` is available; the guard is there
@@ -48,14 +55,13 @@ export function ShareSheet({
     .filter(Boolean)
     .join(' · ');
 
-  async function nativeShare() {
-    if (!navigator.share) return;
-    try {
-      await navigator.share({ title: itinerary.title, text: message, url });
-      void recordShare(itinerary.id, 'native');
-    } catch {
-      // The user dismissed the sheet. Not an error.
-    }
+  // One call covers the native app, a phone browser and a desktop browser; the
+  // outcome tells us which path ran so the share is attributed correctly.
+  async function openShareSheet() {
+    const outcome = await shareLink({ title: itinerary.title, text: message, url });
+    if (outcome === 'dismissed' || outcome === 'failed') return;
+    if (outcome === 'clipboard') setCopied(true);
+    void recordShare(itinerary.id, outcome);
   }
 
   async function copyLink() {
@@ -109,8 +115,8 @@ export function ShareSheet({
         </div>
 
         <div className="mt-4 grid grid-cols-2 gap-2">
-          {typeof navigator !== 'undefined' && 'share' in navigator && (
-            <Button variant="primary" size="md" block onClick={nativeShare} className="col-span-2">
+          {canUseShareSheet && (
+            <Button variant="primary" size="md" block onClick={openShareSheet} className="col-span-2">
               Share…
             </Button>
           )}

@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Wayfare — offline</title>
+  <!--
+    The offline shell.
+
+    Bundled with the app rather than served, because it has to work with no
+    network at all — this is the page Capacitor shows when it cannot reach the
+    server, and it is the whole reason the app is more than a webview.
+
+    Deliberately dependency-free: no framework, no fonts, no images. It reads
+    trips the traveller saved through the Capacitor Preferences bridge and
+    renders them. If this file needed a network request it would be pointless.
+  -->
+  <style>
+    :root {
+      --paper: #fdfbf7;
+      --raised: #ffffff;
+      --sunk: #f4f0e8;
+      --ink: #17150f;
+      --muted: #57534a;
+      --faint: #8a857a;
+      --line: #e6e0d4;
+      --accent: #c2410c;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { margin: 0; padding: 0; background: var(--paper); color: var(--ink); }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+      padding: env(safe-area-inset-top) env(safe-area-inset-right)
+               env(safe-area-inset-bottom) env(safe-area-inset-left);
+      -webkit-font-smoothing: antialiased;
+    }
+    .wrap { max-width: 640px; margin: 0 auto; padding: 24px 20px 64px; }
+    .banner {
+      display: flex; gap: 10px; align-items: flex-start;
+      background: var(--sunk); border: 1px solid var(--line);
+      border-radius: 14px; padding: 14px 16px; margin-bottom: 28px;
+      font-size: 14px; color: var(--muted);
+    }
+    .banner strong { color: var(--ink); display: block; margin-bottom: 2px; }
+    h1 { font-family: Georgia, serif; font-size: 30px; line-height: 1.1; margin: 0 0 6px; letter-spacing: -0.02em; }
+    h2 { font-family: Georgia, serif; font-size: 24px; margin: 0 0 4px; letter-spacing: -0.01em; }
+    h3 { font-family: Georgia, serif; font-size: 19px; margin: 0 0 4px; font-weight: 400; }
+    .sub { color: var(--muted); margin: 0 0 20px; }
+    .eyebrow { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--faint); margin: 0 0 6px; }
+    ul { list-style: none; margin: 0; padding: 0; }
+    .card {
+      display: block; width: 100%; text-align: left; background: var(--raised);
+      border: 1px solid var(--line); border-radius: 16px; padding: 16px;
+      margin-bottom: 12px; font: inherit; color: inherit; cursor: pointer;
+    }
+    .card:active { background: var(--sunk); }
+    .day { border-top: 1px solid var(--line); padding-top: 22px; margin-top: 30px; }
+    .stop { display: flex; gap: 14px; padding-bottom: 22px; }
+    .rail { display: flex; flex-direction: column; align-items: center; padding-top: 7px; }
+    .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--ink); flex: none; }
+    .dot.meal { background: var(--accent); }
+    .line { width: 1px; flex: 1; background: var(--line); margin-top: 5px; }
+    .meta { font-size: 13px; color: var(--faint); display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 2px; }
+    .reason { margin: 6px 0 0; }
+    .desc { margin: 6px 0 0; color: var(--muted); font-size: 15px; }
+    .travel { font-size: 13px; color: var(--faint); padding: 0 0 18px 23px; }
+    a.maps { color: var(--accent); text-decoration: none; font-size: 13px; display: inline-block; margin-top: 8px; }
+    .back {
+      background: none; border: 0; color: var(--muted); font: inherit; font-size: 15px;
+      padding: 8px 0; margin-bottom: 12px; cursor: pointer;
+    }
+    .empty { color: var(--muted); }
+    .retry {
+      display: inline-block; margin-top: 18px; background: var(--ink); color: var(--paper);
+      border: 0; border-radius: 999px; padding: 12px 22px; font: inherit; font-size: 15px; cursor: pointer;
+    }
+    @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  </style>
+</head>
+<body>
+  <div class="wrap" id="root">
+    <div class="banner"><div>Loading your saved trips…</div></div>
+  </div>
+
+  <script type="module">
+    const SNAPSHOT_VERSION = 1;
+    const INDEX_KEY = 'wayfare.offline.index';
+    const tripKey = (slug) => `wayfare.offline.trip.${slug}`;
+    const root = document.getElementById('root');
+
+    /**
+     * Reads through the Capacitor Preferences bridge when it exists, and falls
+     * back to localStorage so this page can be opened in a browser during
+     * development. Preferences is what makes the data visible here at all: the
+     * live app runs on a different origin, so web storage is not shared.
+     */
+    async function read(key) {
+      const cap = window.Capacitor;
+      if (cap?.Plugins?.Preferences) {
+        const { value } = await cap.Plugins.Preferences.get({ key });
+        return value ?? null;
+      }
+      try { return window.localStorage.getItem(key); } catch { return null; }
+    }
+
+    const escape = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => (
+      { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+    ));
+
+    const money = (n, ccy) => {
+      if (n === null || n === undefined) return '';
+      try {
+        return new Intl.NumberFormat('en-AU', { style: 'currency', currency: ccy || 'AUD', maximumFractionDigits: 0 }).format(Math.round(n));
+      } catch { return `${ccy} ${Math.round(n)}`; }
+    };
+
+    const banner = (title, body) => `
+      <div class="banner">
+        <div><strong>${escape(title)}</strong>${escape(body)}</div>
+      </div>`;
+
+    async function renderIndex() {
+      const raw = await read(INDEX_KEY);
+      let trips = [];
+      try { trips = raw ? JSON.parse(raw) : []; } catch { trips = []; }
+
+      if (!Array.isArray(trips) || trips.length === 0) {
+        root.innerHTML = `
+          ${banner("You're offline", 'We could not reach Wayfare, and no trips have been saved to this device yet.')}
+          <h1>Nothing saved yet</h1>
+          <p class="sub">Open a trip while you have a connection and tap <strong>Save offline</strong>. It will be here even in aeroplane mode.</p>
+          <button class="retry" onclick="location.reload()">Try again</button>`;
+        return;
+      }
+
+      root.innerHTML = `
+        ${banner("You're offline", 'Showing the trips you saved to this device.')}
+        <h1>Saved trips</h1>
+        <p class="sub">${trips.length} ${trips.length === 1 ? 'trip' : 'trips'} available without a connection.</p>
+        <ul>
+          ${trips.map((t) => `
+            <li>
+              <button class="card" data-slug="${escape(t.slug)}">
+                <p class="eyebrow">${t.durationDays} ${t.durationDays === 1 ? 'day' : 'days'}${
+                  t.destinations?.length ? ' · ' + escape(t.destinations.join(' → ')) : ''
+                }</p>
+                <h2>${escape(t.title)}</h2>
+              </button>
+            </li>`).join('')}
+        </ul>
+        <button class="retry" onclick="location.reload()">Try again</button>`;
+
+      for (const button of root.querySelectorAll('[data-slug]')) {
+        button.addEventListener('click', () => renderTrip(button.dataset.slug));
+      }
+    }
+
+    async function renderTrip(slug) {
+      const raw = await read(tripKey(slug));
+      if (!raw) { renderIndex(); return; }
+
+      let trip;
+      try { trip = JSON.parse(raw); } catch { renderIndex(); return; }
+
+      // A snapshot written by a newer build may not be safe to render.
+      if (trip.version !== SNAPSHOT_VERSION) {
+        root.innerHTML = `
+          ${banner('Cannot open this trip', 'It was saved by a newer version of the app. Reconnect once to refresh it.')}
+          <button class="retry" onclick="location.reload()">Try again</button>`;
+        return;
+      }
+
+      window.scrollTo(0, 0);
+      root.innerHTML = `
+        <button class="back">← All saved trips</button>
+        ${banner("You're offline", 'This is the copy saved to your device.')}
+        <p class="eyebrow">${trip.durationDays} ${trip.durationDays === 1 ? 'day' : 'days'}${
+          trip.destinations?.length ? ' · ' + escape(trip.destinations.join(' → ')) : ''
+        }</p>
+        <h1>${escape(trip.title)}</h1>
+        ${trip.subtitle ? `<p class="sub">${escape(trip.subtitle)}</p>` : ''}
+        ${trip.estimatedTotal !== null ? `<p class="meta">~${money(trip.estimatedTotal, trip.currency)} estimated · excl. flights</p>` : ''}
+        ${trip.summary ? `<p class="desc">${escape(trip.summary)}</p>` : ''}
+        ${trip.days.map(renderDay).join('')}`;
+
+      root.querySelector('.back').addEventListener('click', renderIndex);
+    }
+
+    function renderDay(day) {
+      const date = day.date
+        ? new Date(day.date + 'T00:00:00Z').toLocaleDateString('en-AU', {
+            weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC',
+          })
+        : '';
+      return `
+        <section class="day">
+          <p class="eyebrow">Day ${day.dayIndex}${date ? ' · ' + escape(date) : ''}</p>
+          <h2>${escape(day.title)}</h2>
+          ${day.summary ? `<p class="desc" style="margin-bottom:18px">${escape(day.summary)}</p>` : ''}
+          <ul>${day.activities.map((a, i) => renderStop(a, i === day.activities.length - 1)).join('')}</ul>
+        </section>`;
+    }
+
+    function renderStop(a, isLast) {
+      const bits = [a.start, a.durationMinutes ? formatDuration(a.durationMinutes) : null]
+        .filter(Boolean).map(escape).join('</span><span>');
+      return `
+        ${a.travel && a.travel.minutes > 0
+          ? `<li class="travel">${a.travel.minutes} min ${escape(a.travel.mode)}${
+              a.travel.meters >= 300 ? ' · ' + (a.travel.meters / 1000).toFixed(1) + ' km' : ''
+            }</li>`
+          : ''}
+        <li class="stop">
+          <div class="rail">
+            <span class="dot${a.kind === 'meal' ? ' meal' : ''}"></span>
+            ${isLast ? '' : '<span class="line"></span>'}
+          </div>
+          <div style="min-width:0;flex:1">
+            ${bits ? `<p class="meta"><span>${bits}</span></p>` : ''}
+            <h3>${escape(a.title)}</h3>
+            ${a.reason ? `<p class="reason">${escape(a.reason)}</p>` : ''}
+            ${a.description ? `<p class="desc">${escape(a.description)}</p>` : ''}
+            ${a.address ? `<p class="meta" style="margin-top:6px">${escape(a.address)}</p>` : ''}
+            ${a.mapsUrl ? `<a class="maps" href="${escape(a.mapsUrl)}">Open in Maps</a>` : ''}
+          </div>
+        </li>`;
+    }
+
+    function formatDuration(minutes) {
+      if (minutes < 60) return minutes + ' min';
+      const h = Math.floor(minutes / 60);
+      const m = minutes % 60;
+      return m === 0 ? h + ' hr' : h + ' hr ' + m + ' min';
+    }
+
+    /*
+     * Hide the splash screen.
+     *
+     * `launchAutoHide` is false so the live app can hold the splash until it has
+     * painted — but this page is what Capacitor shows when the live app cannot
+     * be reached, so it has to hide the splash itself. Without this the app
+     * hangs on the launch image exactly when someone is offline and needs their
+     * itinerary.
+     */
+    window.Capacitor?.Plugins?.SplashScreen?.hide?.().catch?.(() => {});
+
+    renderIndex().catch(() => {
+      root.innerHTML = banner('Something went wrong', 'We could not read your saved trips.') +
+        '<button class="retry" onclick="location.reload()">Try again</button>';
+    });
+  </script>
+</body>
+</html>

@@ -6,6 +6,8 @@ import { Copy, Heart, Loader2, Pencil, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cloneTrip, toggleLike } from '@/app/actions/trip-actions';
 import { ShareSheet } from './share-sheet';
+import { SaveButton } from './save-button';
+import { OfflineButton } from './offline-button';
 import { formatCompact } from '@/lib/utils/format';
 import type { Itinerary } from '@/domain/types/itinerary';
 
@@ -18,13 +20,17 @@ import type { Itinerary } from '@/domain/types/itinerary';
 export function PublicTripActions({
   itinerary,
   isOwner,
+  initiallyLiked,
+  initiallySaved,
 }: {
   itinerary: Itinerary;
   isOwner: boolean;
+  initiallyLiked: boolean;
+  initiallySaved: boolean;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
-  const [liked, setLiked] = useState(false);
+  const [liked, setLiked] = useState(initiallyLiked);
   const [likes, setLikes] = useState(itinerary.counters.likes);
   const [shareOpen, setShareOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -74,6 +80,10 @@ export function PublicTripActions({
           <Share2 className="size-4" />
           Share
         </Button>
+
+        <SaveButton tripId={itinerary.id} initiallySaved={initiallySaved} />
+
+        <OfflineButton itinerary={itinerary} />
 
         <Button
           variant="ghost"

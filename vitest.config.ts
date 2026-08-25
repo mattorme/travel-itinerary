@@ -6,6 +6,7 @@ export default defineConfig({
   plugins: [react()],
   test: {
     environment: 'node',
+    // Component tests render to static markup, which needs no DOM.
     include: [
       'tests/unit/**/*.test.ts',
       'tests/unit/**/*.test.tsx',
