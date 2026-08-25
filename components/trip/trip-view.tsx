@@ -1,9 +1,10 @@
 import type { Itinerary } from '@/domain/types/itinerary';
+import { formatMinute } from '@/domain/sequencing/schedule';
 import { TripHero } from './trip-hero';
 import { DayNav } from './day-nav';
 import { DaySection } from './day-section';
 import { BudgetPanel } from './budget-panel';
-import { TripMap } from './trip-map';
+import { TripMap } from './map/trip-map';
 import { ActivityEditor } from './activity-editor';
 
 /**
@@ -16,19 +17,32 @@ import { ActivityEditor } from './activity-editor';
 export function TripView({
   itinerary,
   actions,
+  footer,
   editable = false,
 }: {
   itinerary: Itinerary;
   actions?: React.ReactNode;
+  /** Rendered after the budget panel. Comments on the public page. */
+  footer?: React.ReactNode;
   /** Owner's view. Adds per-activity controls; never set on the public page. */
   editable?: boolean;
 }) {
   const stops = itinerary.days.flatMap((day) =>
-    day.activities.flatMap((activity) => {
+    day.activities.flatMap((activity, index) => {
       const location = activity.place?.hydrated?.location;
-      return location
-        ? [{ id: activity.id, dayIndex: day.dayIndex, title: activity.title, ...location }]
-        : [];
+      if (!location) return [];
+      return [
+        {
+          activityId: activity.id,
+          dayIndex: day.dayIndex,
+          stopNumber: index + 1,
+          title: activity.title,
+          kind: activity.kind,
+          lat: location.lat,
+          lng: location.lng,
+          startLabel: activity.startMinute !== null ? formatMinute(activity.startMinute) : null,
+        },
+      ];
     }),
   );
 
@@ -38,9 +52,9 @@ export function TripView({
 
       {actions && <div className="mt-8">{actions}</div>}
 
-      {stops.length > 1 && (
+      {stops.length > 0 && (
         <div className="mt-10">
-          <TripMap stops={stops} />
+          <TripMap stops={stops} dayCount={itinerary.days.length} title={itinerary.title} />
         </div>
       )}
 
@@ -78,6 +92,8 @@ export function TripView({
           />
         </div>
       )}
+
+      {footer}
 
       {/* Required when Places content is shown without a Google map. Rendered
           here so it cannot be forgotten on a page that shows place data. */}
