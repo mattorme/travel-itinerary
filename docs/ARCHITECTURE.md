@@ -151,17 +151,30 @@ per-trip marginal Places cost for a warm destination approaches zero — see §1
 It also means place data is always *current*. A restaurant that closed shows as closed rather than
 sitting in an itinerary forever.
 
-### 3.3 Photos
+### 3.3 Photos — as built
 
-Google Place Photos are billed per fetch and cannot be copied into Supabase Storage. Using them as
-the hero image on a viral public page would mean paying per pageview.
+Google Place Photos are billed per fetch and cannot be copied into our storage. Using them as the
+hero on a viral public page would mean paying per pageview, and every link preview any chat app
+generates would bill us again.
 
-- **Hero / OG / share graphics:** a licensable source — Unsplash or Pexels API (both permit
-  hotlinking with attribution), a curated per-destination image set we own, or user upload.
-  Store these in Supabase Storage; they're ours.
-- **Activity thumbnails:** proxied via `/api/place-photo/[id]` with edge caching inside the
-  permitted window, and only rendered where they earn their cost (the expanded activity card,
-  not the timeline).
+Three tiers, in `lib/images/` and `app/api/place-photo/`:
+
+| Surface | Source | Why |
+|---|---|---|
+| Hero, cards, OG image | Unsplash, hotlinked | Free, licensable, cacheable by the CDN, and their terms *require* hotlinking rather than re-hosting |
+| Activity cards | Google Place Photos via `/api/place-photo/[placeId]` | The one place a photo of the actual venue is worth a billed fetch. Proxied so the server key stays server-side and an expired `place_cache` row stops resolving automatically |
+| Everything, always | Generated cover art (`components/ui/cover-art.tsx`) | Deterministic SVG. No key, no network, no cost, no layout shift, renders before JS |
+
+The Unsplash guidelines are load-bearing, not decorative: hotlink the returned URLs, attribute the
+photographer and Unsplash with utm-tagged links, and hit `links.download_location` when a photo is
+actually used. All three are implemented in `lib/images/unsplash.ts` and the credit line renders
+inside `<Cover>` so a caller cannot forget it.
+
+The generated fallback matters more than it sounds. Without an Unsplash key — and for any
+destination nobody has curated — a grey box would make the acquisition page look broken. Instead
+every trip gets a deterministic topographic cover with a dotted route across it, seeded from the
+slug, in one of six palettes. It is the same visual language as the map, and it reads as designed
+rather than missing.
 
 > **Flag:** I've read the developer policy pages, not the full Maps Platform Service Specific
 > Terms, and "how long may a consumer app cache place names" is a question people answer
@@ -682,6 +695,37 @@ create → share (unlisted URL + OG card) → view (no login required)
 The clone CTA must work **before** login. Anonymous sign-in means the clone succeeds instantly and
 the account prompt comes later, at save-or-share — which is the moment the user actually wants an
 account.
+
+---
+
+## 13b. The map — a terms constraint, not a preference
+
+Google Maps Platform's Service Specific Terms contain a **"No use with a non-Google map"** clause:
+Places content may not be shown in conjunction with a map from another provider. It may be shown
+with *no* map at all.
+
+Every coordinate in this product came from Places. So:
+
+- The itinerary map is **Google Maps JS**, not MapLibre or Leaflet, even though a free tile
+  provider would cost nothing per load.
+- With no `NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_KEY`, the map renders **nothing** — deliberately. There
+  is no substitute map, because a substitute map would be the violation.
+
+Given Dynamic Maps is billed per load and this sits on a page built to be shared, the
+implementation is defensive about it:
+
+- **Lazy**: the Maps script loads on an IntersectionObserver, 300px before the map scrolls into
+  view. A visitor who reads the hero and leaves costs nothing.
+- **Per-day colour and numbering**, with one polyline per day rather than one continuous line — a
+  single line would imply a journey that never happened.
+- **Dotted, not solid** routes: these are straight lines between stops, not the road you would
+  actually take. A solid line implies precision the map does not have.
+- **Two-way linking**: selecting a day filters the map; clicking a marker scrolls the itinerary to
+  that activity and highlights it. The two views never disagree about what you are looking at.
+- `gestureHandling: 'cooperative'` so it never hijacks page scroll on a phone.
+
+> The hand-rolled SVG map in the first implementation plotted Places coordinates on a non-Google
+> map. It has been removed.
 
 ---
 

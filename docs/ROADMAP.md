@@ -5,11 +5,12 @@ reviewable and leaves the app in a working state. Nothing is merged without its 
 
 ## Status
 
-M0–M14 are **built**. The whole loop works end to end: plan → generate →
-render → edit → share → view logged out → clone → edit.
+M0–M14 are **built**, plus imagery, the itinerary map, and the deferred social
+features. The whole loop works end to end: plan → generate → render → edit →
+share → view logged out → clone → edit.
 
 Verified: `tsc --noEmit` clean under `strict` with zero `any`, ESLint clean,
-105 unit and integration tests, 29 pgTAP assertions, 36 Playwright tests across
+113 unit and integration tests, 47 pgTAP assertions, 54 Playwright tests across
 mobile and desktop, production build green.
 
 Generation itself needs a real `OPENAI_API_KEY` and `GOOGLE_MAPS_SERVER_KEY`.
@@ -26,6 +27,9 @@ Still open before a public launch:
 - Confirm the Places caching position with counsel — see ARCHITECTURE §3
 - Manual pass on real iOS Safari; CI covers Chromium only
 - Unit economics have not been measured against live APIs, only modelled
+- The itinerary map and Unsplash photography have not been seen running against
+  real keys — both are implemented and both degrade deliberately without one,
+  but neither has been visually confirmed against the live provider
 
 **Definition of done, every milestone:** typechecks with `strict` and zero `any`; tests pass;
 no mock data left behind unless a `// TEMPORARY:` comment says why and when it goes.
@@ -195,7 +199,7 @@ trending/most-cloned listings.
 
 ## Deferred (deliberately)
 
-Follows · comments · full social feed · rich creator profiles · Stripe · collaborative editing ·
+Full algorithmic social feed · Stripe · collaborative editing ·
 multi-destination trips (M3–M8 keep the schema ready; the wizard gates it off until single-city
 quality is proven) · flights · bookings · i18n.
 

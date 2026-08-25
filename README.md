@@ -28,7 +28,14 @@ cache — which is why `activities.title` is authored text, not a copy of the
 Google display name.
 → `lib/google/places/cache.ts`, [ARCHITECTURE §3](docs/ARCHITECTURE.md)
 
-**3. Most of the pipeline is not an LLM.**
+**3. The map is Google's because it has to be.**
+The Maps Platform terms forbid showing Places content with a non-Google map — and every coordinate
+here came from Places. Content may be shown with *no* map, so the no-key path renders nothing
+rather than substituting a free tile provider. The map loads lazily on scroll, because Dynamic Maps
+is billed per load and this sits on a page built to be shared.
+→ `components/trip/map/trip-map.tsx`
+
+**4. Most of the pipeline is not an LLM.**
 Ranking, sequencing, scheduling, costing and repair are optimisation problems
 with objective functions. There are exactly three model calls for a
 single-destination trip regardless of length: shape the trip, assign places per
@@ -58,7 +65,9 @@ needs both:
 |---|---|
 | `OPENAI_API_KEY` | trip generation |
 | `GOOGLE_MAPS_SERVER_KEY` | Places (New) + Routes. Server-side only, restrict by API. |
-| `NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_KEY` | optional; restrict by HTTP referrer |
+| `NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_KEY` | the itinerary map. Without it the map is hidden — see below |
+| `NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID` | map style id; advanced markers need one |
+| `UNSPLASH_ACCESS_KEY` | trip and destination photography. Without it, generated cover art |
 | `UPSTASH_REDIS_*` | distributed rate limits (falls back to in-process) |
 | `TURNSTILE_SECRET_KEY` | bot check on anonymous generation |
 | `CRON_SECRET` | required before the cron endpoints will run at all |
@@ -121,6 +130,36 @@ cold. The levers, in order of impact:
 
 Every external call writes to `api_usage` or `ai_generations`. A daily ceiling
 degrades to "we're at capacity" rather than quietly emptying the account.
+
+## Imagery
+
+Three tiers, so a trip is never a grey box:
+
+1. **Unsplash** for heroes, cards and share images — hotlinked and attributed as their API
+   guidelines require, cached per destination so the tenth Tokyo trip reuses the ninth's search.
+2. **Google Place Photos** on activity cards only, proxied through `/api/place-photo/[placeId]`.
+   Billed per fetch, so never behind a hero and never in an OG image.
+3. **Generated cover art** everywhere else — a deterministic topographic SVG seeded from the trip
+   slug. No key, no network, no cost. This is what runs with no Unsplash key configured.
+
+## Social
+
+| Feature | State |
+|---|---|
+| Share (link, native sheet, per-channel, story graphic) | built |
+| Cloning with attribution and fork lineage | built |
+| Likes, saves, view and share tracking | built |
+| Explore feed with sorting and duration filters | built |
+| Destination hubs and creator profiles | built |
+| Follows with counters | built |
+| Comments with moderation | built |
+
+Likes and saves work anonymously — they are part of planning, and a sign-up wall there would break
+the growth loop. Follows and comments require a real account, enforced in the database rather than
+only in the UI: a social graph and a public comment thread need somebody accountable behind them.
+
+Comments are held for moderation before anyone but their author sees them, because a trip page can
+be indexed and an unmoderated text field on an indexable page is a liability.
 
 ## Before launch
 
