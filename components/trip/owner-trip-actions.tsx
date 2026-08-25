@@ -5,7 +5,7 @@ import { Globe, Link2, Lock, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { setTripVisibility } from '@/app/actions/trip-actions';
 import { ShareSheet } from './share-sheet';
-import { OfflineButton } from './offline-button';
+import { TakeWithYou } from './take-with-you';
 import { cn } from '@/lib/utils/cn';
 import type { Itinerary } from '@/domain/types/itinerary';
 
@@ -56,10 +56,12 @@ export function OwnerTripActions({ itinerary }: { itinerary: Itinerary }) {
           Share
         </Button>
 
-        <OfflineButton itinerary={itinerary} />
+
       </div>
 
-      <fieldset className="rounded-card border border-line bg-paper-raised p-4">
+      <TakeWithYou itinerary={itinerary} />
+
+      <fieldset className="rounded-card border border-line bg-paper-raised p-4" data-print-hide>
         <legend className="px-1 text-sm font-medium">Who can see this</legend>
         <div className="mt-2 space-y-1">
           {OPTIONS.map((option) => (

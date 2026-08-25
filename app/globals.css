@@ -112,6 +112,63 @@
   }
 }
 
+@layer base {
+  /*
+   * Print.
+   *
+   * A printed itinerary is a real use case — it is what goes in a bag as the
+   * backup when a phone dies. Printing the page as-is wastes the first sheet on
+   * navigation and scatters days across page breaks mid-stop.
+   */
+  @media print {
+    /*
+     * Hide the site chrome by opting in, not by element type. `header` also
+     * matches the trip hero and every day heading, so a blanket rule prints a
+     * list of activities with no dates, no day titles and no trip name on it.
+     */
+    [data-print-hide] {
+      display: none !important;
+    }
+
+    body {
+      background: #fff;
+      color: #000;
+      font-size: 11pt;
+    }
+
+    main,
+    article {
+      max-width: none !important;
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+
+    /* Never split a stop or a day header across a page. */
+    article,
+    section {
+      break-inside: avoid;
+    }
+    h1, h2, h3 {
+      break-after: avoid;
+    }
+
+    /* A printed page cannot be tapped, so show where links actually go. */
+    a[href^='http']::after {
+      content: ' (' attr(href) ')';
+      font-size: 9pt;
+      color: #555;
+      word-break: break-all;
+    }
+
+    /* Imagery burns ink and adds nothing to a reference copy. */
+    img,
+    svg[role='img'],
+    figure {
+      display: none !important;
+    }
+  }
+}
+
 @layer utilities {
   .font-display {
     font-family: var(--font-display);

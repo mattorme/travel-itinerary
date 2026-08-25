@@ -40,6 +40,7 @@ export function DayNav({ days }: { days: readonly { dayIndex: number; title: str
   return (
     <nav
       aria-label="Days"
+      data-print-hide
       className="sticky top-16 z-30 -mx-5 border-b border-line bg-paper/90 px-5 backdrop-blur-md"
     >
       <ul className="hide-scrollbar flex gap-1 overflow-x-auto py-3">

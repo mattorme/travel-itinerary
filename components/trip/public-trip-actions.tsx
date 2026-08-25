@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { cloneTrip, toggleLike } from '@/app/actions/trip-actions';
 import { ShareSheet } from './share-sheet';
 import { SaveButton } from './save-button';
-import { OfflineButton } from './offline-button';
+import { TakeWithYou } from './take-with-you';
 import { formatCompact } from '@/lib/utils/format';
 import type { Itinerary } from '@/domain/types/itinerary';
 
@@ -83,7 +83,7 @@ export function PublicTripActions({
 
         <SaveButton tripId={itinerary.id} initiallySaved={initiallySaved} />
 
-        <OfflineButton itinerary={itinerary} />
+
 
         <Button
           variant="ghost"
@@ -96,6 +96,8 @@ export function PublicTripActions({
           {likes > 0 && formatCompact(likes)}
         </Button>
       </div>
+
+      <TakeWithYou itinerary={itinerary} />
 
       {itinerary.counters.clones > 0 && (
         <p className="text-sm text-ink-faint">
