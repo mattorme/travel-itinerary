@@ -142,6 +142,33 @@ Three tiers, so a trip is never a grey box:
 3. **Generated cover art** everywhere else — a deterministic topographic SVG seeded from the trip
    slug. No key, no network, no cost. This is what runs with no Unsplash key configured.
 
+## Editing
+
+A generated itinerary is a first draft, so every part of it can be fixed:
+
+| | |
+|---|---|
+| Swap a stop | Ranked alternatives from the destination corpus — free, and sorted so the day stays tight |
+| Add a stop | Search the destination, or add your own free-text stop |
+| Reorder, remove, pin | Pinning survives every later re-time, for the dinner you already booked |
+| Edit text and costs | A cost you supply is never overwritten by the model |
+
+Alternatives exclude anything already used anywhere in the trip, so the
+generator's no-duplicates rule cannot be broken by hand. Every edit re-runs the
+same scheduling pass the generator used, so an edited trip is as valid as a
+fresh one.
+
+## Taking a trip with you
+
+Three ways out of the app, because the itinerary matters most when the tab is
+closed:
+
+- **Offline** (app only) — the whole plan on the device, addresses and map links
+  included, for a foreign city with roaming off.
+- **Calendar** — an `.ics` export with floating local times, so a 9am stop in
+  Kyoto reads 9am wherever the phone is.
+- **Print** — a clean reference copy with the chrome stripped.
+
 ## Social
 
 | Feature | State |
@@ -153,6 +180,8 @@ Three tiers, so a trip is never a grey box:
 | Destination hubs and creator profiles | built |
 | Follows with counters | built |
 | Comments with moderation | built |
+| Full-text search across trips and destinations | built |
+| Destination hubs with aggregated stats | built |
 
 Likes and saves work anonymously — they are part of planning, and a sign-up wall there would break
 the growth loop. Follows and comments require a real account, enforced in the database rather than
@@ -161,9 +190,20 @@ only in the UI: a social graph and a public comment thread need somebody account
 Comments are held for moderation before anyone but their author sees them, because a trip page can
 be indexed and an unmoderated text field on an indexable page is a liability.
 
+## Accessibility
+
+`npm run test:e2e` runs axe over every page reachable without an account, at
+WCAG 2.1 AA, as a merge gate. It is not an audit you run before launch — a
+contrast or labelling mistake costs nothing to fix the day it appears and a
+great deal a hundred components later.
+
+`--color-ink-faint` is pinned at a value that clears AA on all three surfaces it
+sits on. Lightening it fails the gate.
+
 ## Before launch
 
-- Write `/privacy` and `/terms` (currently placeholders, linked from every page)
+- Have a lawyer review `/privacy` and `/terms` — they are accurate to the code
+  and carry a banner saying they are not yet reviewed
 - Set `CRON_SECRET`, `TURNSTILE_SECRET_KEY` and the Upstash credentials
 - Confirm the Places caching position with counsel (see ARCHITECTURE §3) — the
   code takes the conservative reading and it is a one-table change either way

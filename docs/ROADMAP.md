@@ -5,13 +5,14 @@ reviewable and leaves the app in a working state. Nothing is merged without its 
 
 ## Status
 
-M0–M14 are **built**, plus imagery, the itinerary map, and the deferred social
-features. The whole loop works end to end: plan → generate → render → edit →
+M0–M14 are **built**, plus imagery, the itinerary map, the deferred social
+features, editing that can fix a bad stop rather than only delete it, search,
+calendar and print export, and destination hubs with real aggregated content. The whole loop works end to end: plan → generate → render → edit →
 share → view logged out → clone → edit.
 
 Verified: `tsc --noEmit` clean under `strict` with zero `any`, ESLint clean,
-113 unit and integration tests, 47 pgTAP assertions, 54 Playwright tests across
-mobile and desktop, production build green.
+136 unit and integration tests, 47 pgTAP assertions, ~75 Playwright tests
+across mobile and desktop including a WCAG 2.1 AA gate, production build green.
 
 Generation itself needs a real `OPENAI_API_KEY` and `GOOGLE_MAPS_SERVER_KEY`.
 Everything else — the wizard, public pages, sharing, cloning, editing — runs
@@ -20,7 +21,8 @@ providers.
 
 Still open before a public launch:
 
-- `/privacy` and `/terms` are placeholders and are linked from every page
+- `/privacy` and `/terms` are written and accurate to the code, but have not
+  been reviewed by a lawyer — they say so on the page
 - `CRON_SECRET`, Turnstile and Upstash credentials must be set (the cron
   endpoints refuse to run without a secret; rate limiting falls back to
   in-process without Redis, which is useless across instances)
@@ -196,6 +198,18 @@ trending/most-cloned listings.
 **Exit:** ~50 substantial destination pages live, seeded with quality itineraries worth cloning.
 
 ---
+
+## Still worth doing
+
+- **Regenerate a day.** The repair infrastructure exists; this is a small,
+  targeted AI call, but it cannot be built or verified without a real key.
+- **Push notifications.** Configured, with no device-token table, credentials or
+  sending path. The obvious first two are "your trip starts tomorrow" and
+  "someone copied your trip".
+- **Collections.** Saving is a flat list; grouping saved trips into boards is
+  the part of the Pinterest comparison that is not built.
+- **Accommodation anchor.** Collected in the wizard and stored, but not yet used
+  to anchor each day's routing.
 
 ## Deferred (deliberately)
 
