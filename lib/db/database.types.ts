@@ -1160,6 +1160,7 @@ export type Database = {
           quality_score: number
           root_trip_id: string | null
           save_count: number
+          search_vector: unknown
           share_count: number
           slug: string
           start_date: string | null
@@ -1212,6 +1213,7 @@ export type Database = {
           quality_score?: number
           root_trip_id?: string | null
           save_count?: number
+          search_vector?: unknown
           share_count?: number
           slug: string
           start_date?: string | null
@@ -1264,6 +1266,7 @@ export type Database = {
           quality_score?: number
           root_trip_id?: string | null
           save_count?: number
+          search_vector?: unknown
           share_count?: number
           slug?: string
           start_date?: string | null
@@ -1316,6 +1319,7 @@ export type Database = {
         Args: { target: string }
         Returns: undefined
       }
+      is_anonymous_profile: { Args: { p_id: string }; Returns: boolean }
       record_trip_event: {
         Args: {
           p_actor_hash?: string
@@ -1332,9 +1336,44 @@ export type Database = {
         Returns: undefined
       }
       rollup_trip_counters: { Args: { since?: string }; Returns: number }
+      search_trips: {
+        Args: {
+          p_interest?: string
+          p_limit?: number
+          p_max_days?: number
+          p_min_days?: number
+          p_offset?: number
+          p_query?: string
+          p_sort?: string
+          p_style?: string
+        }
+        Returns: {
+          avatar_url: string
+          clone_count: number
+          currency: string
+          display_name: string
+          duration_days: number
+          estimated_cost_total: number
+          hero_credit: Json
+          hero_image_url: string
+          id: string
+          interests: string[]
+          like_count: number
+          rank: number
+          slug: string
+          subtitle: string
+          title: string
+          travel_style: string
+          username: string
+        }[]
+      }
       slugify: { Args: { input: string }; Returns: string }
       spend_today_usd: { Args: never; Returns: number }
       sweep_expired_cache: { Args: never; Returns: number }
+      text_array_to_string: {
+        Args: { arr: string[]; sep: string }
+        Returns: string
+      }
       trip_comments: {
         Args: { p_trip_id: string }
         Returns: {

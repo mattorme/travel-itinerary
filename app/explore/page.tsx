@@ -3,101 +3,110 @@ import Link from 'next/link';
 import { createClient } from '@/lib/db/supabase/server';
 import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
-import { TripCard } from '@/components/trip/trip-card';
-import { cn } from '@/lib/utils/cn';
+import { TripCard, type TripCardData } from '@/components/trip/trip-card';
+import { ExploreSearch } from '@/components/explore/explore-search';
+import { ExploreFilters } from '@/components/explore/explore-filters';
+import { DURATION_BANDS, SORTS, type SortKey } from '@/components/explore/filter-options';
+import { INTERESTS, TRAVEL_STYLES } from '@/domain/types/taxonomy';
 
 export const metadata: Metadata = {
   title: 'Explore trips',
   description: 'Real itineraries built by other travellers. Copy any of them and make it yours.',
 };
 
-export const revalidate = 120;
+export const dynamic = 'force-dynamic';
 
-const SORTS = [
-  { key: 'popular', label: 'Most copied', column: 'clone_count' },
-  { key: 'liked', label: 'Most liked', column: 'like_count' },
-  { key: 'recent', label: 'Newest', column: 'published_at' },
-] as const;
-
-type SortKey = (typeof SORTS)[number]['key'];
+interface ExploreParams {
+  q?: string;
+  sort?: string;
+  days?: string;
+  style?: string;
+  interest?: string;
+}
 
 export default async function ExplorePage({
   searchParams,
 }: {
-  searchParams: Promise<{ sort?: string; days?: string }>;
+  searchParams: Promise<ExploreParams>;
 }) {
-  const { sort, days } = await searchParams;
-  const active = (SORTS.find((s) => s.key === sort) ?? SORTS[0]) as (typeof SORTS)[number];
+  const params = await searchParams;
+  const query = (params.q ?? '').trim();
+  const sort: SortKey = SORTS.some((s) => s.key === params.sort)
+    ? (params.sort as SortKey)
+    : query
+      ? 'relevance'
+      : 'popular';
+
+  const band = DURATION_BANDS.find((b) => b.key === params.days);
+  const style = TRAVEL_STYLES.includes(params.style as never) ? params.style : undefined;
+  const interest = INTERESTS.includes(params.interest as never) ? params.interest : undefined;
 
   const supabase = await createClient();
-  let query = supabase
-    .from('trips')
-    .select('id, slug, title, subtitle, duration_days, currency, estimated_cost_total, hero_image_url, hero_credit, clone_count, like_count, interests, travel_style, profiles:owner_id(username, display_name, avatar_url)')
-    .eq('visibility', 'public')
-    .eq('moderation_state', 'approved')
-    .eq('status', 'ready')
-    .is('deleted_at', null)
-    .order(active.column, { ascending: false, nullsFirst: false })
-    .limit(24);
+  const { data, error } = await supabase.rpc('search_trips', {
+    p_query: query || undefined,
+    p_min_days: band?.min,
+    p_max_days: band?.max,
+    p_style: style,
+    p_interest: interest,
+    p_sort: sort,
+    p_limit: 24,
+  });
 
-  // Duration is the filter people actually use — "I have a week" is how trips
-  // get planned.
-  const durationBand = parseBand(days);
-  if (durationBand) {
-    query = query.gte('duration_days', durationBand[0]).lte('duration_days', durationBand[1]);
-  }
-
-  const { data: trips } = await query;
+  // Search reshapes rows for ranking; the card expects the table's shape.
+  const trips: TripCardData[] = (data ?? []).map((row) => ({
+    id: row.id,
+    slug: row.slug,
+    title: row.title,
+    subtitle: row.subtitle,
+    duration_days: row.duration_days,
+    currency: row.currency,
+    estimated_cost_total: row.estimated_cost_total,
+    hero_image_url: row.hero_image_url,
+    hero_credit: row.hero_credit,
+    clone_count: row.clone_count,
+    like_count: row.like_count,
+    interests: row.interests,
+    travel_style: row.travel_style,
+    profiles: {
+      username: row.username,
+      display_name: row.display_name,
+      avatar_url: row.avatar_url,
+    },
+  }));
 
   return (
     <>
       <SiteHeader />
       <main className="mx-auto max-w-5xl px-5 py-12">
-        <h1 className="font-display text-display-sm">Trips worth copying</h1>
+        <h1 className="font-display text-display-sm">
+          {query ? `Trips matching “${query}”` : 'Trips worth copying'}
+        </h1>
         <p className="mt-3 max-w-xl text-ink-muted">
-          Every one of these was built from real places and shared by the person who planned it.
+          {query
+            ? `${trips.length}${trips.length === 24 ? '+' : ''} ${trips.length === 1 ? 'trip' : 'trips'} found.`
+            : 'Every one of these was built from real places and shared by the person who planned it.'}
         </p>
 
-        <div className="hide-scrollbar mt-8 flex gap-2 overflow-x-auto pb-1">
-          {SORTS.map((option) => (
-            <Link
-              key={option.key}
-              href={{ pathname: '/explore', query: { sort: option.key, ...(days ? { days } : {}) } }}
-              className={cn(
-                'rounded-full px-4 py-2 text-sm whitespace-nowrap transition-colors',
-                active.key === (option.key as SortKey)
-                  ? 'bg-ink text-paper'
-                  : 'border border-line-strong text-ink-muted hover:text-ink',
-              )}
-            >
-              {option.label}
-            </Link>
-          ))}
-          <span className="w-px shrink-0 bg-line" aria-hidden />
-          {[
-            { key: 'short', label: 'Long weekend' },
-            { key: 'week', label: 'About a week' },
-            { key: 'long', label: 'Two weeks +' },
-          ].map((band) => (
-            <Link
-              key={band.key}
-              href={{
-                pathname: '/explore',
-                query: days === band.key ? { sort: active.key } : { sort: active.key, days: band.key },
-              }}
-              className={cn(
-                'rounded-full px-4 py-2 text-sm whitespace-nowrap transition-colors',
-                days === band.key
-                  ? 'bg-ink text-paper'
-                  : 'border border-line-strong text-ink-muted hover:text-ink',
-              )}
-            >
-              {band.label}
-            </Link>
-          ))}
+        <div className="mt-8 space-y-4">
+          {/* Keyed on the query so a back-navigation remounts it with the
+              right value instead of syncing props into state. */}
+          <ExploreSearch key={query} initialQuery={query} />
+          <ExploreFilters
+            query={query}
+            sort={sort}
+            days={params.days}
+            style={style}
+            interest={interest}
+          />
         </div>
 
-        {trips && trips.length > 0 ? (
+        {error && (
+          <p role="alert" className="mt-10 text-sm text-critical">
+            Search is having a moment. Try again shortly.
+          </p>
+        )}
+
+        {trips.length > 0 ? (
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {trips.map((trip) => (
               <TripCard key={trip.id} trip={trip} />
@@ -105,29 +114,34 @@ export default async function ExplorePage({
           </div>
         ) : (
           <div className="mt-16 rounded-card border border-line bg-paper-raised p-10 text-center">
-            <p className="font-display text-xl">Nothing here yet</p>
-            <p className="mt-2 text-ink-muted">
-              Be the first — build a trip and share it.
+            <p className="font-display text-xl">
+              {query ? 'Nothing matched that' : 'Nothing here yet'}
             </p>
-            <Link
-              href="/plan"
-              className="mt-6 inline-block rounded-full bg-accent px-6 py-3 text-white"
-            >
-              Plan a trip
-            </Link>
+            <p className="mt-2 text-ink-muted">
+              {query
+                ? 'Try a destination, or something you want to do there.'
+                : 'Be the first — build a trip and share it.'}
+            </p>
+            <div className="mt-6 flex flex-wrap justify-center gap-3">
+              {query && (
+                <Link
+                  href="/explore"
+                  className="rounded-full border border-line-strong px-6 py-3 text-sm"
+                >
+                  Clear search
+                </Link>
+              )}
+              <Link
+                href={query ? { pathname: '/plan', query: { q: query } } : '/plan'}
+                className="rounded-full bg-accent px-6 py-3 text-sm text-white"
+              >
+                {query ? `Plan a trip to ${query}` : 'Plan a trip'}
+              </Link>
+            </div>
           </div>
         )}
       </main>
       <SiteFooter />
     </>
   );
-}
-
-function parseBand(days: string | undefined): [number, number] | null {
-  switch (days) {
-    case 'short': return [1, 4];
-    case 'week': return [5, 9];
-    case 'long': return [10, 60];
-    default: return null;
-  }
 }

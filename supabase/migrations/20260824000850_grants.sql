@@ -52,3 +52,10 @@ grant usage on schema public to service_role;
 grant all privileges on all tables    in schema public to service_role;
 grant all privileges on all sequences in schema public to service_role;
 grant all privileges on all functions in schema public to service_role;
+
+-- `grant ... on all functions` covers only what exists right now, so every
+-- migration that adds a function would otherwise have to remember to grant it
+-- again — and the failure is invisible until something calls it. Default
+-- privileges close that gap for anything created later by the migration role.
+alter default privileges in schema public
+  grant execute on functions to service_role;
