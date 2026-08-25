@@ -5,6 +5,7 @@ import { DayNav } from './day-nav';
 import { DaySection } from './day-section';
 import { BudgetPanel } from './budget-panel';
 import { TripMap } from './map/trip-map';
+import { TripInsights } from './trip-insights';
 import { ActivityEditor } from './activity-editor';
 import { AddStop } from './add-stop';
 
@@ -52,6 +53,8 @@ export function TripView({
       <TripHero itinerary={itinerary} />
 
       {actions && <div className="mt-8">{actions}</div>}
+
+      <TripInsights itinerary={itinerary} />
 
       {stops.length > 0 && (
         <div className="mt-10">
