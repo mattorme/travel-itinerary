@@ -113,3 +113,113 @@ function toTime(minute: number): string {
   const wrapped = ((minute % 1440) + 1440) % 1440;
   return `${String(Math.floor(wrapped / 60)).padStart(2, '0')}:${String(wrapped % 60).padStart(2, '0')}:00`;
 }
+
+/**
+ * Point an activity at a different place.
+ *
+ * Uses the admin client because it writes `place_id`, which RLS lets the owner
+ * change but which needs the place row read to derive a title — and the places
+ * table is service-role for writes. Authorisation happened in the action.
+ */
+export async function swapActivityPlace(
+  activityId: string,
+  placeId: string,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const admin = createAdminClient();
+
+  const [{ data: place }, { data: cache }] = await Promise.all([
+    admin.from('places').select('id, destination_id').eq('id', placeId).maybeSingle(),
+    admin
+      .from('place_cache')
+      .select('display_name, website_uri')
+      .eq('place_id', placeId)
+      .gt('expires_at', new Date().toISOString())
+      .maybeSingle(),
+  ]);
+
+  if (!place) return { ok: false, error: 'We could not find that place.' };
+
+  // A place whose cached content has lapsed has no name to show. Refusing is
+  // better than writing an activity titled "Unnamed place".
+  if (!cache?.display_name) {
+    return { ok: false, error: 'We could not load that place right now. Try again in a moment.' };
+  }
+
+  const { error } = await admin
+    .from('activities')
+    .update({
+      place_id: placeId,
+      title: cache.display_name,
+      // The old copy described a different venue.
+      description: null,
+      reason: null,
+      booking_url: cache.website_uri,
+      source: 'user_added',
+      // Travel and timing are recomputed by the reflow that follows.
+      inbound_travel: null,
+    })
+    .eq('id', activityId);
+
+  if (error) return { ok: false, error: 'We could not swap that stop.' };
+  return { ok: true };
+}
+
+/** Append a stop to the end of a day. The reflow decides where it lands. */
+export async function appendActivity(
+  dayId: string,
+  input: { placeId: string } | { customName: string },
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const admin = createAdminClient();
+
+  const { data: siblings } = await admin
+    .from('activities')
+    .select('order_index')
+    .eq('trip_day_id', dayId)
+    .order('order_index', { ascending: false })
+    .limit(1);
+
+  const nextIndex = (siblings?.[0]?.order_index ?? 0) + 1;
+
+  if ('customName' in input) {
+    const name = input.customName.trim().slice(0, 200);
+    if (name.length < 2) return { ok: false, error: 'Give it a name first.' };
+
+    const { error } = await admin.from('activities').insert({
+      trip_day_id: dayId,
+      order_index: nextIndex,
+      kind: 'activity',
+      custom_name: name,
+      title: name,
+      duration_minutes: 60,
+      source: 'user_added',
+      cost_basis: 'user',
+    });
+    if (error) return { ok: false, error: 'We could not add that.' };
+    return { ok: true };
+  }
+
+  const { data: cache } = await admin
+    .from('place_cache')
+    .select('display_name, website_uri')
+    .eq('place_id', input.placeId)
+    .gt('expires_at', new Date().toISOString())
+    .maybeSingle();
+
+  if (!cache?.display_name) {
+    return { ok: false, error: 'We could not load that place right now. Try again in a moment.' };
+  }
+
+  const { error } = await admin.from('activities').insert({
+    trip_day_id: dayId,
+    order_index: nextIndex,
+    kind: 'activity',
+    place_id: input.placeId,
+    title: cache.display_name,
+    booking_url: cache.website_uri,
+    duration_minutes: 75,
+    source: 'user_added',
+  });
+
+  if (error) return { ok: false, error: 'We could not add that.' };
+  return { ok: true };
+}

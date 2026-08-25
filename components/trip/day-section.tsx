@@ -5,12 +5,21 @@ import { ActivityCard } from './activity-card';
 export function DaySection({
   day,
   currency,
+  dayFooter,
   renderEditor,
 }: {
   day: TripDay;
   currency: string;
+  /** Owner-only controls rendered under the day's stops. */
+  dayFooter?: React.ReactNode;
   /** Supplied only in the owner's view. */
-  renderEditor?: (activityId: string, index: number, count: number, isLocked: boolean) => React.ReactNode;
+  renderEditor?: (
+    activityId: string,
+    index: number,
+    count: number,
+    isLocked: boolean,
+    canSwap: boolean,
+  ) => React.ReactNode;
 }) {
   const date = day.date
     ? new Date(`${day.date}T00:00:00Z`).toLocaleDateString('en-AU', {
@@ -49,13 +58,21 @@ export function DaySection({
               activity={activity}
               currency={currency}
               isLast={index === day.activities.length - 1}
-              editor={renderEditor?.(activity.id, index, day.activities.length, activity.isLocked)}
+              editor={renderEditor?.(
+                activity.id,
+                index,
+                day.activities.length,
+                activity.isLocked,
+                activity.place !== null,
+              )}
             />
           ))}
         </ol>
       ) : (
         <p className="text-ink-faint">Nothing planned for this day yet.</p>
       )}
+
+      {dayFooter}
 
       {/* Honest about what we couldn't fit, rather than silently dropping it. */}
       {day.notes && (

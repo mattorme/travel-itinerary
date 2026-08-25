@@ -5,8 +5,8 @@ import { createClient } from '@/lib/db/supabase/server';
 import { requireUser } from '@/lib/auth/session';
 import { assertCanEditTrip, ForbiddenError, NotFoundError } from '@/lib/auth/authorization';
 import { checkLimit } from '@/lib/ratelimit';
-import { asTripId } from '@/domain/types/ids';
-import { reflowDay } from '@/lib/itinerary/edit';
+import { asPlaceId, asTripId } from '@/domain/types/ids';
+import { appendActivity, reflowDay, swapActivityPlace } from '@/lib/itinerary/edit';
 import type { ActionResult } from './trip-actions';
 
 /**
@@ -101,6 +101,62 @@ export async function removeActivity(
   if (error) return { ok: false, error: 'We could not remove that.' };
 
   if (activity) await reflowDay(activity.trip_day_id);
+  revalidatePath(`/trips/${tripId}`);
+  return { ok: true, data: undefined };
+}
+
+/**
+ * Swap a stop for a different place.
+ *
+ * Alternatives come from the shared destination corpus, so this costs nothing
+ * for anywhere somebody has already planned. The authored title and description
+ * belonged to the old venue and would be wrong for the new one, so they are
+ * cleared rather than carried across — a confident description of the wrong
+ * restaurant is worse than none at all.
+ */
+export async function replaceActivity(
+  tripId: string,
+  activityId: string,
+  placeId: string,
+): Promise<ActionResult> {
+  const denied = await authorise(tripId);
+  if (denied) return denied;
+
+  const supabase = await createClient();
+  const { data: activity } = await supabase
+    .from('activities')
+    .select('id, trip_day_id')
+    .eq('id', activityId)
+    .maybeSingle();
+
+  if (!activity) return { ok: false, error: 'We could not find that activity.' };
+
+  const swapped = await swapActivityPlace(activityId, asPlaceId(placeId));
+  if (!swapped.ok) return { ok: false, error: swapped.error };
+
+  await reflowDay(activity.trip_day_id);
+  revalidatePath(`/trips/${tripId}`);
+  return { ok: true, data: undefined };
+}
+
+/**
+ * Add a stop to a day.
+ *
+ * Appended, then re-timed — the scheduler decides whether it actually fits, so
+ * a day cannot be quietly pushed past its pace by adding things one at a time.
+ */
+export async function addActivity(
+  tripId: string,
+  dayId: string,
+  input: { placeId: string } | { customName: string },
+): Promise<ActionResult> {
+  const denied = await authorise(tripId);
+  if (denied) return denied;
+
+  const added = await appendActivity(dayId, input);
+  if (!added.ok) return { ok: false, error: added.error };
+
+  await reflowDay(dayId);
   revalidatePath(`/trips/${tripId}`);
   return { ok: true, data: undefined };
 }

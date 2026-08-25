@@ -304,29 +304,52 @@ begin
 
   for spec in
     select * from (values
-      ('seed-yanaka-cemetery', 'Yanaka Cemetery walk',            35.7268, 139.7669, 'park'),
-      ('seed-yanaka-ginza',    'Yanaka Ginza',                    35.7276, 139.7654, 'market'),
-      ('seed-nezu-soba',       'Soba lunch in Nezu',              35.7204, 139.7615, 'restaurant'),
-      ('seed-nezu-shrine',     'Nezu Shrine',                     35.7203, 139.7594, 'place_of_worship'),
-      ('seed-nezu-izakaya',    'Dinner at a neighbourhood izakaya',35.7189, 139.7628, 'restaurant'),
-      ('seed-kiyosumi-coffee', 'Coffee in Kiyosumi',              35.6811, 139.7996, 'coffee_shop'),
-      ('seed-kiyosumi-teien',  'Kiyosumi Teien',                  35.6807, 139.7975, 'garden'),
-      ('seed-monzen-lunch',    'Lunch in Monzen-Nakacho',         35.6714, 139.7967, 'restaurant'),
-      ('seed-takao',           'Mount Takao',                     35.6250, 139.2436, 'hiking_area'),
-      ('seed-tsukiji',         'Tsukiji Outer Market',            35.6654, 139.7707, 'market'),
-      ('seed-hamarikyu',       'Hama-rikyu Gardens',              35.6597, 139.7634, 'garden'),
-      ('seed-tsukiji-sushi',   'Sushi lunch back at Tsukiji',     35.6660, 139.7699, 'restaurant')
-    ) as t(gid, title, lat, lng, ptype)
+      -- Used by the demo trip.
+      ('seed-yanaka-cemetery', 'Yanaka Cemetery walk',            35.7268, 139.7669, 'park',             'park_garden'),
+      ('seed-yanaka-ginza',    'Yanaka Ginza',                    35.7276, 139.7654, 'market',           'market'),
+      ('seed-nezu-soba',       'Soba lunch in Nezu',              35.7204, 139.7615, 'restaurant',       'lunch'),
+      ('seed-nezu-shrine',     'Nezu Shrine',                     35.7203, 139.7594, 'place_of_worship', 'temple_shrine'),
+      ('seed-nezu-izakaya',    'Dinner at a neighbourhood izakaya',35.7189, 139.7628, 'restaurant',      'dinner'),
+      ('seed-kiyosumi-coffee', 'Coffee in Kiyosumi',              35.6811, 139.7996, 'coffee_shop',      'coffee'),
+      ('seed-kiyosumi-teien',  'Kiyosumi Teien',                  35.6807, 139.7975, 'garden',           'park_garden'),
+      ('seed-monzen-lunch',    'Lunch in Monzen-Nakacho',         35.6714, 139.7967, 'restaurant',       'lunch'),
+      ('seed-takao',           'Mount Takao',                     35.6250, 139.2436, 'hiking_area',      'hike'),
+      ('seed-tsukiji',         'Tsukiji Outer Market',            35.6654, 139.7707, 'market',           'market'),
+      ('seed-hamarikyu',       'Hama-rikyu Gardens',              35.6597, 139.7634, 'garden',           'park_garden'),
+      ('seed-tsukiji-sushi',   'Sushi lunch back at Tsukiji',     35.6660, 139.7699, 'restaurant',       'lunch'),
+
+      -- Not used by any trip. A real corpus holds far more than any one
+      -- itinerary needs — that surplus is what "swap this stop" draws on, and
+      -- without it the feature has nothing to offer.
+      ('seed-yanaka-coffee',   'Kayaba Coffee',                   35.7220, 139.7690, 'coffee_shop',      'coffee'),
+      ('seed-sendagi-soba',    'Sendagi soba counter',            35.7260, 139.7605, 'restaurant',       'lunch'),
+      ('seed-nezu-yakitori',   'Yakitori under the tracks',       35.7175, 139.7640, 'restaurant',       'dinner'),
+      ('seed-ueno-park',       'Ueno Park',                       35.7156, 139.7730, 'park',             'park_garden'),
+      ('seed-tokyo-natmuseum', 'Tokyo National Museum',           35.7188, 139.7765, 'museum',           'museum'),
+      ('seed-yushima',         'Yushima Tenmangu',                35.7075, 139.7680, 'place_of_worship', 'temple_shrine'),
+      ('seed-ameyoko',         'Ameyoko market street',           35.7100, 139.7745, 'market',           'market'),
+      ('seed-kappabashi',      'Kappabashi kitchen street',       35.7130, 139.7890, 'market',           'shopping_street'),
+      ('seed-kiyosumi-lunch',  'Fukagawa-meshi lunch',            35.6800, 139.7960, 'restaurant',       'lunch'),
+      ('seed-monzen-dinner',   'Monzen-Nakacho izakaya',          35.6720, 139.7975, 'restaurant',       'dinner'),
+      ('seed-tsukishima',      'Tsukishima monjayaki street',     35.6645, 139.7830, 'restaurant',       'dinner'),
+      ('seed-teamlab',         'Toyosu waterfront walk',          35.6450, 139.7900, 'tourist_attraction','neighbourhood_walk'),
+      ('seed-shiba-park',      'Shiba Park',                      35.6570, 139.7490, 'park',             'park_garden'),
+      ('seed-zojoji',          'Zojo-ji',                         35.6575, 139.7480, 'place_of_worship', 'temple_shrine')
+    ) as t(gid, title, lat, lng, ptype, tag)
   loop
     insert into public.places (google_place_id, destination_id, primary_type, types, tags)
-    values (spec.gid, tokyo, spec.ptype, array[spec.ptype], array['landmark'])
+    values (spec.gid, tokyo, spec.ptype, array[spec.ptype], array[spec.tag])
     returning id into pid;
 
     insert into public.place_cache
       (place_id, display_name, formatted_address, lat, lng, rating, user_rating_count,
        price_level, business_status, fetched_at, expires_at)
     values
-      (pid, spec.title, 'Tokyo, Japan', spec.lat, spec.lng, 4.4, 1200,
+      (pid, spec.title, 'Tokyo, Japan', spec.lat, spec.lng,
+       -- Deterministic spread from the id, so ranking has real signal to sort
+       -- on instead of a flat 4.4 across every place.
+       4.0 + (('x' || substr(md5(spec.gid), 1, 4))::bit(16)::int % 90) / 100.0,
+       200 + (('x' || substr(md5(spec.gid), 5, 4))::bit(16)::int % 4000),
        'PRICE_LEVEL_MODERATE', 'OPERATIONAL', now(), now() + interval '20 days');
 
     -- Attach to the matching activity on the demo trip by its authored title.

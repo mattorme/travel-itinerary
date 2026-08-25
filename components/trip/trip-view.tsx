@@ -6,6 +6,7 @@ import { DaySection } from './day-section';
 import { BudgetPanel } from './budget-panel';
 import { TripMap } from './map/trip-map';
 import { ActivityEditor } from './activity-editor';
+import { AddStop } from './add-stop';
 
 /**
  * The itinerary itself, shared by the public page and the owner's view.
@@ -68,13 +69,15 @@ export function TripView({
             currency={itinerary.request.currency}
             {...(editable
               ? {
-                  renderEditor: (activityId, index, count, isLocked) => (
+                  dayFooter: <AddStop tripId={itinerary.id} dayId={day.id} />,
+                  renderEditor: (activityId, index, count, isLocked, canSwap) => (
                     <ActivityEditor
                       tripId={itinerary.id}
                       activityId={activityId}
                       index={index}
                       count={count}
                       isLocked={isLocked}
+                      canSwap={canSwap}
                     />
                   ),
                 }

@@ -1,9 +1,12 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { ChevronDown, ChevronUp, Loader2, Pin, Trash2 } from 'lucide-react';
+import { ChevronDown, ChevronUp, Loader2, Pin, Repeat, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { lockActivity, moveActivity, removeActivity } from '@/app/actions/edit-actions';
+import { lockActivity, moveActivity, removeActivity, replaceActivity } from '@/app/actions/edit-actions';
+import { alternativesFor } from '@/app/actions/place-actions';
+import { PlacePicker } from './place-picker';
+import type { Alternative } from '@/lib/itinerary/alternatives';
 import { cn } from '@/lib/utils/cn';
 
 /**
@@ -20,17 +23,22 @@ export function ActivityEditor({
   index,
   count,
   isLocked,
+  canSwap,
 }: {
   tripId: string;
   activityId: string;
   index: number;
   count: number;
   isLocked: boolean;
+  /** Only a stop backed by a real place has alternatives to offer. */
+  canSwap: boolean;
 }) {
   const [pending, startTransition] = useTransition();
   const [locked, setLocked] = useState(isLocked);
   const [confirming, setConfirming] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [swapping, setSwapping] = useState(false);
+  const [alternatives, setAlternatives] = useState<readonly Alternative[] | null>(null);
 
   function run(action: () => Promise<{ ok: boolean; error?: string }>) {
     setError(null);
@@ -60,6 +68,24 @@ export function ActivityEditor({
       >
         <ChevronDown className="size-4" />
       </Button>
+
+      {canSwap && (
+        <Button
+          variant="ghost"
+          size="sm"
+          disabled={pending}
+          onClick={() => {
+            setSwapping(true);
+            setAlternatives(null);
+            // Loaded on open rather than on mount: a twelve-day trip would
+            // otherwise fire sixty lookups nobody asked for.
+            void alternativesFor(tripId, activityId).then(setAlternatives);
+          }}
+        >
+          <Repeat className="size-4" />
+          Swap
+        </Button>
+      )}
 
       <Button
         variant="ghost"
@@ -112,6 +138,20 @@ export function ActivityEditor({
         <span role="alert" className="text-xs text-critical">
           {error}
         </span>
+      )}
+
+      {swapping && (
+        <PlacePicker
+          title="Swap this stop"
+          subtitle="Alternatives that keep the day tight, ranked the same way the original was chosen."
+          initial={alternatives}
+          onClose={() => setSwapping(false)}
+          onPick={async (choice) => {
+            if (!('placeId' in choice)) return;
+            const result = await replaceActivity(tripId, activityId, choice.placeId);
+            if (!result.ok) setError(result.error);
+          }}
+        />
       )}
     </div>
   );
