@@ -171,6 +171,7 @@ work. Details in [MOBILE.md](./MOBILE.md).
 ```bash
 npm run dev          npm run typecheck    npm test
 npm run test:e2e     npm run db:reset     npm run db:test
+npm run test:auth    # cross-trip authorisation, needs a running database
 ```
 
 ---
@@ -237,7 +238,40 @@ makes the itinerary logic testable without a network, a database, or a key.
 
 ---
 
-## 8. Traps worth knowing about
+## 8. Standards compliance
+
+The project is audited against `CLAUDE.md` (untracked, local to your working
+copy). Current state:
+
+| Standard | State |
+|---|---|
+| No duplicated logic | Clean — eight duplicated helpers consolidated |
+| Small, focused functions | Clean — nothing over ~170 lines, and that one is a single stage |
+| No massive files | Clean — largest is 401 lines |
+| Business logic out of route handlers | Clean — admission policy lives in `lib/itinerary/admission.ts` |
+| No hardcoded secrets | Clean — verified by scan and by a CI bundle check |
+| No internal errors returned to users | Clean — every user-facing string is written for the reader |
+| Inputs validated | Clean — Zod at every boundary |
+| Queries scoped to the authenticated user | Clean — RLS everywhere, plus explicit scoping on admin writes |
+| Ownership validation on user-owned resources | Clean — pinned by pgTAP and by an integration suite |
+| No N+1 patterns | Clean |
+| Dead code removed | Clean |
+| Centralised API calls | Clean — `lib/api/client.ts` |
+| Passwords hashed | N/A — no passwords exist; magic link and OAuth only |
+
+Two deliberate exceptions:
+
+- **`fx_rates` has no foreign key.** It is a reference table keyed on
+  `(base, quote, as_of)` with nothing to reference.
+- **`tests/integration/authorization.test.ts` skips without a database.** It has
+  to run against a real one, because the bug class it covers lives in the gap
+  between "RLS would have stopped this" and "the admin client does not consult
+  RLS". It runs in the CI job that has a database, and skips loudly rather than
+  silently.
+
+---
+
+## 9. Traps worth knowing about
 
 Things that have already bitten once and are easy to reintroduce.
 

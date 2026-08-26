@@ -24,6 +24,7 @@ import {
   type WizardState,
 } from './state';
 import { Turnstile } from '@/components/turnstile';
+import { startGeneration } from '@/lib/api/client';
 
 export function Wizard({ initialQuery }: { initialQuery: string | null }) {
   const router = useRouter();
@@ -48,26 +49,13 @@ export function Wizard({ initialQuery }: { initialQuery: string | null }) {
   async function submit() {
     setSubmitting(true);
     setError(null);
-    try {
-      const response = await fetch('/api/trips/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ trip: toTripRequest(state), turnstileToken }),
-      });
-
-      if (!response.ok) {
-        const data = (await response.json().catch(() => ({}))) as { error?: string };
-        setError(data.error ?? 'We could not start that trip. Please try again.');
-        setSubmitting(false);
-        return;
-      }
-
-      const { tripId } = (await response.json()) as { tripId: string };
-      router.push(`/trips/${tripId}`);
-    } catch {
-      setError('We could not reach the server. Check your connection and try again.');
+    const result = await startGeneration(toTripRequest(state), turnstileToken);
+    if (!result.ok) {
+      setError(result.error);
       setSubmitting(false);
+      return;
     }
+    router.push(`/trips/${result.data.tripId}`);
   }
 
   return (

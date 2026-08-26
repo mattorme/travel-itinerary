@@ -68,7 +68,7 @@ export async function upsertPlaces(
 }
 
 /** Read whatever is still live. Expired rows are invisible by policy. */
-export async function readCache(
+async function readCache(
   placeIds: readonly PlaceId[],
 ): Promise<ReadonlyMap<PlaceId, PlaceHydration>> {
   if (placeIds.length === 0) return new Map();

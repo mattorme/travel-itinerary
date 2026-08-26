@@ -48,12 +48,6 @@ export function centroid(points: readonly LatLng[]): LatLng | null {
   };
 }
 
-export function withinBounds(p: LatLng, b: BoundingBox): boolean {
-  const latOk = p.lat <= b.north && p.lat >= b.south;
-  // Handle antimeridian-crossing boxes.
-  const lngOk = b.west <= b.east ? p.lng >= b.west && p.lng <= b.east : p.lng >= b.west || p.lng <= b.east;
-  return latOk && lngOk;
-}
 
 /**
  * Straight-line travel time used during draft iteration so the pipeline never

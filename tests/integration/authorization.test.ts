@@ -27,13 +27,16 @@ const URL_ = process.env.SUPABASE_TEST_URL ?? '';
 const SERVICE_KEY = process.env.SUPABASE_TEST_SERVICE_KEY ?? '';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-const admin: any = createClient(URL_, SERVICE_KEY, {
-  auth: { autoRefreshToken: false, persistSession: false },
-});
+// Constructed only when the variables are present: `createClient` throws on an
+// empty URL, which would fail this file at import time in the default test run
+// instead of skipping it.
+const admin: any = URL_ && SERVICE_KEY
+  ? createClient(URL_, SERVICE_KEY, { auth: { autoRefreshToken: false, persistSession: false } })
+  : null;
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
 async function databaseReachable(): Promise<boolean> {
-  if (!URL_ || !SERVICE_KEY) return false;
+  if (!admin) return false;
   try {
     const { error } = await admin.from('trips').select('id').limit(1);
     return !error;

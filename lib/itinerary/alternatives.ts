@@ -225,15 +225,3 @@ export async function searchTripPlaces(args: {
   }));
 }
 
-/** Our tag taxonomy for a place, used when inserting it as a new activity. */
-export async function primaryTagFor(placeId: PlaceId): Promise<ExperienceTag> {
-  const admin = createAdminClient();
-  const { data } = await admin
-    .from('places')
-    .select('tags, types')
-    .eq('id', placeId)
-    .maybeSingle();
-
-  const tag = data?.tags?.[0] ?? tagsForGoogleTypes(data?.types ?? [])[0] ?? 'landmark';
-  return tag as ExperienceTag;
-}

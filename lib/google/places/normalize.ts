@@ -8,7 +8,7 @@ import type { GooglePlace } from './types';
  * 24-hour venue is expressed as a single period with no close.
  */
 
-export function normalizeOpeningHours(place: GooglePlace): OpeningHours | null {
+function normalizeOpeningHours(place: GooglePlace): OpeningHours | null {
   const raw = place.regularOpeningHours;
   if (!raw?.periods || raw.periods.length === 0) return null;
 

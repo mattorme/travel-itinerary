@@ -23,7 +23,7 @@ export interface Entitlement {
   readonly remaining: number;
 }
 
-export function dailyQuotaFor(user: SessionUser): number {
+function dailyQuotaFor(user: SessionUser): number {
   const env = serverEnv();
   if (user.tier === 'pro') return env.GENERATION_QUOTA_PRO;
   if (user.isAnonymous) return env.GENERATION_QUOTA_ANON;

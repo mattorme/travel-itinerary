@@ -186,6 +186,3 @@ function dedupeById(candidates: readonly Candidate[]): readonly Candidate[] {
   return out;
 }
 
-export function distanceFrom(candidate: Candidate, point: LatLng | null): number | null {
-  return point ? Math.round(haversineMeters(candidate.location, point)) : null;
-}

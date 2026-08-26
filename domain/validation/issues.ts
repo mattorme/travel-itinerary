@@ -30,9 +30,6 @@ export type ItineraryIssue =
 
 export type IssueCode = ItineraryIssue['code'];
 
-export function errorsOnly(issues: readonly ItineraryIssue[]): readonly ItineraryIssue[] {
-  return issues.filter((i) => i.severity === 'error');
-}
 
 /** Human-facing copy. Used both in the repair log and, for survivors, in the UI. */
 export function describeIssue(issue: ItineraryIssue): string {

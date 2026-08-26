@@ -22,9 +22,6 @@ function imageProvider(): ImageProvider | null {
   return provider;
 }
 
-export function imagesAvailable(): boolean {
-  return imageProvider() !== null;
-}
 
 /**
  * The hero for a destination, resolving once and reusing it thereafter.

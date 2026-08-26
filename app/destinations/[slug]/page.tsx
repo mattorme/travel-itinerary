@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Cover } from '@/components/ui/cover';
 import { formatCurrency, humanise } from '@/lib/utils/format';
 import { publicEnv } from '@/lib/public-env';
+import { destinationCover } from '@/lib/images';
 
 export const revalidate = 3600;
 
@@ -90,6 +91,15 @@ export default async function DestinationPage({
       .limit(18),
   ]);
 
+  // Resolves once and is stored on the destination row, so a hub costs one
+  // image search ever rather than one per view. Falls back to generated cover
+  // art when there is no image provider configured.
+  const cover = await destinationCover({
+    destinationId: destination.id,
+    name: destination.name,
+    countryName: destination.country_name,
+  }).catch(() => null);
+
   const stats = statsRows?.[0];
   const trips = (tripRows ?? []) as unknown as TripCardData[];
   const hasStats = Boolean(stats && stats.trip_count > 0);
@@ -100,8 +110,8 @@ export default async function DestinationPage({
       <main className="mx-auto max-w-5xl px-5 pb-16">
         <div className="relative -mx-5 aspect-[3/2] overflow-hidden bg-paper-sunk sm:mx-0 sm:mt-6 sm:aspect-[21/9] sm:rounded-card">
           <Cover
-            imageUrl={destination.hero_image_url}
-            credit={destination.hero_credit as never}
+            imageUrl={cover?.url ?? destination.hero_image_url}
+            credit={(cover ?? destination.hero_credit) as never}
             seed={slug}
             label={destination.name}
             priority

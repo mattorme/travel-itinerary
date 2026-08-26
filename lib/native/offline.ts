@@ -140,7 +140,7 @@ export async function isSavedOffline(slug: string): Promise<boolean> {
   return (await readIndex()).some((entry) => entry.slug === slug);
 }
 
-export async function readIndex(): Promise<OfflineIndexEntry[]> {
+async function readIndex(): Promise<OfflineIndexEntry[]> {
   const raw = await storage.get(OFFLINE_INDEX_KEY);
   if (!raw) return [];
   try {

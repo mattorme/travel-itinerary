@@ -4,12 +4,13 @@ import { useEffect, useRef, useState } from 'react';
 import { Search } from 'lucide-react';
 import { Field, inputClass } from '@/components/ui/field';
 import { cn } from '@/lib/utils/cn';
+import { suggestDestinations, type DestinationSuggestion } from '@/lib/api/client';
 import type { WizardState } from '../state';
 
 type Patch = (patch: Partial<WizardState>) => void;
 
 export function DestinationStep({ state, patch }: { state: WizardState; patch: Patch }) {
-  const [suggestions, setSuggestions] = useState<{ placeId: string; primary: string; secondary: string | null }[]>([]);
+  const [suggestions, setSuggestions] = useState<readonly DestinationSuggestion[]>([]);
   const [open, setOpen] = useState(false);
   // One session token per autocomplete session is how Google bills a whole
   // typing session as a single lookup rather than one per keystroke.
@@ -23,17 +24,11 @@ export function DestinationStep({ state, patch }: { state: WizardState; patch: P
     if (query.length < 2 || state.destinationPlaceId) return;
 
     const timer = setTimeout(async () => {
-      try {
-        const response = await fetch(
-          `/api/places/autocomplete?q=${encodeURIComponent(query)}&session=${sessionToken.current}`,
-        );
-        if (!response.ok) return;
-        const data = (await response.json()) as { suggestions?: typeof suggestions };
-        setSuggestions(data.suggestions ?? []);
-        setOpen(true);
-      } catch {
-        // Autocomplete is a convenience. Typing a name freehand works fine.
-      }
+      // Autocomplete is a convenience: a failure is an empty list, and typing a
+      // name freehand works perfectly well.
+      const found = await suggestDestinations(query, sessionToken.current);
+      setSuggestions(found);
+      setOpen(found.length > 0);
     }, 280);
     return () => clearTimeout(timer);
   }, [state.destinationQuery, state.destinationPlaceId]);

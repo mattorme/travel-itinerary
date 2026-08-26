@@ -287,7 +287,7 @@ function serialise(days: readonly DraftDay[]): string {
  * freshly generated trip and to one a user has edited — there is exactly one
  * definition of "valid" in the codebase.
  */
-export function toItineraryView(
+function toItineraryView(
   days: readonly DraftDay[],
   request: TripRequestParsed,
   estimatedTotal: number | null,

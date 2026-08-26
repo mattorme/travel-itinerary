@@ -151,7 +151,3 @@ export async function runGenerationJob(
   }
 }
 
-export function stageCopy(stage: string | null): string {
-  if (!stage) return 'Getting started…';
-  return STAGE_COPY[stage as Stage] ?? 'Working…';
-}
