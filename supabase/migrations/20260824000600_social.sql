@@ -1,6 +1,6 @@
 -- ============================================================================
 -- Social: likes, saves, clones, events. Follows/comments are schema-only for now
--- (see docs/ROADMAP.md "Deferred") so the tables exist before they are needed.
+-- (see docs/STATUS.md) so the tables exist before they are needed.
 -- ============================================================================
 
 create table public.trip_likes (

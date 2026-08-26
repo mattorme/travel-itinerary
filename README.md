@@ -5,8 +5,13 @@ itinerary easy; the itinerary itself is the social object, the public page is
 the acquisition channel, sharing is the growth loop and cloning is the retention
 loop.
 
-- [Architecture](docs/ARCHITECTURE.md) — the design and the reasoning behind it
-- [Roadmap](docs/ROADMAP.md) — milestones and what is deliberately deferred
+> **New here, or coming back after a while? Start with
+> [docs/STATUS.md](docs/STATUS.md).** It is the single orientation: what is
+> built, what is not, how to run it, and what to do next.
+
+- [Status](docs/STATUS.md) — start here
+- [Architecture](docs/ARCHITECTURE.md) — the decisions, and why
+- [Mobile](docs/MOBILE.md) — the iOS and Android shell
 
 ---
 
