@@ -27,7 +27,7 @@ export default function PrivacyPage() {
           <li>
             <strong className="text-ink">Your account.</strong> An email address, and a username
             and display name you choose. If you sign in with Google we receive your name and
-            profile picture. We never store a password — signing in is a link sent to your email.
+            profile picture. We never store a password. Signing in is a link sent to your email.
           </li>
           <li>
             <strong className="text-ink">Your trips.</strong> Everything you enter in the planner,
@@ -41,7 +41,7 @@ export default function PrivacyPage() {
           <li>
             <strong className="text-ink">Anonymous sessions.</strong> You can plan and copy a trip
             without an account. That still creates an account behind the scenes so the trip has an
-            owner — it just has no email attached. If you sign up later, it becomes your account
+            owner. It just has no email attached. If you sign up later, it becomes your account
             and your trips come with you.
           </li>
         </ul>
@@ -63,25 +63,25 @@ export default function PrivacyPage() {
       <Section title="Who else sees it">
         <ul className="list-disc space-y-2 pl-5 text-steel">
           <li>
-            <strong className="text-ink">Google Maps Platform</strong> — we send the destination
+            <strong className="text-ink">Google Maps Platform</strong>: we send the destination
             and the kinds of places you are interested in so we can find real venues, opening
             hours and travel times. We do not send your name, email or notes.
           </li>
           <li>
-            <strong className="text-ink">OpenAI</strong> — we send your trip preferences,
+            <strong className="text-ink">OpenAI</strong>: we send your trip preferences,
             including your free-text notes, so a model can shape the itinerary. We do not send
             your name or email.
           </li>
           <li>
-            <strong className="text-ink">Unsplash</strong> — we request a photograph for the
+            <strong className="text-ink">Unsplash</strong>: we request a photograph for the
             destination. Images are loaded from Unsplash directly, so they see the request.
           </li>
           <li>
-            <strong className="text-ink">Cloudflare Turnstile</strong> — a bot check shown before
+            <strong className="text-ink">Cloudflare Turnstile</strong>: a bot check shown before
             generating a trip without an account.
           </li>
           <li>
-            <strong className="text-ink">Supabase and Vercel</strong> — our database and hosting.
+            <strong className="text-ink">Supabase and Vercel</strong>: our database and hosting.
           </li>
         </ul>
       </Section>
@@ -90,7 +90,7 @@ export default function PrivacyPage() {
         <p className="text-steel">
           A trip is private when you create it. Sharing makes it reachable by anyone with the
           link, and only a further, deliberate choice makes it public and listed. On a shared or
-          public trip, other people see the itinerary, your username and your avatar — never your
+          public trip, other people see the itinerary, your username and your avatar, never your
           email.
         </p>
         <p className="text-steel">
@@ -102,7 +102,7 @@ export default function PrivacyPage() {
         <p className="text-steel">
           When someone copies a public trip they get their own independent copy, taken at that
           moment. Editing your original afterwards does not change their copy, and deleting yours
-          does not remove theirs — their copy keeps a credit to your username. If you make a trip
+          does not remove theirs. Their copy keeps a credit to your username. If you make a trip
           private again, copies people already made remain theirs.
         </p>
       </Section>

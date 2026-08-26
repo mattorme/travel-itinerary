@@ -19,7 +19,7 @@ export function TravellersStep({ state, patch }: { state: WizardState; patch: Pa
         />
       </Field>
 
-      <Field label="Children" hint="Ages help — a 4-year-old and a 15-year-old want different days.">
+      <Field label="Children" hint="Ages help: a 4-year-old and a 15-year-old want different days.">
         <Stepper
           value={state.children.length}
           min={0}

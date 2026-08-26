@@ -8,7 +8,7 @@ export function SiteFooter() {
         <div>
           <Logo />
           <p className="mt-4 max-w-xs text-[0.9375rem] leading-relaxed text-steel">
-            Day-by-day itineraries built from places that exist, and easy to pass on.
+            Day-by-day trip plans with the times filled in, and easy to pass on.
           </p>
         </div>
 

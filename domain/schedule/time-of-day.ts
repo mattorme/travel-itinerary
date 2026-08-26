@@ -82,5 +82,5 @@ export function describeArc(label: string, segments: readonly ArcSegment[]): str
     (band) => `${counts[band]} ${band}`,
   );
   const stops = segments.length === 1 ? '1 stop' : `${segments.length} stops`;
-  return `${label}: ${stops} — ${parts.join(', ')}`;
+  return `${label}: ${stops}, ${parts.join(', ')}`;
 }

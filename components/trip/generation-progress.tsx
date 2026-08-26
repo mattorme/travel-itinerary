@@ -127,13 +127,13 @@ export function GenerationProgress({
       </div>
 
       <p className="mt-10 text-sm leading-relaxed text-steel-2">
-        This usually takes under a minute. We&apos;re checking real places, their opening
-        hours, and how long it actually takes to get between them — you can leave this page
-        and come back.
+        This usually takes under a minute. We&apos;re looking up each place, reading its
+        opening hours, and measuring the walk between them. You can leave this page and
+        come back.
       </p>
 
       <p className="sr-only" role="status" aria-live="polite">
-        {stageCopyClient(stage)} — {percent} percent complete
+        {stageCopyClient(stage)}, {percent} percent complete
       </p>
     </div>
   );

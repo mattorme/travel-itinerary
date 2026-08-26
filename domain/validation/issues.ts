@@ -39,7 +39,7 @@ export function describeIssue(issue: ItineraryIssue): string {
     case 'CLOSED_AT_VISIT':
       return `Day ${issue.dayIndex}: a place is scheduled while it is closed.`;
     case 'HOURS_UNKNOWN':
-      return `Day ${issue.dayIndex}: opening hours are unknown for one stop — worth checking before you go.`;
+      return `Day ${issue.dayIndex}: opening hours are unknown for one stop, so it is worth checking before you go.`;
     case 'TRAVEL_TIME_IMPOSSIBLE':
       return `Day ${issue.dayIndex}: only ${issue.haveMinutes} minutes allowed for a ${issue.needMinutes}-minute journey.`;
     case 'GEOGRAPHIC_THRASH':
@@ -53,7 +53,7 @@ export function describeIssue(issue: ItineraryIssue): string {
     case 'BUDGET_EXCEEDED':
       return `The estimate is ${Math.round(issue.ratio * 100)}% over budget.`;
     case 'BUDGET_UNDERSPENT':
-      return `The estimate is ${Math.round(Math.abs(issue.ratio) * 100)}% under budget — there is room for more.`;
+      return `The estimate is ${Math.round(Math.abs(issue.ratio) * 100)}% under budget, so there is room for more.`;
     case 'INTEREST_UNMET':
       return `Nothing in this trip covers "${issue.interest}".`;
     case 'DUPLICATE_PLACE':

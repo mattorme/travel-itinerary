@@ -70,7 +70,7 @@ function dayEvents(
       activity.inboundTravel
         ? `Getting here: ${activity.inboundTravel.minutes} min ${activity.inboundTravel.mode}`
         : null,
-      `Part of "${itinerary.title}" — ${options.tripUrl}`,
+      `Part of "${itinerary.title}". ${options.tripUrl}`,
     ]
       .filter((v): v is string => Boolean(v))
       .join('\n\n');

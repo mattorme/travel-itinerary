@@ -209,7 +209,7 @@ function dropWeakest(day: DraftDay): DraftDay {
     activities: reindex(day.activities.filter((a) => a.slotId !== victim.slotId)),
     unfilledSlots: [
       ...day.unfilledSlots,
-      { slotId: victim.slotId, why: `We dropped ${victim.title} — the day was too full to do it justice.` },
+      { slotId: victim.slotId, why: `We dropped ${victim.title}. The day was too full to do it justice.` },
     ],
   };
 }

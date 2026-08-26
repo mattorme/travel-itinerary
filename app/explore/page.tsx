@@ -11,7 +11,7 @@ import { INTERESTS, TRAVEL_STYLES } from '@/domain/types/taxonomy';
 
 export const metadata: Metadata = {
   title: 'Explore trips',
-  description: 'Real itineraries built by other travellers. Copy any of them and make it yours.',
+  description: 'Itineraries other travellers planned and shared. Copy any of them and make it yours.',
 };
 
 export const dynamic = 'force-dynamic';
@@ -84,7 +84,7 @@ export default async function ExplorePage({
         <p className="mt-3 max-w-xl text-steel">
           {query
             ? `${trips.length}${trips.length === 24 ? '+' : ''} ${trips.length === 1 ? 'trip' : 'trips'} found.`
-            : 'Every one of these was built from real places and shared by the person who planned it.'}
+            : 'Each of these was planned by the person who shared it. Any of them can be yours in one tap.'}
         </p>
 
         <div className="mt-8 space-y-4">
@@ -120,7 +120,7 @@ export default async function ExplorePage({
             <p className="mt-2 text-steel">
               {query
                 ? 'Try a destination, or something you want to do there.'
-                : 'Be the first — build a trip and share it.'}
+                : 'Be the first. Build a trip and share it.'}
             </p>
             <div className="mt-6 flex flex-wrap justify-center gap-3">
               {query && (

@@ -48,23 +48,23 @@ export default async function LandingPage() {
                 New
               </span>
               <span className="text-[0.8125rem] font-medium text-steel">
-                Real opening hours, on every stop
+                Opening hours checked on every stop
               </span>
             </p>
 
-            <h1 className="type-display type-hero mt-6 max-w-[13ch]">
-              See the shape
+            <h1 className="type-display type-hero mt-6">
+              Describe your trip.
               <br />
-              <span className="grad-text">of a day.</span>
+              <span className="grad-text">We plan the hours.</span>
             </h1>
 
             <p
               className="rise mt-6 max-w-[46ch] text-[1.125rem] leading-relaxed text-steel"
               style={stagger(1)}
             >
-              Tell us where you&apos;re going and how you like to travel. You get a plan with real
-              times on it — early mornings, a free afternoon, dinner that runs late — built from
-              places that genuinely exist.
+              Say where you&apos;re going and how you like to travel. You get a day-by-day plan with
+              the times already on it: early starts, a free afternoon, a dinner that runs late.
+              Every stop has an address and opening hours.
             </p>
 
             <div className="rise mt-9 flex flex-col gap-3 sm:flex-row" style={stagger(2)}>
@@ -100,7 +100,7 @@ export default async function LandingPage() {
           scripted fills.
         */}
         <section className="mx-auto max-w-3xl px-4 pb-24 text-center sm:px-6">
-          <h2 className="type-display type-section">Describe it the way you would to a friend</h2>
+          <h2 className="type-display type-section">In your own words</h2>
 
           <form action="/plan" method="get" className="mt-7">
             <label htmlFor="q" className="sr-only">

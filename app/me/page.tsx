@@ -43,8 +43,8 @@ export default async function MyTripsPage() {
           <div className="mt-8 rounded-panel border border-signal/30 bg-signal-wash p-5">
             <p className="font-medium">Save these to an account</p>
             <p className="mt-1.5 text-sm text-steel">
-              You&apos;re browsing without an account. Your trips live on this device only —
-              sign up and they come with you.
+              You&apos;re browsing without an account. Your trips live on this device only.
+              Sign up and they come with you.
             </p>
             <Link href="/signin" className="mt-4 inline-block">
               <Button variant="primary" size="sm">Create an account</Button>

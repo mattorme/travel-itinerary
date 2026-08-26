@@ -130,7 +130,7 @@ export function ActivityEditor({
 
       {locked && (
         <span className="text-xs text-steel-2">
-          Pinned — we won&apos;t move this when the day changes.
+          Pinned. We won&apos;t move this when the day changes.
         </span>
       )}
 

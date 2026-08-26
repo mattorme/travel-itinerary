@@ -14,7 +14,7 @@ export function BudgetStep({ state, patch }: { state: WizardState; patch: Patch 
   return (
     <div className="space-y-7">
       <p className="text-[0.9375rem] text-steel">
-        Optional — but it changes what we suggest. Excludes flights.
+        Optional, but it changes what we suggest. Excludes flights.
       </p>
 
       <div className="flex gap-2">

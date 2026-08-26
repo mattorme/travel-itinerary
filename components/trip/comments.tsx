@@ -72,7 +72,7 @@ export function Comments({
       }
       setNotice(
         result.data.pending
-          ? 'Posted — it will appear for everyone once it has been checked.'
+          ? 'Posted. It will appear for everyone once it has been checked.'
           : 'Posted.',
       );
     });

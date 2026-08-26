@@ -63,7 +63,7 @@ describe('describeArc', () => {
       { startMinute: 19 * 60, durationMinutes: 120 },
     ]);
     expect(bandCounts(segments)).toEqual({ morning: 2, afternoon: 0, evening: 1 });
-    expect(describeArc('Day 1', segments)).toBe('Day 1: 3 stops — 2 morning, 1 evening');
+    expect(describeArc('Day 1', segments)).toBe('Day 1: 3 stops, 2 morning, 1 evening');
   });
 
   it('is honest about an empty day', () => {

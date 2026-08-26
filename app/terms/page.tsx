@@ -20,7 +20,7 @@ export default function TermsPage() {
         <p className="text-steel">
           Every itinerary is generated. The places are real and the opening hours and travel times
           come from Google, but they change, and a place that was open last week may not be open
-          when you arrive. Check anything that matters — especially opening times, bookings and
+          when you arrive. Check anything that matters, especially opening times, bookings and
           anything you are travelling a long way for.
         </p>
         <p className="text-steel">
@@ -52,7 +52,7 @@ export default function TermsPage() {
 
       <Section title="Copying other people's trips">
         <p className="text-steel">
-          Copying a public trip is a feature, not a breach — that is what the button is for. Your
+          Copying a public trip is a feature, not a breach. That is what the button is for. Your
           copy is independent and yours to edit, and it keeps a credit to the person who planned
           the original.
         </p>
@@ -76,7 +76,7 @@ export default function TermsPage() {
       <Section title="Availability">
         <p className="text-steel">
           We will try to keep the site up and your trips safe, but this is a young product and we
-          cannot promise either. Keep your own copy of anything you depend on — every trip can be
+          cannot promise either. Keep your own copy of anything you depend on. Every trip can be
           printed or exported to your calendar.
         </p>
       </Section>

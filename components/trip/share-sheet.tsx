@@ -98,7 +98,7 @@ export function ShareSheet({
           <div>
             <h2 className="type-display text-xl">Share this trip</h2>
             <p className="mt-1 text-sm text-steel">
-              Anyone with the link can open it — no account needed.
+              Anyone with the link can open it. No account needed.
             </p>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose} aria-label="Close">

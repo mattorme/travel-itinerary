@@ -29,11 +29,11 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL(publicEnv.siteUrl),
   title: {
-    default: 'Wayfare — itineraries worth sharing',
+    default: 'Wayfare: itineraries worth sharing',
     template: '%s · Wayfare',
   },
   description:
-    'Tell us where you are going. Get a real, day-by-day itinerary built from places that actually exist — then share it, and let other people make it theirs.',
+    'Say where you are going and how you like to travel. Get a day-by-day itinerary with the times already on it, then share it and let other people make it theirs.',
   openGraph: {
     type: 'website',
     siteName: 'Wayfare',

@@ -75,7 +75,7 @@ export async function postComment(
 
   const text = body.trim();
   if (text.length < 2) return { ok: false, error: 'Say a little more than that.' };
-  if (text.length > 2000) return { ok: false, error: 'That is a bit long — 2000 characters max.' };
+  if (text.length > 2000) return { ok: false, error: 'That is a bit long. 2000 characters max.' };
 
 
   // Comments land on a page that can be indexed, so nothing is published until

@@ -14,10 +14,10 @@ import { BRAND_FROM } from '@/lib/brand';
  */
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Wayfare — itineraries worth sharing',
+    name: 'Wayfare: itineraries worth sharing',
     short_name: 'Wayfare',
     description:
-      'Day-by-day travel itineraries built from real places, and easy to share.',
+      'Day-by-day travel itineraries with the times filled in, and easy to share.',
     start_url: '/',
     scope: '/',
     display: 'standalone',

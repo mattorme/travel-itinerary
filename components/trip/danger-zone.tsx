@@ -34,7 +34,7 @@ export function DangerZone({ tripId, cloneCount }: { tripId: string; cloneCount:
               <>
                 {' '}
                 {cloneCount === 1 ? 'One person has' : `${cloneCount} people have`} already made
-                their own copy — those stay with them, and keep crediting you.
+                their own copy. Those stay with them, and keep crediting you.
               </>
             )}
           </p>

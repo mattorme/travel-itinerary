@@ -61,7 +61,7 @@ export function TripInsights({ itinerary }: { itinerary: Itinerary }) {
 
       {insights.busiestDay && insights.lightestDay && (
         <p className="mt-3 text-sm text-steel-2">
-          Day {insights.busiestDay.dayIndex} is the heaviest —{' '}
+          Day {insights.busiestDay.dayIndex} is the heaviest, with{' '}
           {formatDuration(insights.busiestDay.activeMinutes + insights.busiestDay.travelMinutes)}{' '}
           accounted for. Day {insights.lightestDay.dayIndex} is the easiest.
           {insights.walkingMeters > 3000 && (
