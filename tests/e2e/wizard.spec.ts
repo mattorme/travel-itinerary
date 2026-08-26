@@ -72,4 +72,31 @@ test.describe('trip wizard', () => {
     await page.getByRole('link', { name: /5 days in Tokyo/ }).click();
     await expect(page.getByPlaceholder(/Tokyo, Portugal/)).toHaveValue(/5 days in Tokyo/);
   });
+
+  test('the landing-page form carries a typed sentence into the wizard', async ({ page }) => {
+    await page.goto('/');
+    await page.getByLabel(/Where are you going/).fill('Six days in Seville, mostly eating');
+    await page.getByRole('button', { name: 'Plan it' }).click();
+    await expect(page.getByPlaceholder(/Tokyo, Portugal/)).toHaveValue(
+      'Six days in Seville, mostly eating',
+    );
+  });
+
+  /*
+   * The form is a plain GET to /plan, and that is deliberate — it is the only
+   * entry point on the page, so it has to work before any JavaScript has run.
+   *
+   * Submitted with the keyboard rather than the button: it is how the field is
+   * actually used, and it covers the implicit-submission path that a click on
+   * the button does not.
+   */
+  test('the landing-page form works with JavaScript disabled', async ({ browser }) => {
+    const context = await browser.newContext({ javaScriptEnabled: false });
+    const page = await context.newPage();
+    await page.goto('/');
+    await page.getByLabel(/Where are you going/).fill('Four days in Rome, no rushing');
+    await page.getByLabel(/Where are you going/).press('Enter');
+    await page.waitForURL(/\/plan\?q=Four\+days/);
+    await context.close();
+  });
 });

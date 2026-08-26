@@ -7,7 +7,6 @@ import { TripCard } from '@/components/trip/trip-card';
 import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
 import { AppMock } from '@/components/marketing/app-mock';
-import { Anatomy } from '@/components/marketing/anatomy';
 import { stagger } from '@/lib/utils/motion';
 
 export const revalidate = 300;
@@ -92,17 +91,43 @@ export default async function LandingPage() {
           </div>
         </section>
 
-        <Anatomy />
+        {/*
+          The actual way in.
+          
+          A plain GET form to /plan, which is where the wizard already reads `q`
+          from — so it works with no JavaScript, the browser remembers what was
+          typed, and the suggestions underneath are ordinary links rather than
+          scripted fills.
+        */}
+        <section className="mx-auto max-w-3xl px-4 pb-24 text-center sm:px-6">
+          <h2 className="type-display type-section">Describe it the way you would to a friend</h2>
 
-        <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
-          <h2 className="type-display type-section">Start from a sentence</h2>
-          <p className="mt-2 text-steel">However you&apos;d describe the trip to a friend.</p>
-          <ul className="mt-6 flex flex-wrap gap-2.5">
+          <form action="/plan" method="get" className="mt-7">
+            <label htmlFor="q" className="sr-only">
+              Where are you going, and how do you like to travel?
+            </label>
+            <div className="flex flex-col gap-3 rounded-sheet bg-surface p-3 shadow-(--shadow-card) sm:flex-row sm:items-center sm:rounded-full sm:pl-6">
+              <input
+                id="q"
+                name="q"
+                type="text"
+                autoComplete="off"
+                placeholder="Four days in Rome, no rushing…"
+                className="min-w-0 flex-1 bg-transparent px-3 py-3 text-[1rem] text-ink placeholder:text-steel-2 focus:outline-none sm:px-0"
+              />
+              <Button type="submit" variant="signal" size="lg" className="shrink-0 sm:rounded-full">
+                Plan it
+                <ArrowRight className="size-4 transition-transform duration-200 group-hover/btn:translate-x-0.5" />
+              </Button>
+            </div>
+          </form>
+
+          <ul className="mt-5 flex flex-wrap justify-center gap-2">
             {SAMPLE_PROMPTS.map((prompt) => (
               <li key={prompt}>
                 <Link
                   href={{ pathname: '/plan', query: { q: prompt } }}
-                  className="inline-block rounded-full bg-surface px-4 py-2.5 text-[0.875rem] text-steel shadow-(--shadow-card) transition-all duration-200 hover:-translate-y-0.5 hover:text-signal hover:shadow-(--shadow-lift)"
+                  className="inline-block rounded-full px-3.5 py-2 text-[0.875rem] text-steel-2 transition-colors hover:bg-signal-wash hover:text-signal-deep"
                 >
                   {prompt}
                 </Link>
