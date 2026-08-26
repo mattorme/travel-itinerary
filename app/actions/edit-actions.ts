@@ -61,7 +61,7 @@ export async function moveActivity(
   });
   if (error) return { ok: false, error: 'We could not reorder that day.' };
 
-  await reflowDay(activity.trip_day_id);
+  await reflowDay(tripId, activity.trip_day_id);
   revalidatePath(`/trips/${tripId}`);
   return { ok: true, data: undefined };
 }
@@ -83,7 +83,7 @@ export async function removeActivity(
   const { error } = await supabase.from('activities').delete().eq('id', activityId);
   if (error) return { ok: false, error: 'We could not remove that.' };
 
-  if (activity) await reflowDay(activity.trip_day_id);
+  if (activity) await reflowDay(tripId, activity.trip_day_id);
   revalidatePath(`/trips/${tripId}`);
   return { ok: true, data: undefined };
 }
@@ -114,10 +114,10 @@ export async function replaceActivity(
 
   if (!activity) return { ok: false, error: 'We could not find that activity.' };
 
-  const swapped = await swapActivityPlace(activityId, asPlaceId(placeId));
+  const swapped = await swapActivityPlace(tripId, activityId, asPlaceId(placeId));
   if (!swapped.ok) return { ok: false, error: swapped.error };
 
-  await reflowDay(activity.trip_day_id);
+  await reflowDay(tripId, activity.trip_day_id);
   revalidatePath(`/trips/${tripId}`);
   return { ok: true, data: undefined };
 }
@@ -136,10 +136,10 @@ export async function addActivity(
   const guard = await guardTripEditor(tripId);
   if (!guard.ok) return guard;
 
-  const added = await appendActivity(dayId, input);
+  const added = await appendActivity(tripId, dayId, input);
   if (!added.ok) return { ok: false, error: added.error };
 
-  await reflowDay(dayId);
+  await reflowDay(tripId, dayId);
   revalidatePath(`/trips/${tripId}`);
   return { ok: true, data: undefined };
 }

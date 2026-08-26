@@ -17,13 +17,17 @@ import { minuteToSqlTime, sqlTimeToMinute } from '@/lib/utils/time';
  * an edit must never block on a Routes call, and re-routing on every drag would
  * be expensive for something the traveller may undo a second later.
  */
-export async function reflowDay(tripDayId: string): Promise<void> {
+export async function reflowDay(tripId: string, tripDayId: string): Promise<void> {
   const admin = createAdminClient();
 
+  // Scoped by trip for the same reason the writes above are: the caller was
+  // authorised for a trip, not for whichever day id they also sent, and the
+  // admin client will not notice the difference.
   const { data: day } = await admin
     .from('trip_days')
     .select('id, trip_id, trips!inner(pace, transport_modes)')
     .eq('id', tripDayId)
+    .eq('trip_id', tripId)
     .maybeSingle();
 
   if (!day) return;
@@ -108,17 +112,37 @@ export async function reflowDay(tripDayId: string): Promise<void> {
 
 
 /**
+ * The trip_day ids belonging to a trip.
+ *
+ * Every admin-client write below is scoped by this rather than trusting the id
+ * the client supplied. The caller has been authorised for a *trip*; that says
+ * nothing about whether the activity or day they also passed belongs to it, and
+ * the admin client bypasses the RLS that would otherwise notice.
+ */
+async function dayIdsForTrip(tripId: string): Promise<string[]> {
+  const admin = createAdminClient();
+  const { data } = await admin.from('trip_days').select('id').eq('trip_id', tripId);
+  return (data ?? []).map((row) => row.id);
+}
+
+/**
  * Point an activity at a different place.
  *
- * Uses the admin client because it writes `place_id`, which RLS lets the owner
- * change but which needs the place row read to derive a title — and the places
- * table is service-role for writes. Authorisation happened in the action.
+ * Uses the admin client because deriving the new title needs to read the place
+ * row, and `places` is service-role for reads of unexpired cache content. The
+ * write is therefore scoped to the caller's own trip explicitly — an admin
+ * write that trusts a client-supplied id is an ownership check that is not
+ * happening.
  */
 export async function swapActivityPlace(
+  tripId: string,
   activityId: string,
   placeId: string,
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   const admin = createAdminClient();
+
+  const dayIds = await dayIdsForTrip(tripId);
+  if (dayIds.length === 0) return { ok: false, error: 'We could not find that trip.' };
 
   const [{ data: place }, { data: cache }] = await Promise.all([
     admin.from('places').select('id, destination_id').eq('id', placeId).maybeSingle(),
@@ -138,7 +162,7 @@ export async function swapActivityPlace(
     return { ok: false, error: 'We could not load that place right now. Try again in a moment.' };
   }
 
-  const { error } = await admin
+  const { data: updated, error } = await admin
     .from('activities')
     .update({
       place_id: placeId,
@@ -151,18 +175,40 @@ export async function swapActivityPlace(
       // Travel and timing are recomputed by the reflow that follows.
       inbound_travel: null,
     })
-    .eq('id', activityId);
+    .eq('id', activityId)
+    // Scoped, not merely checked: a separate lookup then an unscoped write
+    // leaves a window between them.
+    .in('trip_day_id', dayIds)
+    .select('id');
 
   if (error) return { ok: false, error: 'We could not swap that stop.' };
+  if (!updated || updated.length === 0) {
+    return { ok: false, error: 'We could not find that stop on this trip.' };
+  }
   return { ok: true };
 }
 
-/** Append a stop to the end of a day. The reflow decides where it lands. */
+/**
+ * Append a stop to the end of a day. The reflow decides where it lands.
+ *
+ * `dayId` comes from the client, so it is verified against the trip the caller
+ * was actually authorised for before anything is written.
+ */
 export async function appendActivity(
+  tripId: string,
   dayId: string,
   input: { placeId: string } | { customName: string },
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   const admin = createAdminClient();
+
+  const { data: day } = await admin
+    .from('trip_days')
+    .select('id')
+    .eq('id', dayId)
+    .eq('trip_id', tripId)
+    .maybeSingle();
+
+  if (!day) return { ok: false, error: 'We could not find that day on this trip.' };
 
   const { data: siblings } = await admin
     .from('activities')

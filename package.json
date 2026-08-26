@@ -23,7 +23,8 @@
     "mobile:ios": "cap open ios",
     "mobile:android": "cap open android",
     "mobile:add": "cap add ios && cap add android",
-    "mobile:dev": "CAP_SERVER_URL=http://$(ipconfig getifaddr en0):3000 cap sync"
+    "mobile:dev": "CAP_SERVER_URL=http://$(ipconfig getifaddr en0):3000 cap sync",
+    "test:auth": "SUPABASE_TEST_URL=$(npx supabase status -o json | jq -r .API_URL) SUPABASE_TEST_SERVICE_KEY=$(npx supabase status -o json | jq -r .SERVICE_ROLE_KEY) vitest run tests/integration/authorization.test.ts"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.0",

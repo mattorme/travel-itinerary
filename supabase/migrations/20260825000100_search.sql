@@ -94,7 +94,12 @@ as $$
       -- raises on punctuation the way to_tsquery does.
       else websearch_to_tsquery('english', p_query)
     end as ts,
-    nullif(btrim(coalesce(p_query, '')), '') as raw
+    -- Escaped for LIKE. The value is parameterised, so this is not about
+    -- injection — it is that `%` and `_` are wildcards, and a search for "%"
+    -- would otherwise match every destination we have.
+    replace(replace(replace(
+      nullif(btrim(coalesce(p_query, '')), ''),
+      '\\', '\\\\'), '%', '\\%'), '_', '\\_') as raw
   )
   select
     t.id, t.slug, t.title, t.subtitle, t.duration_days, t.currency::text,
