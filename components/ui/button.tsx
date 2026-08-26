@@ -25,7 +25,7 @@ const buttonVariants = cva(
       variant: {
         primary: 'bg-ink text-white shadow-(--shadow-card) hover:bg-ink-2',
         signal:
-          'grad-brand text-white shadow-(--shadow-cta) hover:shadow-(--shadow-lift) hover:-translate-y-0.5',
+          'grad-brand text-white shadow-(--shadow-cta) hover:shadow-(--shadow-cta-hover) hover:-translate-y-0.5',
         outline:
           'border border-rule-2 bg-surface text-ink shadow-xs hover:border-signal/40 hover:text-signal',
         ghost: 'text-steel hover:bg-signal-wash hover:text-signal',

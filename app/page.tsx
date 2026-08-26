@@ -1,11 +1,13 @@
 import Link from 'next/link';
-import { ArrowRight, MapPin, Route, Share2 } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { createClient } from '@/lib/db/supabase/server';
+import { TRIP_CARD_COLUMNS } from '@/lib/db/selects';
 import { TripCard } from '@/components/trip/trip-card';
 import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
 import { AppMock } from '@/components/marketing/app-mock';
+import { Anatomy } from '@/components/marketing/anatomy';
 import { stagger } from '@/lib/utils/motion';
 
 export const revalidate = 300;
@@ -15,24 +17,6 @@ const SAMPLE_PROMPTS = [
   '10 days in Portugal on a budget',
   'A week in Mexico City with two teenagers',
   '4 days in Rome, no rushing',
-];
-
-const CLAIMS = [
-  {
-    icon: MapPin,
-    title: 'Places that exist',
-    body: 'Every stop is a real, current listing with real opening hours. The model picks between verified options — it never invents a restaurant.',
-  },
-  {
-    icon: Route,
-    title: 'Days that hold together',
-    body: 'Stops are ordered by measured travel time, so a day stays in one part of a city instead of scattering famous names across a map.',
-  },
-  {
-    icon: Share2,
-    title: 'Built to pass on',
-    body: 'Every trip gets a link that looks right in a group chat. Anyone can open it, and make it theirs in one tap.',
-  },
 ];
 
 /**
@@ -46,9 +30,7 @@ export default async function LandingPage() {
   const supabase = await createClient();
   const { data: featured } = await supabase
     .from('trips')
-    .select(
-      'id, slug, title, subtitle, duration_days, currency, estimated_cost_total, hero_image_url, hero_credit, clone_count, like_count, interests, travel_style, profiles:owner_id(username, display_name, avatar_url)',
-    )
+    .select(TRIP_CARD_COLUMNS)
     .eq('visibility', 'public')
     .eq('moderation_state', 'approved')
     .is('deleted_at', null)
@@ -110,25 +92,7 @@ export default async function LandingPage() {
           </div>
         </section>
 
-        {/* Three claims, each one a thing a generic AI wrapper cannot say. */}
-        <section className="py-16 sm:py-20">
-          <div className="mx-auto max-w-6xl px-4 sm:px-6">
-            <div className="grid gap-8 md:grid-cols-3 md:gap-10">
-              {CLAIMS.map((claim) => (
-                <div
-                  key={claim.title}
-                  className="rounded-panel bg-surface p-7 shadow-(--shadow-card) transition-all duration-200 ease-(--ease-out-quint) hover:-translate-y-1 hover:shadow-(--shadow-lift)"
-                >
-                  <span className="grad-brand flex size-11 items-center justify-center rounded-edge shadow-(--shadow-cta)">
-                    <claim.icon className="size-5 text-white" aria-hidden />
-                  </span>
-                  <h2 className="type-display mt-5 text-[1.375rem]">{claim.title}</h2>
-                  <p className="mt-3 text-[0.9375rem] leading-relaxed text-steel">{claim.body}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+        <Anatomy />
 
         <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
           <h2 className="type-display type-section">Start from a sentence</h2>

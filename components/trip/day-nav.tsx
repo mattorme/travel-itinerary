@@ -56,7 +56,7 @@ export function DayNav({ days }: { days: readonly { dayIndex: number; title: str
                 className={cn(
                   'type-label flex shrink-0 items-center rounded-full px-3 py-2 whitespace-nowrap transition-colors',
                   isActive
-                    ? 'grad-brand text-white shadow-(--shadow-cta)'
+                    ? 'grad-brand text-white'
                     : 'text-steel-2 hover:bg-signal-wash hover:text-signal',
                 )}
               >

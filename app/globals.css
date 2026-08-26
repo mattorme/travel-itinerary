@@ -66,15 +66,23 @@
   --radius-sheet: 24px;
 
   /*
-   * Coloured shadows. The card shadow is indigo at 10% — barely a colour, but
-   * enough that a white card reads as sitting on this ground rather than cut
-   * out of it. Nothing here uses a zero-offset blur: that is a glow, and a glow
-   * is the thing that makes a page look generated.
+   * Shadows.
+   *
+   * Every one of these is a shadow, which is to say: it falls downwards, it is
+   * tighter than the thing casting it, and it is mostly neutral with a trace of
+   * indigo so a white card reads as sitting on this ground rather than cut out
+   * of it. A large blur at zero offset and high alpha is a *glow*, and a glow
+   * around a button is the single most synthetic-looking thing on a page — the
+   * colour is a hint that the ground is warm, not a light source.
+   *
+   * The small ones are also the reason chips and tiles carry no shadow at all:
+   * anything that reads as a halo at 30px across gets none.
    */
-  --shadow-card: 0 4px 20px -2px rgb(79 70 229 / 0.1);
-  --shadow-lift: 0 20px 40px -12px rgb(79 70 229 / 0.22), 0 6px 14px -8px rgb(15 20 36 / 0.08);
-  --shadow-cta: 0 4px 14px 0 rgb(79 70 229 / 0.35);
-  --shadow-deep: 0 30px 60px -18px rgb(15 20 36 / 0.3), 0 12px 28px -12px rgb(79 70 229 / 0.22);
+  --shadow-card: 0 1px 2px rgb(15 20 36 / 0.04), 0 6px 16px -6px rgb(79 70 229 / 0.1);
+  --shadow-lift: 0 2px 4px rgb(15 20 36 / 0.05), 0 16px 32px -14px rgb(79 70 229 / 0.18);
+  --shadow-cta: 0 1px 2px rgb(15 20 36 / 0.08), 0 3px 8px -2px rgb(79 70 229 / 0.22);
+  --shadow-cta-hover: 0 2px 4px rgb(15 20 36 / 0.1), 0 7px 16px -4px rgb(79 70 229 / 0.28);
+  --shadow-deep: 0 24px 48px -20px rgb(15 20 36 / 0.28), 0 8px 20px -12px rgb(79 70 229 / 0.16);
 
   --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
 }
