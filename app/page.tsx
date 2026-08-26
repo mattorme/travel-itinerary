@@ -1,13 +1,11 @@
 import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, MapPin, Route, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { createClient } from '@/lib/db/supabase/server';
 import { TripCard } from '@/components/trip/trip-card';
 import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
-import { DayArc, ArcLegend } from '@/components/trip/day-arc';
-import { bandOf, type TimeBand } from '@/domain/schedule/time-of-day';
-import { formatMinute } from '@/domain/sequencing/schedule';
+import { AppMock } from '@/components/marketing/app-mock';
 
 export const revalidate = 300;
 
@@ -18,13 +16,30 @@ const SAMPLE_PROMPTS = [
   '4 days in Rome, no rushing',
 ];
 
+const CLAIMS = [
+  {
+    icon: MapPin,
+    title: 'Places that exist',
+    body: 'Every stop is a real, current listing with real opening hours. The model picks between verified options — it never invents a restaurant.',
+  },
+  {
+    icon: Route,
+    title: 'Days that hold together',
+    body: 'Stops are ordered by measured travel time, so a day stays in one part of a city instead of scattering famous names across a map.',
+  },
+  {
+    icon: Share2,
+    title: 'Built to pass on',
+    body: 'Every trip gets a link that looks right in a group chat. Anyone can open it, and make it theirs in one tap.',
+  },
+];
+
 /**
  * The landing page.
  *
- * Opens on the product's actual thesis: a day you can read the shape of before
- * you read a word of it. Every other itinerary tool hands you a list; this one
- * hands you the hours, and the hero is that claim demonstrated rather than
- * described.
+ * Leads with the product surface itself rather than a description of it: the
+ * hero device is the real trip page, drawn by the real components. The claim
+ * this page makes is that you can see the shape of a day, so the page shows one.
  */
 export default async function LandingPage() {
   const supabase = await createClient();
@@ -42,26 +57,34 @@ export default async function LandingPage() {
       <SiteHeader />
 
       <main>
-        <section className="mx-auto max-w-6xl px-4 pt-12 pb-16 sm:px-6 sm:pt-20 lg:grid lg:grid-cols-[1fr_1.05fr] lg:items-center lg:gap-14">
+        <section className="mx-auto max-w-6xl px-4 pt-14 pb-24 sm:px-6 sm:pt-20 lg:grid lg:grid-cols-[1fr_1.08fr] lg:items-center lg:gap-16 lg:pb-32">
           <div>
-            <p className="type-label text-steel">Real places · Real hours</p>
-
-            <h1 className="type-display type-hero mt-4 max-w-[13ch]">
-              See the shape of a day.
-            </h1>
-
-            <p className="mt-6 max-w-[46ch] text-[1.125rem] leading-relaxed text-steel">
-              Tell us where you&apos;re going and how you like to travel. You get a plan with real
-              times on it — early mornings, a free afternoon, dinner that runs late — built from
-              places that genuinely exist and ordered so you&apos;re not crossing the city four
-              times.
+            <p className="rise inline-flex items-center gap-2 rounded-full bg-surface py-1.5 pr-4 pl-1.5 shadow-(--shadow-card)">
+              <span className="grad-brand rounded-full px-2.5 py-1 text-[0.6875rem] font-bold tracking-wide text-white uppercase">
+                New
+              </span>
+              <span className="text-[0.8125rem] font-medium text-steel">
+                Real opening hours, on every stop
+              </span>
             </p>
 
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <h1 className="type-display type-hero mt-6 max-w-[13ch]">
+              See the shape
+              <br />
+              <span className="grad-text">of a day.</span>
+            </h1>
+
+            <p className="rise mt-6 max-w-[46ch] text-[1.125rem] leading-relaxed text-steel" style={{ '--i': 1 } as React.CSSProperties}>
+              Tell us where you&apos;re going and how you like to travel. You get a plan with real
+              times on it — early mornings, a free afternoon, dinner that runs late — built from
+              places that genuinely exist.
+            </p>
+
+            <div className="rise mt-9 flex flex-col gap-3 sm:flex-row" style={{ '--i': 2 } as React.CSSProperties}>
               <Link href="/plan">
                 <Button size="lg" variant="signal" block className="sm:w-auto">
                   Plan my trip
-                  <ArrowRight className="size-4" />
+                  <ArrowRight className="size-4 transition-transform duration-200 group-hover/btn:translate-x-0.5" />
                 </Button>
               </Link>
               <Link href="/explore">
@@ -71,20 +94,45 @@ export default async function LandingPage() {
               </Link>
             </div>
 
-            <p className="type-label mt-5 text-steel-2">No account needed · Free</p>
+            <p className="mt-5 text-[0.8125rem] text-steel-2">
+              No account needed · Free · Nothing to install
+            </p>
           </div>
 
-          <SampleDay />
+          <div className="mt-20 lg:mt-0">
+            <AppMock />
+          </div>
         </section>
 
-        <section className="mx-auto max-w-6xl px-4 pb-16 sm:px-6">
-          <p className="type-label mb-3 text-steel-2">Try one of these</p>
-          <ul className="flex flex-wrap gap-2">
+        {/* Three claims, each one a thing a generic AI wrapper cannot say. */}
+        <section className="py-16 sm:py-20">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6">
+            <div className="grid gap-8 md:grid-cols-3 md:gap-10">
+              {CLAIMS.map((claim) => (
+                <div
+                  key={claim.title}
+                  className="rounded-panel bg-surface p-7 shadow-(--shadow-card) transition-all duration-200 ease-(--ease-out-quint) hover:-translate-y-1 hover:shadow-(--shadow-lift)"
+                >
+                  <span className="grad-brand flex size-11 items-center justify-center rounded-edge shadow-(--shadow-cta)">
+                    <claim.icon className="size-5 text-white" aria-hidden />
+                  </span>
+                  <h2 className="type-display mt-5 text-[1.375rem]">{claim.title}</h2>
+                  <p className="mt-3 text-[0.9375rem] leading-relaxed text-steel">{claim.body}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
+          <h2 className="type-display type-section">Start from a sentence</h2>
+          <p className="mt-2 text-steel">However you&apos;d describe the trip to a friend.</p>
+          <ul className="mt-6 flex flex-wrap gap-2.5">
             {SAMPLE_PROMPTS.map((prompt) => (
               <li key={prompt}>
                 <Link
                   href={{ pathname: '/plan', query: { q: prompt } }}
-                  className="inline-block rounded-full border border-rule-2 bg-surface px-4 py-2 text-[0.875rem] text-steel transition-colors hover:border-ink hover:text-ink"
+                  className="inline-block rounded-full bg-surface px-4 py-2.5 text-[0.875rem] text-steel shadow-(--shadow-card) transition-all duration-200 hover:-translate-y-0.5 hover:text-signal hover:shadow-(--shadow-lift)"
                 >
                   {prompt}
                 </Link>
@@ -93,43 +141,18 @@ export default async function LandingPage() {
           </ul>
         </section>
 
-        {/* Three claims, each one a thing a generic AI wrapper cannot say. */}
-        <section className="bg-ink py-16 text-white sm:py-20">
-          <div className="mx-auto grid max-w-6xl gap-10 px-4 sm:px-6 md:grid-cols-3 md:gap-8">
-            {[
-              {
-                title: 'Places that exist',
-                body: 'Every stop is a real, current listing with real opening hours. The model chooses between verified options — it never invents a restaurant.',
-              },
-              {
-                title: 'Days that hold together',
-                body: 'Stops are ordered by actual travel time, so a day is one part of a city rather than famous names scattered across a map.',
-              },
-              {
-                title: 'Built to pass on',
-                body: 'Every trip gets a link that looks right in a group chat. Anyone can open it, and make it theirs in one tap.',
-              },
-            ].map((item) => (
-              <div key={item.title}>
-                <h2 className="type-display text-[1.5rem]">{item.title}</h2>
-                <p className="mt-3 text-[0.9375rem] leading-relaxed text-white/70">{item.body}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
         {featured && featured.length > 0 && (
-          <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+          <section className="mx-auto max-w-6xl px-4 pb-24 sm:px-6">
             <div className="mb-8 flex items-end justify-between gap-4">
-              <h2 className="type-display type-title">Trips people are copying</h2>
+              <h2 className="type-display type-section">Trips people are copying</h2>
               <Link
                 href="/explore"
-                className="type-label shrink-0 pb-1.5 text-steel hover:text-ink"
+                className="shrink-0 pb-1 text-[0.875rem] font-semibold text-signal hover:underline"
               >
                 See all →
               </Link>
             </div>
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {featured.map((trip) => (
                 <TripCard key={trip.id} trip={trip} />
               ))}
@@ -140,70 +163,5 @@ export default async function LandingPage() {
 
       <SiteFooter />
     </>
-  );
-}
-
-/**
- * One day of a real itinerary, drawn the way the product draws every day.
- *
- * Hand-specified rather than pulled from the database: it is the page's
- * argument, and it has to be legible before anything has loaded. The times are
- * the point — the arc across the top is generated from them by the same
- * function the trip page uses, so what the landing page promises is literally
- * what the product renders.
- */
-const SAMPLE_STOPS = [
-  { start: 570, minutes: 75, name: 'Yanaka Cemetery', note: 'Before anything opens' },
-  { start: 660, minutes: 80, name: 'Yanaka Ginza', note: 'One sloping street of small shops' },
-  { start: 800, minutes: 60, name: 'Soba lunch in Nezu', note: 'Counter seating, cash only' },
-  { start: 890, minutes: 70, name: 'Nezu Shrine', note: 'Early 1700s, original buildings' },
-  { start: 1140, minutes: 120, name: 'Izakaya on Kototoi-dori', note: 'Booked for four' },
-] as const;
-
-const BAND_DOT: Record<TimeBand, string> = {
-  morning: 'bg-morning-ink',
-  afternoon: 'bg-afternoon-ink',
-  evening: 'bg-evening-ink',
-};
-
-function SampleDay() {
-  const activities = SAMPLE_STOPS.map((stop) => ({
-    startMinute: stop.start,
-    durationMinutes: stop.minutes,
-  }));
-
-  return (
-    <div className="mt-14 rounded-panel bg-surface p-5 shadow-(--shadow-card) sm:p-7 lg:mt-0">
-      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-        <p className="type-label text-ink">Day 1 · Tokyo</p>
-        <p className="type-label text-steel-2">The old east side</p>
-      </div>
-
-      <DayArc activities={activities} label="Sample day in Tokyo" animate className="mt-4" />
-      <div className="type-label mt-2 flex justify-between text-steel-2">
-        <span>6 am</span>
-        <span>Midnight</span>
-      </div>
-
-      <div className="mt-4">
-        <ArcLegend />
-      </div>
-
-      <ol className="mt-6 space-y-4 border-t border-rule pt-5">
-        {SAMPLE_STOPS.map((stop) => (
-          <li key={stop.name} className="flex gap-3.5">
-            <span
-              aria-hidden
-              className={`mt-2 size-2 shrink-0 rounded-full ${BAND_DOT[bandOf(stop.start)]}`}
-            />
-            <div className="min-w-0">
-              <p className="type-data text-[0.8125rem] text-steel-2">{formatMinute(stop.start)}</p>
-              <p className="type-display text-[1.0625rem]">{stop.name}</p>
-              <p className="text-[0.875rem] leading-snug text-steel">{stop.note}</p>
-            </div>
-          </li>
-        ))}
-      </ol>
-    </div>
   );
 }

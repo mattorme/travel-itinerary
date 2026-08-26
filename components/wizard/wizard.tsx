@@ -76,7 +76,7 @@ export function Wizard({ initialQuery }: { initialQuery: string | null }) {
               key={s}
               className={cn(
                 'h-1 flex-1 rounded-full transition-colors',
-                i <= stepIndex ? 'bg-ink' : 'bg-rule',
+                i <= stepIndex ? 'grad-brand' : 'bg-rule',
               )}
             />
           ))}

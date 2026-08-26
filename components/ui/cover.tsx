@@ -59,7 +59,7 @@ export function Cover({
         className={cn('object-cover', className)}
       />
       {credit?.author && (
-        <span className="pointer-events-auto absolute right-2 bottom-2 rounded-full bg-ink/55 px-2.5 py-1 text-[0.6875rem] text-paper/90 backdrop-blur-sm">
+        <span className="pointer-events-auto absolute right-2 bottom-2 rounded-full bg-ink/60 px-2.5 py-1 text-[0.6875rem] text-white/90 backdrop-blur-sm">
           {credit.authorUrl ? (
             <a href={credit.authorUrl} target="_blank" rel="noopener noreferrer" className="hover:underline">
               {credit.author}

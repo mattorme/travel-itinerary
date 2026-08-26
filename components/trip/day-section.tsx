@@ -45,7 +45,7 @@ export function DaySection({
     <section id={`day-${day.dayIndex}`} className="scroll-mt-32">
       <header className="mb-6">
         <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-          <span className="type-label text-ink">Day {day.dayIndex}</span>
+          <span className="type-label text-signal">Day {day.dayIndex}</span>
           {date && <span className="type-label text-steel-2">{date}</span>}
         </div>
 
@@ -98,7 +98,7 @@ export function DaySection({
 
       {/* Honest about what we couldn't fit, rather than silently dropping it. */}
       {day.notes && (
-        <p className="mt-4 rounded-edge border-l-3 border-caution bg-signal-wash px-4 py-3 text-[0.875rem] text-steel">
+        <p className="mt-4 rounded-edge border-l-3 border-caution bg-caution/8 px-4 py-3 text-[0.875rem] text-steel">
           {day.notes}
         </p>
       )}

@@ -43,7 +43,7 @@ export function DayNav({ days }: { days: readonly { dayIndex: number; title: str
     <nav
       aria-label="Days"
       data-print-hide
-      className="sticky top-14 z-30 -mx-4 border-b border-rule bg-paper/90 px-4 backdrop-blur-md sm:mx-0 sm:px-0"
+      className="sticky top-18 z-30 -mx-4 border-b border-rule bg-paper/90 px-4 backdrop-blur-md sm:mx-0 sm:px-0"
     >
       <ul className="hide-scrollbar flex gap-2 overflow-x-auto py-2.5">
         {days.map((day) => {
@@ -56,8 +56,8 @@ export function DayNav({ days }: { days: readonly { dayIndex: number; title: str
                 className={cn(
                   'type-label flex shrink-0 items-center rounded-full px-3 py-2 whitespace-nowrap transition-colors',
                   isActive
-                    ? 'bg-ink text-white'
-                    : 'text-steel-2 hover:bg-sunk hover:text-ink',
+                    ? 'grad-brand text-white shadow-(--shadow-cta)'
+                    : 'text-steel-2 hover:bg-signal-wash hover:text-signal',
                 )}
               >
                 Day {day.dayIndex}

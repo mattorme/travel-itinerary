@@ -71,7 +71,7 @@ export function OptionCard({
       className={cn(
         'rounded-panel border p-4 text-left transition-colors',
         selected
-          ? 'border-ink bg-ink text-white'
+          ? 'grad-brand border-transparent text-white shadow-(--shadow-cta)'
           : 'border-rule-2 bg-surface hover:border-ink/40',
       )}
     >

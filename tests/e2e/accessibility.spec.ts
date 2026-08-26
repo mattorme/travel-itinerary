@@ -14,6 +14,21 @@ import { expect, test, type Page } from '@playwright/test';
  * look.
  */
 async function scan(page: Page, disable: string[] = []) {
+  /*
+   * Wait for every entrance animation to finish first.
+   *
+   * axe measures the colour it finds on screen at the instant it runs, and
+   * content fading in from zero opacity blends with the background — it will
+   * report a contrast failure that stops existing a fraction of a second
+   * later. Waiting for the settled state tests what a reader actually holds
+   * still and reads, and makes the gate deterministic instead of a race.
+   */
+  await page.waitForFunction(
+    () => document.getAnimations().every((a) => a.playState === 'finished'),
+    undefined,
+    { timeout: 5000 },
+  );
+
   const results = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
     .disableRules(disable)
@@ -24,6 +39,7 @@ async function scan(page: Page, disable: string[] = []) {
     impact: v.impact,
     help: v.help,
     targets: v.nodes.slice(0, 4).map((n) => n.target.join(' ')),
+    why: v.nodes.slice(0, 4).map((n) => (n.failureSummary ?? '').replace(/\n/g, ' ')),
   }));
 
   expect(summary, JSON.stringify(summary, null, 2)).toEqual([]);

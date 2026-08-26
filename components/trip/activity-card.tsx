@@ -49,9 +49,10 @@ export function ActivityCard({
         id={`activity-${activity.id}`}
         className={cn(
           'overflow-hidden rounded-panel bg-surface shadow-(--shadow-card) scroll-mt-28',
+          'transition-shadow duration-200 hover:shadow-(--shadow-lift)',
           // Set by the map when a marker is clicked, so the two views stay in
           // agreement about what you are looking at.
-          'data-[map-focus=true]:outline data-[map-focus=true]:outline-2 data-[map-focus=true]:outline-offset-3 data-[map-focus=true]:outline-ink',
+          'data-[map-focus=true]:outline data-[map-focus=true]:outline-2 data-[map-focus=true]:outline-offset-3 data-[map-focus=true]:outline-signal',
         )}
       >
         {/* Google Place Photos are billed per fetch, so they appear here — on

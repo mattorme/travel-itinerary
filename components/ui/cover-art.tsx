@@ -40,16 +40,17 @@ function makeRandom(seed: number): () => number {
  * Ground and line pairs drawn from the route palette.
  *
  * Constrained on purpose: a random hue would eventually clash, and six covers
- * sitting in a grid need to look like one set. Each pair is a pale ground with
- * its own line colour taken from the same family the map and timeline use.
+ * sitting in a grid need to look like one set. Every pair is a tint and a line
+ * drawn from the brand's own indigo/violet family, so a wall of generated
+ * covers reads as one product rather than six moods.
  */
 const PALETTES: readonly { bg: string; line: string; wash: string; route: string }[] = [
-  { bg: '#DDE3F4', line: '#1B3BD8', wash: '#C3CDEC', route: '#12299B' },
-  { bg: '#D6E6DD', line: '#0B6E4F', wash: '#B7D4C6', route: '#075139' },
-  { bg: '#EFD8D3', line: '#D6321F', wash: '#E1BDB6', route: '#96200F' },
-  { bg: '#E9D5E4', line: '#B0187E', wash: '#D8BAD0', route: '#7B1058' },
-  { bg: '#EBE0C6', line: '#8A5A00', wash: '#DCCBA5', route: '#5E3D00' },
-  { bg: '#D3E5E9', line: '#00697A', wash: '#B7D5DB', route: '#004A56' },
+  { bg: '#E4E3FB', line: '#4F46E5', wash: '#CFCDF6', route: '#3730A3' },
+  { bg: '#EDE4FC', line: '#7C3AED', wash: '#DCCDF8', route: '#5B21B6' },
+  { bg: '#DDF2F8', line: '#0891B2', wash: '#C2E6F0', route: '#155E75' },
+  { bg: '#FBE2EE', line: '#DB2777', wash: '#F5CBDF', route: '#9D174D' },
+  { bg: '#FBEEDC', line: '#D97706', wash: '#F5DDBC', route: '#92400E' },
+  { bg: '#E2E8FA', line: '#4338CA', wash: '#CBD5F3', route: '#312E81' },
 ];
 
 export function CoverArt({

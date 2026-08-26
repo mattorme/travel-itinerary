@@ -63,7 +63,7 @@ export function DayArc({
       aria-label={describeArc(label, segments)}
       className={cn(
         'relative h-2.5 w-full overflow-hidden rounded-full',
-        onInk ? 'bg-white/12' : 'bg-sunk',
+        onInk ? 'bg-white/15' : 'bg-sunk',
         className,
       )}
     >
@@ -80,7 +80,7 @@ export function DayArc({
         <span
           key={index}
           className={cn(
-            'absolute inset-y-0 rounded-full',
+            'absolute inset-y-0 rounded-full shadow-[0_1px_2px_rgb(15_20_36/0.12)]',
             onInk ? BAND_FILL[segment.band].onInk : BAND_FILL[segment.band].onPaper,
             animate && 'arc-draw',
           )}

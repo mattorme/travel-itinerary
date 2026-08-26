@@ -232,16 +232,28 @@ makes the itinerary logic testable without a network, a database, or a key.
 ### The visual system
 
 `app/globals.css` is the whole of it: a token block, a handful of `.type-*`
-utilities, and nothing else. The identity is **time of day** — the day arc in
-`components/trip/day-arc.tsx`, drawn from `domain/schedule/time-of-day.ts`,
-places each stop at its real hour and colours it morning / afternoon / evening.
-It is the trip hero, every day heading, the share card and the app icon, all
-from the same data the timeline renders, so the two can never disagree.
+utilities, and nothing else.
 
-Two rules keep it coherent: colour means an hour (never decoration), and amber
-is the one action colour and always takes ink text — white on amber is 2:1. The
-day-index palette in `components/trip/map/types.ts` exists only to tell
-overlapping routes apart on the Google map; it is not page chrome.
+Modern product SaaS. White surfaces on a faintly violet ground, an indigo →
+violet gradient (`#4f46e5 → #7c3aed`) reserved for things you act on, soft
+*coloured* shadows rather than grey ones, and Plus Jakarta Sans over Inter.
+Two rules keep it coherent:
+
+- **The gradient is an action.** Primary button, logo tile, active filter, the
+  emphasised half of a headline. Never a background wash, and never a
+  zero-offset blur — a coloured shadow gives depth, a halo just looks synthetic.
+- **Depth comes from shadow, not borders.** Cards are white with a soft indigo
+  shadow and no outline. A hairline divides; it never contains.
+
+Two pieces carry the identity. `components/trip/day-arc.tsx` draws each day
+across its real hours from `domain/schedule/time-of-day.ts` — the trip hero,
+every day heading and the share card all render it from the same data the
+timeline uses, so they cannot disagree. `components/marketing/app-mock.tsx` is
+the landing hero: the actual trip UI in a browser frame, tilted from `lg` up,
+built from the real components so a marketing mock can never drift out of date.
+
+The day-index palette in `components/trip/map/types.ts` exists only to tell
+overlapping routes apart on the Google map. It is not page chrome.
 
 ### The other documents
 - **[ARCHITECTURE.md](./ARCHITECTURE.md)** — the decisions and, more usefully,
@@ -308,4 +320,14 @@ Things that have already bitten once and are easy to reintroduce.
   `html { scroll-padding-top }` covers anchors; Playwright's own scrolling does
   not honour it, so a click test near the top of a page can fail on interception
   even when the page is fine.
+- **`prefers-reduced-motion` must zero `animation-delay`, not just the
+  duration.** Staggered entrances hold their first keyframe until their turn, so
+  collapsing the duration alone leaves content at `opacity: 0` for the length of
+  the stagger. Blended foreground colours in an axe report — `#b7bcc8` where the
+  token is `#55607a` — mean something is being measured mid-fade.
+- **An animation with `fill-mode: both` overrides a static `transform`.** `rise`
+  ends on `transform: none` and silently cancelled the hero's `lg:tilt` until the
+  two were split onto separate elements.
+- **A class in `@layer utilities` cannot take a Tailwind v4 variant.** `lg:tilt`
+  works only because `tilt` is declared with `@utility`.
 - **Running `next build` kills a running `next dev`** — they share `.next`.

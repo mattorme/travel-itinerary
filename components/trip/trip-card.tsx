@@ -40,7 +40,7 @@ export function TripCard({ trip }: { trip: TripCardData }) {
       // Exposed as data so filtering can be asserted without reading text that
       // CSS has upper-cased.
       data-duration={trip.duration_days}
-      className="group flex flex-col overflow-hidden rounded-panel bg-surface shadow-(--shadow-card) transition-shadow duration-200 hover:shadow-(--shadow-lift)"
+      className="group flex flex-col overflow-hidden rounded-panel bg-surface shadow-(--shadow-card) transition-all duration-200 ease-(--ease-out-quint) hover:-translate-y-1 hover:shadow-(--shadow-lift)"
     >
       <div className="relative aspect-[3/2] overflow-hidden bg-sunk">
         <Cover
@@ -50,13 +50,13 @@ export function TripCard({ trip }: { trip: TripCardData }) {
           label={trip.title}
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
         />
-        <span className="type-label absolute top-3 left-3 rounded-full bg-ink/85 px-2.5 py-1.5 text-white backdrop-blur-sm">
+        <span className="type-label absolute top-3 left-3 rounded-full bg-surface/90 px-3 py-1.5 text-ink shadow-(--shadow-card) backdrop-blur-sm">
           {trip.duration_days} {trip.duration_days === 1 ? 'day' : 'days'}
         </span>
       </div>
 
       <div className="flex flex-1 flex-col p-4 sm:p-5">
-        <h3 className="type-display text-[1.3125rem]">{trip.title}</h3>
+        <h3 className="type-display text-[1.25rem] transition-colors group-hover:text-signal">{trip.title}</h3>
         {trip.subtitle && (
           <p className="mt-2 line-clamp-2 text-[0.875rem] leading-relaxed text-steel">
             {trip.subtitle}

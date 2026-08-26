@@ -42,7 +42,7 @@ export function Field({
 export const inputClass =
   'w-full rounded-edge border border-rule-2 bg-surface px-3.5 py-3 ' +
   'text-ink placeholder:text-steel-2 transition-colors ' +
-  'focus:border-ink focus:outline-2 focus:outline-offset-0 focus:outline-ink ' +
+  'focus:border-signal focus:outline-2 focus:outline-offset-0 focus:outline-signal ' +
   // 16px minimum stops iOS Safari zooming the viewport on focus.
   'text-[16px]';
 

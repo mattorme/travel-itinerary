@@ -1,29 +1,28 @@
 import type { Metadata, Viewport } from 'next';
-import { Bricolage_Grotesque, Figtree } from 'next/font/google';
+import { Plus_Jakarta_Sans, Inter } from 'next/font/google';
 import { publicEnv } from '@/lib/public-env';
 import { NativeShell } from '@/components/native-shell';
 import './globals.css';
 
 /**
- * Bricolage Grotesque — the display face.
+ * Plus Jakarta Sans — the display face.
  *
- * A grotesque with slightly irregular, hand-cut terminals: warm at large sizes
- * where a neutral sans would read as anonymous. The width axis is what lets
- * headlines set dense rather than airy — see `.type-display`.
+ * A geometric sans with slightly humanist proportions: confident at 800 without
+ * turning severe, which is the exact register this product wants. Set tight —
+ * see `.type-display`.
  */
-const bricolage = Bricolage_Grotesque({
+const jakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
   display: 'swap',
-  variable: '--font-bricolage',
-  axes: ['opsz', 'wdth'],
+  variable: '--font-jakarta',
 });
 
-/** Figtree — body, interface, and every figure. Its tabular numerals are why
- *  the product needs no monospace at all. */
-const figtree = Figtree({
+/** Inter — interface, body, and every figure. Its tabular numerals are why the
+ *  product needs no monospace at all. */
+const inter = Inter({
   subsets: ['latin'],
   display: 'swap',
-  variable: '--font-figtree',
+  variable: '--font-inter',
 });
 
 export const metadata: Metadata = {
@@ -51,7 +50,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#141b34',
+  themeColor: '#4f46e5',
   width: 'device-width',
   initialScale: 1,
   // Required for env(safe-area-inset-*) to report real values inside the app.
@@ -63,7 +62,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${bricolage.variable} ${figtree.variable}`}>
+    <html lang="en" className={`${jakarta.variable} ${inter.variable}`}>
       <body className="min-h-dvh antialiased">
         <NativeShell />
         {children}

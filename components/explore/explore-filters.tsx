@@ -109,7 +109,7 @@ export function ExploreFilters({
             <li key={chip.label}>
               <Link
                 href={href(chip.clear)}
-                className="inline-flex items-center gap-1.5 rounded-full bg-ink px-3 py-1.5 text-sm text-white"
+                className="grad-brand inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm text-white shadow-(--shadow-cta)"
               >
                 {chip.label}
                 <X className="size-3" aria-hidden />
@@ -148,7 +148,7 @@ function Chip({
       className={cn(
         'shrink-0 rounded-full px-3.5 py-1.5 text-sm whitespace-nowrap transition-colors',
         active
-          ? 'bg-ink text-white'
+          ? 'grad-brand text-white shadow-(--shadow-cta)'
           : 'border border-rule-2 text-steel hover:text-ink',
       )}
     >

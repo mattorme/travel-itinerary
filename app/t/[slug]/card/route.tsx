@@ -43,7 +43,7 @@ export async function GET(
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
-          background: '#141b34',
+          backgroundImage: 'linear-gradient(150deg, #4f46e5 0%, #7c3aed 100%)',
           color: '#ffffff',
           padding: 96,
           fontFamily: 'sans-serif',

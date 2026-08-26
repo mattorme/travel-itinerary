@@ -57,7 +57,7 @@ export function useMapStops(
              <div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8a857a">
                Day ${stop.dayIndex}${stop.startLabel ? ` &middot; ${escapeHtml(stop.startLabel)}` : ''}
              </div>
-             <div style="font-size:15px;margin-top:4px;color:#141b34">${escapeHtml(stop.title)}</div>
+             <div style="font-size:15px;margin-top:4px;color:#0f1424">${escapeHtml(stop.title)}</div>
            </div>`,
         );
         info?.open({ map, anchor: marker });

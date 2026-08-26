@@ -3,87 +3,81 @@
 /* ==========================================================================
    Wayfare — visual system
 
-   An itinerary is not a list of places. It is a set of hours: a morning that
-   starts early, an afternoon left open, a dinner that runs late. That is the
-   thing a traveller actually feels, and it is the only thing about this
-   product that no other product's content shares. So the whole visual system
-   is built from time of day.
+   Modern product SaaS: white surfaces on a faintly violet ground, an indigo →
+   violet gradient reserved for the things you act on, soft *coloured* shadows
+   instead of grey ones, and a geometric sans set tight and confident.
 
-   1. THE ARC IS THE IDENTITY. Every day is drawn as a band across 06:00–24:00
-      with its real stops placed at their real times, coloured morning /
-      afternoon / evening. It is the hero, the day heading, and the card art.
-      One element, generated entirely from data, everywhere. See day-arc.tsx.
-   2. COLOUR MEANS AN HOUR. Amber is morning, teal is afternoon, rose is
-      evening. Nothing is coloured for decoration. The one exception is amber
-      doubling as the accent on the single most important action per screen —
-      because the thing you are being asked to do is start a day.
-   3. THE GROUND IS COOL, THE INK IS INDIGO. Deep indigo rather than black:
-      it is the last band of the arc, so the chrome is part of the same idea.
+   Two rules do most of the work:
 
-   Each colour that carries an hour exists twice — once tuned for the indigo
-   ground, once darkened for the light ground — so contrast holds in both
-   without inventing a second palette.
+   1. THE GRADIENT IS AN ACTION. Indigo #4f46e5 → violet #7c3aed appears on the
+      primary button, the logo mark, the emphasised half of a headline and the
+      day arc. It never appears as a background wash, and never as a glow —
+      a coloured shadow gives depth; a blurred halo just looks synthetic.
+   2. DEPTH IS BUILT FROM SHADOW, NOT BORDERS. Cards are white with a soft
+      indigo shadow and no outline. A hairline is for dividing, never for
+      containing.
+
+   The day arc (components/trip/day-arc.tsx) stays the product's one piece of
+   real information design: every day drawn across its actual hours. Everything
+   here is in service of making that read as a modern product, not a diagram.
    ========================================================================== */
 @theme {
-  /* Ground. Cool and slightly blue: chosen to sit under indigo, not inherited. */
-  --color-paper: #ebeef3;
+  /* Ground. Off-white with a violet bias, so it sits under indigo rather than
+     fighting it — a neutral grey here reads as unconsidered. */
+  --color-paper: #f6f7fb;
   --color-surface: #ffffff;
-  --color-sunk: #dfe4ec;
+  --color-sunk: #eef0f8;
 
-  /* Indigo, not black. The last hour of the day. */
-  --color-ink: #141b34;
-  --color-ink-2: #243052;
+  --color-ink: #0f1424;
+  --color-ink-2: #1c2438;
 
-  --color-steel: #4f5a70;
-  --color-steel-2: #5e6a80;
+  --color-steel: #55607a;
+  --color-steel-2: #656f88;
 
-  --color-rule: #dce1ea;
-  --color-rule-2: #c2cad8;
+  --color-rule: #e6e9f2;
+  --color-rule-2: #d4d9e8;
+
+  /* The brand. `signal` is the anchor; `signal-2` is where the gradient lands. */
+  --color-signal: #4f46e5;
+  --color-signal-2: #7c3aed;
+  --color-signal-deep: #4338ca;
+  --color-signal-wash: #eef0ff;
+  --color-signal-wash-2: #f3eeff;
+
+  /* Time of day. Kept, because a stop genuinely belongs to a morning or an
+     evening — but retuned to sit inside the indigo/violet world instead of
+     next to it. `-ink` variants are for marks on a light ground. */
+  --color-morning: #fbbf24;
+  --color-morning-ink: #d97706;
+  --color-afternoon: #22d3ee;
+  --color-afternoon-ink: #0891b2;
+  --color-evening: #f472b6;
+  --color-evening-ink: #db2777;
+
+  --color-positive: #047857;
+  --color-caution: #b45309;
+  --color-critical: #be123c;
+
+  --font-display: var(--font-jakarta), 'Segoe UI', system-ui, sans-serif;
+  --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
+
+  /* Control, card, sheet. Nothing reaches outside this scale. */
+  --radius-edge: 10px;
+  --radius-panel: 16px;
+  --radius-sheet: 24px;
 
   /*
-   * The hours. Base values are tuned for the indigo ground; `-ink` variants
-   * are the same three hues taken down far enough to hold their own on white
-   * without going brown, which is what happens to amber if you push it to
-   * body-text contrast. The arc is always accompanied by the times in words,
-   * so these carry emphasis, never meaning on their own.
+   * Coloured shadows. The card shadow is indigo at 10% — barely a colour, but
+   * enough that a white card reads as sitting on this ground rather than cut
+   * out of it. Nothing here uses a zero-offset blur: that is a glow, and a glow
+   * is the thing that makes a page look generated.
    */
-  --color-morning: #f2a65a;
-  --color-morning-ink: #c87316;
-  --color-afternoon: #5fd0c4;
-  --color-afternoon-ink: #12857a;
-  --color-evening: #f2867a;
-  --color-evening-ink: #cc4433;
+  --shadow-card: 0 4px 20px -2px rgb(79 70 229 / 0.1);
+  --shadow-lift: 0 20px 40px -12px rgb(79 70 229 / 0.22), 0 6px 14px -8px rgb(15 20 36 / 0.08);
+  --shadow-cta: 0 4px 14px 0 rgb(79 70 229 / 0.35);
+  --shadow-deep: 0 30px 60px -18px rgb(15 20 36 / 0.3), 0 12px 28px -12px rgb(79 70 229 / 0.22);
 
-  /*
-   * Action. Morning amber, because the ask is always "start something".
-   * Always paired with ink text, never white — see .btn contrast note.
-   */
-  --color-signal: #f2a65a;
-  --color-signal-deep: #e08e38;
-  --color-signal-wash: #fdf0e1;
-
-  --color-positive: #0f6b53;
-  --color-caution: #8a5a00;
-  --color-critical: #a4231c;
-
-  --font-display: var(--font-bricolage), 'Trebuchet MS', 'Helvetica Neue', sans-serif;
-  --font-sans: var(--font-figtree), 'Helvetica Neue', Arial, sans-serif;
-
-  /*
-   * Soft, consistent, never sharp — the itinerary is a plan, not a timetable.
-   * Three steps for three scales: a control, a panel, a sheet. Nothing in the
-   * product should reach for a radius outside this scale.
-   */
-  --radius-edge: 8px;
-  --radius-panel: 12px;
-  --radius-sheet: 16px;
-
-  --shadow-card: 0 1px 2px rgb(20 27 52 / 0.05), 0 10px 28px -14px rgb(20 27 52 / 0.22);
-  --shadow-lift: 0 2px 4px rgb(20 27 52 / 0.06), 0 18px 40px -18px rgb(20 27 52 / 0.3);
-
-  /* Arc geometry. The window every day is drawn against: 06:00 to midnight. */
-  --arc-start-minute: 360;
-  --arc-span-minutes: 1080;
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @layer base {
@@ -93,16 +87,15 @@
     /*
      * The masthead is sticky, so anything scrolled to the top of the viewport
      * lands underneath it — an anchor link, a focused field, a browser find.
-     * One header's worth of scroll padding fixes all of them at once; sections
-     * that also sit under the day navigation add their own scroll margin.
+     * One header's worth of scroll padding fixes all of them at once.
      */
-    scroll-padding-top: 3.5rem;
+    scroll-padding-top: 4.5rem;
   }
 
   body {
     /*
      * Column layout so the footer sits at the bottom of a short page instead of
-     * halfway up it — every page renders header / main / footer as siblings here.
+     * halfway up it — every page renders header / main / footer as siblings.
      */
     display: flex;
     flex-direction: column;
@@ -130,12 +123,12 @@
   }
 
   ::selection {
-    background: var(--color-signal);
-    color: var(--color-ink);
+    background: var(--color-signal-wash);
+    color: var(--color-signal-deep);
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-ink);
+    outline: 2px solid var(--color-signal);
     outline-offset: 2px;
   }
 
@@ -151,8 +144,21 @@
     *::after {
       animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
+      /*
+       * The delay matters as much as the duration. Every entrance here is
+       * staggered and holds its first keyframe until its turn — collapsing the
+       * duration alone leaves content at zero opacity for the length of the
+       * stagger, which is a blank page for anyone who asked for less motion.
+       */
+      animation-delay: 0ms !important;
       transition-duration: 0.01ms !important;
+      transition-delay: 0ms !important;
       scroll-behavior: auto !important;
+    }
+    /* A tilted mock is a static composition, not motion — but it should not be
+       the one thing that still moves when someone has asked for stillness. */
+    .tilt {
+      transform: none !important;
     }
   }
 
@@ -197,6 +203,7 @@
       max-width: none !important;
       padding: 0 !important;
       margin: 0 !important;
+      box-shadow: none !important;
     }
     article,
     section {
@@ -221,32 +228,41 @@
   }
 }
 
+/*
+ * Declared with @utility rather than inside @layer utilities so it can take a
+ * variant: the hero mock is flat on a phone, where a perspective transform only
+ * costs legibility, and tilted from `lg` up.
+ */
+@utility tilt {
+  transform: perspective(1600px) rotateY(-13deg) rotateX(5deg) rotate(0.6deg);
+  transform-style: preserve-3d;
+}
+
 @layer utilities {
   /*
-   * Display type: Bricolage Grotesque, narrowed and tightened.
+   * Display type: Plus Jakarta Sans at 800, tracked in hard.
    *
-   * A grotesque with irregular, slightly hand-cut terminals — warm where a
-   * neutral sans would be anonymous. The width axis is pulled in at large
-   * sizes so headlines set dense rather than airy, which is what makes a
-   * two-line title feel composed instead of merely large.
+   * A geometric sans rather than a grotesque — rounder, warmer, and the face
+   * this whole category of product is set in. The tight tracking at large sizes
+   * is what stops it reading as a default system stack.
    */
   .type-display {
     font-family: var(--font-display);
-    font-variation-settings: 'wdth' 92;
-    font-weight: 700;
-    letter-spacing: -0.025em;
-    line-height: 1.02;
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    line-height: 1.05;
     text-wrap: balance;
   }
 
   .type-hero {
-    font-size: clamp(2.75rem, 8.5vw, 5.25rem);
+    font-size: clamp(2.5rem, 5.4vw, 4rem);
+    line-height: 1.04;
   }
   .type-title {
-    font-size: clamp(1.875rem, 5vw, 2.875rem);
+    font-size: clamp(1.875rem, 4vw, 2.75rem);
   }
   .type-section {
-    font-size: clamp(1.25rem, 3vw, 1.5rem);
+    font-size: clamp(1.375rem, 2.6vw, 1.75rem);
   }
 
   /* Small, tracked, upper case. Every eyebrow and field label in the product. */
@@ -254,24 +270,38 @@
     font-family: var(--font-sans);
     font-size: 0.6875rem;
     font-weight: 600;
-    letter-spacing: 0.11em;
+    letter-spacing: 0.09em;
     text-transform: uppercase;
     line-height: 1.2;
   }
 
-  /*
-   * Times, distances, prices.
-   *
-   * Deliberately not a monospace. A mono face here would be the third typeface
-   * on the page and would make a departure time look like a log line; Figtree's
-   * tabular figures already align down a column, which is the only thing the
-   * mono was ever doing.
-   */
+  /* Times, distances, prices — aligned by tabular figures, not by a mono face. */
   .type-data {
-    font-family: var(--font-sans);
     font-variant-numeric: tabular-nums;
-    font-weight: 500;
+    font-weight: 550;
     letter-spacing: -0.01em;
+  }
+
+  /*
+   * The brand gradient. One angle everywhere, so the button, the logo mark and
+   * the emphasised headline all read as the same surface caught at the same
+   * light.
+   */
+  .grad-brand {
+    background-image: linear-gradient(100deg, var(--color-signal), var(--color-signal-2));
+  }
+
+  /*
+   * Gradient text. Both endpoints clear 5.7:1 on white on their own, so this is
+   * safe as emphasis — it is never the only copy carrying a message.
+   */
+  .grad-text {
+    background-image: linear-gradient(100deg, var(--color-signal), var(--color-signal-2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    /* Descenders get clipped by background-clip in some engines without this. */
+    padding-bottom: 0.06em;
   }
 
   .hide-scrollbar {
@@ -291,12 +321,11 @@
 
   /*
    * The arc draws itself in, left to right, one day after another — the single
-   * orchestrated moment in the product. `--i` is set per segment by the
-   * component. Neutralised wholesale by the reduced-motion block above.
+   * orchestrated moment in the product. `--i` is set per segment.
    */
   .arc-draw {
     transform-origin: left center;
-    animation: arc-draw 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation: arc-draw 460ms var(--ease-out-quint) both;
     animation-delay: calc(var(--i, 0) * 55ms);
   }
 
@@ -308,6 +337,23 @@
     to {
       transform: scaleX(1);
       opacity: 1;
+    }
+  }
+
+  /* Hero entrance: content settles once, then nothing moves again. */
+  .rise {
+    animation: rise 620ms var(--ease-out-quint) both;
+    animation-delay: calc(var(--i, 0) * 80ms);
+  }
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
     }
   }
 }

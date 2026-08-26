@@ -28,13 +28,13 @@ export function SelectPill({
   return (
     <label
       className={cn(
-        'group relative inline-flex cursor-pointer items-center gap-2 rounded-edge border px-3.5 py-2',
+        'group relative inline-flex cursor-pointer items-center gap-2 rounded-full border px-4 py-2',
         'text-[0.875rem] font-medium transition-colors select-none',
         checked
-          ? 'border-ink bg-ink text-white shadow-(--shadow-card)'
-          : 'border-rule-2 bg-surface text-ink hover:border-ink',
+          ? 'grad-brand border-transparent text-white shadow-(--shadow-cta)'
+          : 'border-rule-2 bg-surface text-ink hover:border-signal/50 hover:text-signal',
         disabled && 'pointer-events-none opacity-35',
-        'focus-within:outline focus-within:outline-2 focus-within:outline-ink focus-within:outline-offset-2',
+        'focus-within:outline focus-within:outline-2 focus-within:outline-signal focus-within:outline-offset-2',
       )}
     >
       <input

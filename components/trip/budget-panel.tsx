@@ -54,7 +54,7 @@ export function BudgetPanel({
                   aria-hidden
                 >
                   <span
-                    className="block h-1 rounded-full bg-ink/70"
+                    className="grad-brand block h-1 rounded-full"
                     style={{ width: `${Math.round((value / max) * 100)}%` }}
                   />
                 </span>

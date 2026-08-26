@@ -21,11 +21,12 @@ export const alt = 'Trip itinerary';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
-const INK = '#141b34';
+const INK = '#0f1424';
+const BRAND = 'linear-gradient(115deg, #4f46e5 0%, #7c3aed 100%)';
 const BAND: Record<TimeBand, string> = {
-  morning: '#f2a65a',
-  afternoon: '#5fd0c4',
-  evening: '#f2867a',
+  morning: '#fbbf24',
+  afternoon: '#22d3ee',
+  evening: '#f472b6',
 };
 
 export default async function OpengraphImage({
@@ -43,7 +44,7 @@ export default async function OpengraphImage({
           style={{
             width: '100%', height: '100%', display: 'flex',
             alignItems: 'center', justifyContent: 'center',
-            background: INK, color: '#ffffff', fontSize: 48,
+            backgroundImage: BRAND, color: '#ffffff', fontSize: 48,
           }}
         >
           Wayfare
@@ -74,7 +75,7 @@ export default async function OpengraphImage({
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
-          background: INK,
+          backgroundImage: BRAND,
           padding: 68,
           fontFamily: 'sans-serif',
           color: '#ffffff',
@@ -96,9 +97,12 @@ export default async function OpengraphImage({
             position: 'absolute',
             inset: 0,
             display: 'flex',
+            // Anchored to ink on the left, where every word sits — the brand
+            // gradient stays visible on the right, and nothing has to be read
+            // against it.
             background: hero
-              ? 'linear-gradient(90deg, rgba(20,27,52,0.94) 0%, rgba(20,27,52,0.86) 55%, rgba(20,27,52,0.5) 100%)'
-              : 'linear-gradient(120deg, rgba(36,48,82,0.75) 0%, rgba(20,27,52,0) 60%)',
+              ? 'linear-gradient(90deg, rgba(15,20,36,0.95) 0%, rgba(15,20,36,0.86) 55%, rgba(15,20,36,0.42) 100%)'
+              : 'linear-gradient(90deg, rgba(15,20,36,0.86) 0%, rgba(15,20,36,0.45) 65%, rgba(15,20,36,0.2) 100%)',
           }}
         />
 
