@@ -1,9 +1,24 @@
 import Link from 'next/link';
 import { Copy, Heart } from 'lucide-react';
-import { Cover } from '@/components/ui/cover';
+import { Cover, type CoverCredit } from '@/components/ui/cover';
 import { formatCurrency } from '@/lib/utils/format';
+import { jsonAs, type Json } from '@/lib/db/rows';
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/**
+ * What a card needs, in the shape the `trips` table returns it.
+ *
+ * Deliberately a hand-written contract rather than a query result type: two
+ * different sources satisfy it — a `trips` select via
+ * `TRIP_CARD_COLUMNS`, and the `search_trips` RPC, which returns the creator's
+ * columns flattened and is reshaped by the caller. The component states what it
+ * renders; it is the queries' job to supply it.
+ */
+export interface TripCardCreator {
+  username: string;
+  display_name: string | null;
+  avatar_url: string | null;
+}
+
 export interface TripCardData {
   id: string;
   slug: string;
@@ -13,14 +28,13 @@ export interface TripCardData {
   currency: string;
   estimated_cost_total: number | string | null;
   hero_image_url: string | null;
-  hero_credit?: unknown;
+  hero_credit?: Json | null;
   clone_count: number;
   like_count: number;
   interests: string[] | null;
   travel_style: string | null;
-  profiles: any;
+  profiles: TripCardCreator | null;
 }
-/* eslint-enable @typescript-eslint/no-explicit-any */
 
 /**
  * A trip in a listing.
@@ -31,7 +45,7 @@ export interface TripCardData {
  * would make the product's one honest graphic dishonest.
  */
 export function TripCard({ trip }: { trip: TripCardData }) {
-  const creator = Array.isArray(trip.profiles) ? trip.profiles[0] : trip.profiles;
+  const creator = trip.profiles;
   const cost = trip.estimated_cost_total !== null ? Number(trip.estimated_cost_total) : null;
 
   return (
@@ -45,7 +59,7 @@ export function TripCard({ trip }: { trip: TripCardData }) {
       <div className="relative aspect-[3/2] overflow-hidden bg-sunk">
         <Cover
           imageUrl={trip.hero_image_url}
-          credit={trip.hero_credit as never}
+          credit={jsonAs<CoverCredit>(trip.hero_credit)}
           seed={trip.slug}
           label={trip.title}
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"

@@ -48,12 +48,7 @@ export async function findAlternatives(args: {
 
   if (!activity) return [];
 
-  /* eslint-disable @typescript-eslint/no-explicit-any */
-  const place = (Array.isArray((activity as any).places)
-    ? (activity as any).places[0]
-    : (activity as any).places) as { id: string; tags: string[]; destination_id: string } | null;
-  /* eslint-enable @typescript-eslint/no-explicit-any */
-
+  const place = activity.places;
   if (!place?.destination_id) return [];
 
   const tag = (place.tags?.[0] ?? 'landmark') as ExperienceTag;

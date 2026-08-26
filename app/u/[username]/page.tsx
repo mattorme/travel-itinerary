@@ -5,6 +5,7 @@ import { getSessionUser } from '@/lib/auth/session';
 import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
 import { TripCard } from '@/components/trip/trip-card';
+import { TRIP_CARD_COLUMNS } from '@/lib/db/selects';
 import { FollowButton } from '@/components/profile/follow-button';
 import { CoverArt } from '@/components/ui/cover-art';
 import { formatCompact } from '@/lib/utils/format';
@@ -45,7 +46,7 @@ export default async function ProfilePage({
   const [{ data: trips }, { data: follow }] = await Promise.all([
     supabase
       .from('trips')
-      .select('id, slug, title, subtitle, duration_days, currency, estimated_cost_total, hero_image_url, hero_credit, clone_count, like_count, interests, travel_style, profiles:owner_id(username, display_name, avatar_url)')
+      .select(TRIP_CARD_COLUMNS)
       .eq('owner_id', profile.id)
       .eq('visibility', 'public')
       .eq('moderation_state', 'approved')

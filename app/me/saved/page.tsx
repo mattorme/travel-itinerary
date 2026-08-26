@@ -6,6 +6,7 @@ import { getSessionUser } from '@/lib/auth/session';
 import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
 import { TripCard } from '@/components/trip/trip-card';
+import { TRIP_CARD_COLUMNS } from '@/lib/db/selects';
 import { Button } from '@/components/ui/button';
 
 export const metadata: Metadata = { title: 'Saved trips', robots: { index: false } };
@@ -18,16 +19,12 @@ export default async function SavedTripsPage() {
   const supabase = await createClient();
   const { data: saves } = await supabase
     .from('trip_saves')
-    .select('created_at, trips!inner(id, slug, title, subtitle, duration_days, currency, estimated_cost_total, hero_image_url, hero_credit, clone_count, like_count, interests, travel_style, profiles:owner_id(username, display_name, avatar_url))')
+    .select(`created_at, trips!inner(${TRIP_CARD_COLUMNS})`)
     .eq('profile_id', user.id)
     .order('created_at', { ascending: false })
     .limit(48);
 
-  /* eslint-disable @typescript-eslint/no-explicit-any */
-  const trips = (saves ?? [])
-    .map((row) => (Array.isArray((row as any).trips) ? (row as any).trips[0] : (row as any).trips))
-    .filter(Boolean);
-  /* eslint-enable @typescript-eslint/no-explicit-any */
+  const trips = (saves ?? []).map((row) => row.trips);
 
   return (
     <>

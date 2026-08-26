@@ -1,5 +1,6 @@
 import 'server-only';
 import { createAdminClient } from '@/lib/db/supabase/admin';
+import { jsonAs, type Row } from '@/lib/db/rows';
 import type { PlaceHydration } from '@/domain/types/itinerary';
 import type { ExperienceTag } from '@/domain/types/taxonomy';
 import { asPlaceId, type DestinationId, type PlaceId } from '@/domain/types/ids';
@@ -194,16 +195,23 @@ function toCacheRow(
   };
 }
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-function rowToHydration(row: any): PlaceHydration {
+/**
+ * A cached place row, back to the domain shape.
+ *
+ * `price_level` is `text` and `opening_hours` is `jsonb`, so neither can be
+ * proved by the database — both are written by `toCacheRow` a few lines above
+ * from an already-validated `PlaceHydration`, which is the whole reason the
+ * round trip is safe.
+ */
+function rowToHydration(row: Row<'place_cache'>): PlaceHydration {
   return {
     displayName: row.display_name ?? 'Unnamed place',
     formattedAddress: row.formatted_address ?? null,
     location: row.lat !== null && row.lng !== null ? { lat: row.lat, lng: row.lng } : null,
     rating: row.rating ?? null,
     userRatingCount: row.user_rating_count ?? null,
-    priceLevel: row.price_level ?? null,
-    openingHours: row.opening_hours ?? null,
+    priceLevel: (row.price_level as PlaceHydration['priceLevel']) ?? null,
+    openingHours: jsonAs<PlaceHydration['openingHours']>(row.opening_hours),
     websiteUri: row.website_uri ?? null,
     googleMapsUri: row.google_maps_uri ?? null,
     editorialSummary: row.editorial_summary ?? null,
@@ -211,5 +219,4 @@ function rowToHydration(row: any): PlaceHydration {
     businessStatus: row.business_status ?? null,
   };
 }
-/* eslint-enable @typescript-eslint/no-explicit-any */
 

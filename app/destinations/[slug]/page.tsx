@@ -6,6 +6,7 @@ import { createClient } from '@/lib/db/supabase/server';
 import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
 import { TripCard, type TripCardData } from '@/components/trip/trip-card';
+import { TRIP_CARD_COLUMNS } from '@/lib/db/selects';
 import { Button } from '@/components/ui/button';
 import { Cover } from '@/components/ui/cover';
 import { formatCurrency, humanise } from '@/lib/utils/format';
@@ -82,7 +83,9 @@ export default async function DestinationPage({
     supabase.rpc('destination_top_places', { p_destination_id: destination.id, p_limit: 8 }),
     supabase
       .from('trips')
-      .select('id, slug, title, subtitle, duration_days, currency, estimated_cost_total, hero_image_url, hero_credit, clone_count, like_count, interests, travel_style, profiles:owner_id(username, display_name, avatar_url), trip_destinations!inner(destination_id)')
+      // The embedded join is a filter, not content: it is how the hub asks for
+      // trips that visit this destination.
+      .select(`${TRIP_CARD_COLUMNS}, trip_destinations!inner(destination_id)`)
       .eq('trip_destinations.destination_id', destination.id)
       .eq('visibility', 'public')
       .eq('moderation_state', 'approved')

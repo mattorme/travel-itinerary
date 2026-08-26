@@ -284,27 +284,31 @@ copy). Current state:
 | Ownership validation on user-owned resources | Clean — pinned by pgTAP and by an integration suite |
 | No N+1 patterns | Clean |
 | Dead code removed | Clean |
-| No `any` | **17 remain**, all at the database boundary — see below |
+| No `any` | Clean — zero, and zero `no-explicit-any` suppressions |
 | Centralised API calls | Clean — `lib/api/client.ts` |
 | Passwords hashed | N/A — no passwords exist; magic link and OAuth only |
 
-### The remaining `any`s
+### How the database boundary is typed
 
-Seventeen, in eight files, all where a Supabase result meets our own types, and
-of two kinds:
+There is no `any` anywhere in `app/`, `components/`, `lib/` or `domain/`, and no
+`eslint-disable` for it either. Three things make that possible without
+hand-maintaining a parallel copy of the schema:
 
-- **Untyped rows.** `assemble(row: any)` in `lib/itinerary/hydrate.ts` and its
-  callees account for eight; `destination.ts`, `cache.ts` and `images/index.ts`
-  each take one row or one stored JSON blob the same way.
-- **Embedded-relation narrowing.** The generated type for a joined row is
-  `T | T[] | null`, and five places immediately narrow it by hand —
-  `alternatives.ts`, `edit.ts`, `trip-card.tsx`, `me/saved/page.tsx`.
+- **supabase-js infers result types from the select string.** `QueryData<typeof
+  query>` gives the fully nested shape — days, activities, places, the embedded
+  profile — straight off the literal, so `lib/itinerary/hydrate.ts` types a
+  five-level join without restating a column. The literal is load-bearing:
+  `'a' + 'b'` widens to `string` and the inference silently disappears, so the
+  shared column lists in `lib/db/selects.ts` are single template literals.
+- **`Row<'table'>` from `lib/db/rows.ts`** for the plain `select('*')` reads.
+- **`jsonAs<T>()`** for `jsonb` columns, which is the one genuinely unchecked
+  cast in the codebase. It is named rather than scattered so it can be grepped,
+  and it carries the rule: these blobs are written by this codebase, and
+  anything a person can put content into is validated with Zod at the *write*.
 
-They are contained: every one is turned into a real domain type within a few
-lines, and nothing typed `any` leaves the module it appears in. They are still a
-gap against the standard rather than an exception to it. The fix is a small set
-of row types in `lib/db/` plus one `unwrapOne()` helper for the join case — a
-contained change, and the right next piece of housekeeping.
+Two things the database cannot promise, and so are checked rather than asserted:
+`interests` and `food_prefs` are `text[]`, not enum arrays, so they are filtered
+through `membersOf()` on read.
 
 Two deliberate exceptions:
 

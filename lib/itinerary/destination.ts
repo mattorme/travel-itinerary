@@ -1,6 +1,7 @@
 import 'server-only';
 import tzlookup from 'tz-lookup';
 import { createAdminClient } from '@/lib/db/supabase/admin';
+import { jsonAs, type Row } from '@/lib/db/rows';
 import { geocodeDestination } from '@/lib/google/places/client';
 import { countryCodeOf, countryNameOf } from '@/lib/google/places/normalize';
 import { recordApiUsage } from '@/lib/observability/usage';
@@ -113,9 +114,8 @@ export async function resolveDestination(
   return toResolved(data);
 }
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-function toResolved(row: any): ResolvedDestination {
-  const bbox = row.bbox as BoundingBox | null;
+function toResolved(row: Row<'destinations'>): ResolvedDestination {
+  const bbox = jsonAs<BoundingBox>(row.bbox);
   return {
     id: asDestinationId(row.id),
     name: row.name,
@@ -128,7 +128,6 @@ function toResolved(row: any): ResolvedDestination {
     radiusMeters: radiusFor(row.kind, bbox),
   };
 }
-/* eslint-enable @typescript-eslint/no-explicit-any */
 
 /**
  * Search radius. A city is a tight search; a region needs a wide one, but never

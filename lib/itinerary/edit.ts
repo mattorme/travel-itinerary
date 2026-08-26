@@ -2,7 +2,7 @@ import 'server-only';
 import { createAdminClient } from '@/lib/db/supabase/admin';
 import { scheduleDay, type ScheduleItem } from '@/domain/sequencing/schedule';
 import { estimateTravelSeconds, haversineMeters, inferMode } from '@/domain/types/geo';
-import type { Pace, TransportMode } from '@/domain/types/taxonomy';
+import type { TransportMode } from '@/domain/types/taxonomy';
 import type { OpeningHours, TravelLeg } from '@/domain/types/itinerary';
 import { minuteToSqlTime, sqlTimeToMinute } from '@/lib/utils/time';
 
@@ -32,11 +32,7 @@ export async function reflowDay(tripId: string, tripDayId: string): Promise<void
 
   if (!day) return;
 
-  /* eslint-disable @typescript-eslint/no-explicit-any */
-  const trip = (Array.isArray((day as any).trips) ? (day as any).trips[0] : (day as any).trips) as
-    | { pace: Pace; transport_modes: TransportMode[] }
-    | undefined;
-  /* eslint-enable @typescript-eslint/no-explicit-any */
+  const trip = day.trips;
   if (!trip) return;
 
   const { data: activities } = await admin

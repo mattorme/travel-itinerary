@@ -149,3 +149,20 @@ export const INTEREST_TAGS: Readonly<Record<Interest, readonly ExperienceTag[]>>
   music: ['live_music', 'bar'],
   family: ['aquarium_zoo', 'theme_park', 'park_garden', 'museum'],
 };
+
+/**
+ * Keep only the values that are actually in a taxonomy.
+ *
+ * `interests` and `food_prefs` are `text[]` in Postgres, not enum arrays, so a
+ * row comes back as `string[]` however carefully the wizard validated it on the
+ * way in. Filtering on read costs nothing on a five-element array and is honest
+ * about what the database can and cannot promise — asserting the union with a
+ * cast would just be a nicer-looking `any`.
+ */
+export function membersOf<T extends string>(
+  allowed: readonly T[],
+  values: readonly string[] | null | undefined,
+): T[] {
+  const set = new Set<string>(allowed);
+  return (values ?? []).filter((value): value is T => set.has(value));
+}

@@ -1,4 +1,5 @@
 import 'server-only';
+import type { QueryData } from '@supabase/supabase-js';
 import { createClient } from '@/lib/db/supabase/server';
 import { createAdminClient } from '@/lib/db/supabase/admin';
 import { hydratePlaces } from '@/lib/google/places/cache';
@@ -14,13 +15,23 @@ import {
 } from '@/domain/types/ids';
 import type {
   Activity,
+  CostBreakdown,
+  ImageCredit,
   Itinerary,
+  Party,
   PlaceHydration,
   PlaceRef,
+  TravelLeg,
   TripDay,
   TripDestination,
 } from '@/domain/types/itinerary';
-import type { ExperienceTag } from '@/domain/types/taxonomy';
+import {
+  FOOD_PREFS,
+  INTERESTS,
+  membersOf,
+  type ExperienceTag,
+} from '@/domain/types/taxonomy';
+import { jsonAs } from '@/lib/db/rows';
 import { sqlTimeToMinute } from '@/lib/utils/time';
 
 /**
@@ -57,6 +68,18 @@ const TRIP_SELECT = `
   )
 `;
 
+/**
+ * The shape TRIP_SELECT returns, derived from the select string rather than
+ * restated. supabase-js parses the literal, so the nested days, activities,
+ * places and profile all come back fully typed — and changing a column in
+ * TRIP_SELECT changes this with it, which a hand-written interface could not do.
+ */
+type TripRow = QueryData<ReturnType<typeof tripQuery>>;
+
+function tripQuery(db: Awaited<ReturnType<typeof createClient>>) {
+  return db.from('trips').select(TRIP_SELECT).is('deleted_at', null).maybeSingle();
+}
+
 export async function loadTripBySlug(slug: string): Promise<Itinerary | null> {
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -83,9 +106,11 @@ export async function loadTripById(tripId: TripId): Promise<Itinerary | null> {
   return assemble(data);
 }
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-async function assemble(row: any): Promise<Itinerary> {
-  const rawDays: any[] = [...(row.trip_days ?? [])].sort((a, b) => a.day_index - b.day_index);
+type TripDayRow = NonNullable<TripRow>['trip_days'][number];
+type ActivityRow = TripDayRow['activities'][number];
+
+async function assemble(row: NonNullable<TripRow>): Promise<Itinerary> {
+  const rawDays = [...(row.trip_days ?? [])].sort((a, b) => a.day_index - b.day_index);
 
   // One hydration pass for the whole trip rather than per activity.
   const placeEntries: { placeId: PlaceId; googlePlaceId: string }[] = [];
@@ -112,19 +137,19 @@ async function assemble(row: any): Promise<Itinerary> {
     estimatedCost: day.estimated_cost !== null ? Number(day.estimated_cost) : null,
     notes: day.notes,
     activities: [...(day.activities ?? [])]
-      .sort((a: any, b: any) => a.order_index - b.order_index)
-      .map((a: any): Activity => toActivity(a, hydrated)),
+      .sort((a, b) => a.order_index - b.order_index)
+      .map((a): Activity => toActivity(a, hydrated)),
   }));
 
   const destinations: TripDestination[] = [...(row.trip_destinations ?? [])]
-    .filter((td: any) => td.destinations)
-    .sort((a: any, b: any) => a.order_index - b.order_index)
-    .map((td: any) => ({
-      destinationId: asDestinationId(td.destinations.id),
-      name: td.destinations.name,
-      countryCode: td.destinations.country_code,
-      timezone: td.destinations.timezone,
-      location: { lat: td.destinations.lat, lng: td.destinations.lng },
+    .filter((td) => td.destinations !== null)
+    .sort((a, b) => a.order_index - b.order_index)
+    .map((td) => ({
+      destinationId: asDestinationId(td.destinations!.id),
+      name: td.destinations!.name,
+      countryCode: td.destinations!.country_code,
+      timezone: td.destinations!.timezone,
+      location: { lat: td.destinations!.lat, lng: td.destinations!.lng },
       orderIndex: td.order_index,
       firstDayIndex: td.first_day_index,
       nights: td.nights,
@@ -148,15 +173,15 @@ async function assemble(row: any): Promise<Itinerary> {
         end: row.end_date,
         durationDays: row.duration_days,
       },
-      party: row.party ?? { adults: 2, children: [] },
+      party: jsonAs<Party>(row.party) ?? { adults: 2, children: [] },
       currency: row.currency,
       budgetTotal: row.budget_total !== null ? Number(row.budget_total) : null,
       budgetDaily: row.budget_daily !== null ? Number(row.budget_daily) : null,
       travelStyle: row.travel_style,
       pace: row.pace,
-      interests: row.interests ?? [],
+      interests: membersOf(INTERESTS, row.interests),
       transportModes: row.transport_modes ?? ['mixed'],
-      foodPrefs: row.food_prefs ?? [],
+      foodPrefs: membersOf(FOOD_PREFS, row.food_prefs),
       accommodation: row.accommodation_pref,
       notes: row.user_notes,
     },
@@ -164,9 +189,9 @@ async function assemble(row: any): Promise<Itinerary> {
     highlights: row.highlights ?? [],
     destinations,
     days,
-    estimatedCost: row.estimated_cost_breakdown ?? null,
+    estimatedCost: jsonAs<CostBreakdown>(row.estimated_cost_breakdown),
     heroImageUrl: row.hero_image_url,
-    heroCredit: row.hero_credit,
+    heroCredit: jsonAs<ImageCredit>(row.hero_credit),
     lineage: {
       forkedFromTripId: row.forked_from_trip_id ? asTripId(row.forked_from_trip_id) : null,
       forkedFromVersion: row.forked_from_version,
@@ -196,7 +221,7 @@ async function assemble(row: any): Promise<Itinerary> {
   };
 }
 
-function toActivity(a: any, hydrated: ReadonlyMap<PlaceId, PlaceHydration>): Activity {
+function toActivity(a: ActivityRow, hydrated: ReadonlyMap<PlaceId, PlaceHydration>): Activity {
   const placeRow = a.places;
   const place: PlaceRef | null = placeRow
     ? {
@@ -221,13 +246,12 @@ function toActivity(a: any, hydrated: ReadonlyMap<PlaceId, PlaceHydration>): Act
     durationMinutes: a.duration_minutes,
     estimatedCost: a.estimated_cost !== null ? Number(a.estimated_cost) : null,
     costBasis: a.cost_basis,
-    inboundTravel: a.inbound_travel ?? null,
+    inboundTravel: jsonAs<TravelLeg>(a.inbound_travel),
     bookingUrl: a.booking_url,
     isLocked: a.is_locked,
     source: a.source,
   };
 }
-/* eslint-enable @typescript-eslint/no-explicit-any */
 
 /**
  * Read-path hydration.

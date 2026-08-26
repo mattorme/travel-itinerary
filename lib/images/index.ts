@@ -1,8 +1,9 @@
 import 'server-only';
 import { createAdminClient } from '@/lib/db/supabase/admin';
+import { jsonAs, type Json } from '@/lib/db/rows';
 import { recordApiUsage } from '@/lib/observability/usage';
 import { createUnsplashProvider } from './unsplash';
-import type { CoverImage, ImageProvider, ImageQuery } from './types';
+import type { CoverImage, ImageCredit, ImageProvider, ImageQuery } from './types';
 
 export type { CoverImage, ImageCredit, ImageQuery } from './types';
 
@@ -94,25 +95,47 @@ async function search(query: ImageQuery): Promise<CoverImage | null> {
   return found;
 }
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-function fromStored(url: string, credit: any): CoverImage {
+/**
+ * `destinations.hero_credit`, as it has actually been written.
+ *
+ * Every field is optional because the column holds rows from two eras: the
+ * current one stores the whole cover minus its URL, an earlier one stored just
+ * the four credit fields at the top level. Both still render, which is why the
+ * reader below checks the nested shape first and then the flat one — and why
+ * this is a shape with optional fields rather than a `CoverImage`.
+ */
+interface StoredCover {
+  thumbUrl?: string | null;
+  width?: number;
+  height?: number;
+  colour?: string | null;
+  altText?: string | null;
+  provider?: string;
+  credit?: Partial<ImageCredit>;
+  author?: string;
+  authorUrl?: string | null;
+  source?: string;
+  sourceUrl?: string | null;
+}
+
+function fromStored(url: string, stored: Json | null): CoverImage {
+  const cover = jsonAs<StoredCover>(stored) ?? {};
   return {
     url,
-    thumbUrl: credit?.thumbUrl ?? null,
-    width: credit?.width ?? 1600,
-    height: credit?.height ?? 900,
-    colour: credit?.colour ?? null,
-    altText: credit?.altText ?? null,
+    thumbUrl: cover.thumbUrl ?? null,
+    width: cover.width ?? 1600,
+    height: cover.height ?? 900,
+    colour: cover.colour ?? null,
+    altText: cover.altText ?? null,
     credit: {
-      author: credit?.credit?.author ?? credit?.author ?? 'Unknown',
-      authorUrl: credit?.credit?.authorUrl ?? credit?.authorUrl ?? null,
-      source: credit?.credit?.source ?? credit?.source ?? 'Unsplash',
-      sourceUrl: credit?.credit?.sourceUrl ?? credit?.sourceUrl ?? null,
+      author: cover.credit?.author ?? cover.author ?? 'Unknown',
+      authorUrl: cover.credit?.authorUrl ?? cover.authorUrl ?? null,
+      source: cover.credit?.source ?? cover.source ?? 'Unsplash',
+      sourceUrl: cover.credit?.sourceUrl ?? cover.sourceUrl ?? null,
     },
-    provider: credit?.provider ?? 'unsplash',
+    provider: cover.provider ?? 'unsplash',
   };
 }
-/* eslint-enable @typescript-eslint/no-explicit-any */
 
 /** Drops provider-internal fields before the image is persisted. */
 function stripInternals(image: CoverImage): CoverImage {

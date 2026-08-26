@@ -4,16 +4,30 @@ import Script from 'next/script';
 import { useEffect, useRef } from 'react';
 import { publicEnv } from '@/lib/public-env';
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/**
+ * The slice of Cloudflare's widget API this component uses.
+ *
+ * Declared as the options we actually pass rather than an open bag: the script
+ * is loaded at runtime and has no types of its own, so this declaration is the
+ * only description of it anywhere in the codebase — and a `Record<string, any>`
+ * would let a typo in `'expired-callback'` through in silence.
+ */
+interface TurnstileOptions {
+  sitekey: string;
+  size?: 'normal' | 'compact' | 'flexible';
+  callback?: (token: string) => void;
+  'error-callback'?: () => void;
+  'expired-callback'?: () => void;
+}
+
 declare global {
   interface Window {
     turnstile?: {
-      render: (el: HTMLElement, options: Record<string, any>) => string;
+      render: (el: HTMLElement, options: TurnstileOptions) => string;
       remove: (id: string) => void;
     };
   }
 }
-/* eslint-enable @typescript-eslint/no-explicit-any */
 
 /**
  * Invisible bot check in front of anonymous generation.
