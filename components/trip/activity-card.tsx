@@ -1,9 +1,10 @@
 import { ExternalLink, MapPin, Star } from 'lucide-react';
 import type { Activity } from '@/domain/types/itinerary';
 import { formatMinute } from '@/domain/sequencing/schedule';
-import { bandOf, type TimeBand } from '@/domain/schedule/time-of-day';
+import { bandOf } from '@/domain/schedule/time-of-day';
 import { formatCurrency, formatDuration } from '@/lib/utils/format';
 import { cn } from '@/lib/utils/cn';
+import { BAND_DOT } from './day-arc';
 import { PlacePhoto } from './place-photo';
 import { TravelLegRow } from './travel-leg';
 
@@ -21,12 +22,6 @@ import { TravelLegRow } from './travel-leg';
  * fields are extras that appear when live, and carry the attribution the Maps
  * terms require.
  */
-
-const BAND_DOT: Record<TimeBand, string> = {
-  morning: 'bg-morning-ink',
-  afternoon: 'bg-afternoon-ink',
-  evening: 'bg-evening-ink',
-};
 
 export function ActivityCard({
   activity,

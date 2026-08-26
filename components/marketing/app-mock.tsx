@@ -1,7 +1,8 @@
 import { Sparkles } from 'lucide-react';
-import { DayArc } from '@/components/trip/day-arc';
-import { bandOf, type TimeBand } from '@/domain/schedule/time-of-day';
+import { BAND_DOT, DayArc } from '@/components/trip/day-arc';
+import { bandOf } from '@/domain/schedule/time-of-day';
 import { formatMinute } from '@/domain/sequencing/schedule';
+import { stagger } from '@/lib/utils/motion';
 
 /**
  * The hero device.
@@ -23,12 +24,6 @@ const STOPS = [
   { start: 800, minutes: 60, name: 'Soba lunch in Nezu', note: 'Counter seating, cash only' },
   { start: 1140, minutes: 120, name: 'Izakaya on Kototoi-dori', note: 'Booked for four' },
 ] as const;
-
-const BAND_DOT: Record<TimeBand, string> = {
-  morning: 'bg-morning-ink',
-  afternoon: 'bg-afternoon-ink',
-  evening: 'bg-evening-ink',
-};
 
 export function AppMock() {
   const activities = STOPS.map((s) => ({ startMinute: s.start, durationMinutes: s.minutes }));
@@ -88,7 +83,7 @@ export function AppMock() {
           paragraph of copy. */}
       <div
         className="rise absolute -bottom-7 left-2 flex items-center gap-3 rounded-panel bg-surface px-4 py-3.5 shadow-(--shadow-lift) sm:-left-6 lg:-left-10"
-        style={{ '--i': 3 } as React.CSSProperties}
+        style={stagger(3)}
       >
         <span className="grad-brand flex size-9 shrink-0 items-center justify-center rounded-edge">
           <Sparkles className="size-4 text-white" />

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Plus_Jakarta_Sans, Inter } from 'next/font/google';
 import { publicEnv } from '@/lib/public-env';
+import { BRAND_FROM } from '@/lib/brand';
 import { NativeShell } from '@/components/native-shell';
 import './globals.css';
 
@@ -50,7 +51,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#4f46e5',
+  themeColor: BRAND_FROM,
   width: 'device-width',
   initialScale: 1,
   // Required for env(safe-area-inset-*) to report real values inside the app.

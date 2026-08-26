@@ -6,6 +6,7 @@ import { TripCard } from '@/components/trip/trip-card';
 import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
 import { AppMock } from '@/components/marketing/app-mock';
+import { stagger } from '@/lib/utils/motion';
 
 export const revalidate = 300;
 
@@ -45,7 +46,9 @@ export default async function LandingPage() {
   const supabase = await createClient();
   const { data: featured } = await supabase
     .from('trips')
-    .select('id, slug, title, subtitle, duration_days, currency, estimated_cost_total, hero_image_url, hero_credit, clone_count, like_count, interests, travel_style, profiles:owner_id(username, display_name, avatar_url)')
+    .select(
+      'id, slug, title, subtitle, duration_days, currency, estimated_cost_total, hero_image_url, hero_credit, clone_count, like_count, interests, travel_style, profiles:owner_id(username, display_name, avatar_url)',
+    )
     .eq('visibility', 'public')
     .eq('moderation_state', 'approved')
     .is('deleted_at', null)
@@ -74,13 +77,16 @@ export default async function LandingPage() {
               <span className="grad-text">of a day.</span>
             </h1>
 
-            <p className="rise mt-6 max-w-[46ch] text-[1.125rem] leading-relaxed text-steel" style={{ '--i': 1 } as React.CSSProperties}>
+            <p
+              className="rise mt-6 max-w-[46ch] text-[1.125rem] leading-relaxed text-steel"
+              style={stagger(1)}
+            >
               Tell us where you&apos;re going and how you like to travel. You get a plan with real
               times on it — early mornings, a free afternoon, dinner that runs late — built from
               places that genuinely exist.
             </p>
 
-            <div className="rise mt-9 flex flex-col gap-3 sm:flex-row" style={{ '--i': 2 } as React.CSSProperties}>
+            <div className="rise mt-9 flex flex-col gap-3 sm:flex-row" style={stagger(2)}>
               <Link href="/plan">
                 <Button size="lg" variant="signal" block className="sm:w-auto">
                   Plan my trip

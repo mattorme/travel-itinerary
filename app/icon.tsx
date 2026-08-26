@@ -1,4 +1,5 @@
 import { ImageResponse } from 'next/og';
+import { brandGradient } from '@/lib/brand';
 
 /**
  * The app icon.
@@ -32,7 +33,7 @@ export default function Icon() {
           alignItems: 'center',
           justifyContent: 'center',
           gap: 26,
-          backgroundImage: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
+          backgroundImage: brandGradient(135),
         }}
       >
         {BARS.map((bar, i) => (

@@ -42,17 +42,16 @@
   --color-signal-2: #7c3aed;
   --color-signal-deep: #4338ca;
   --color-signal-wash: #eef0ff;
-  --color-signal-wash-2: #f3eeff;
 
-  /* Time of day. Kept, because a stop genuinely belongs to a morning or an
-     evening — but retuned to sit inside the indigo/violet world instead of
-     next to it. `-ink` variants are for marks on a light ground. */
-  --color-morning: #fbbf24;
-  --color-morning-ink: #d97706;
-  --color-afternoon: #22d3ee;
-  --color-afternoon-ink: #0891b2;
-  --color-evening: #f472b6;
-  --color-evening-ink: #db2777;
+  /*
+   * Time of day. Kept, because a stop genuinely belongs to a morning or an
+   * evening — retuned to sit inside the indigo/violet world instead of next to
+   * it. These are the values for a light ground, which is every ground the web
+   * build has; the brighter set the generated images need lives in lib/brand.ts.
+   */
+  --color-morning: #d97706;
+  --color-afternoon: #0891b2;
+  --color-evening: #db2777;
 
   --color-positive: #047857;
   --color-caution: #b45309;
@@ -309,14 +308,6 @@
   }
   .hide-scrollbar::-webkit-scrollbar {
     display: none;
-  }
-
-  /*
-   * A hairline that survives a zoomed-out viewport. A 1px border on a high-DPI
-   * screen at some zoom levels disappears entirely; a shadow does not.
-   */
-  .rule-top {
-    box-shadow: inset 0 1px 0 var(--color-rule);
   }
 
   /*

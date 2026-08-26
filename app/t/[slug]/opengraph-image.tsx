@@ -1,6 +1,7 @@
 import { ImageResponse } from 'next/og';
 import { loadTripBySlug } from '@/lib/itinerary/hydrate';
-import { arcSegments, type TimeBand } from '@/domain/schedule/time-of-day';
+import { arcSegments } from '@/domain/schedule/time-of-day';
+import { BAND_ON_DARK, brandGradient } from '@/lib/brand';
 import { formatCurrency } from '@/lib/utils/format';
 
 /**
@@ -21,13 +22,7 @@ export const alt = 'Trip itinerary';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
-const INK = '#0f1424';
-const BRAND = 'linear-gradient(115deg, #4f46e5 0%, #7c3aed 100%)';
-const BAND: Record<TimeBand, string> = {
-  morning: '#fbbf24',
-  afternoon: '#22d3ee',
-  evening: '#f472b6',
-};
+const BRAND = brandGradient(115);
 
 export default async function OpengraphImage({
   params,
@@ -192,7 +187,7 @@ export default async function OpengraphImage({
                         left: `${segment.offset * 100}%`,
                         width: `${segment.width * 100}%`,
                         borderRadius: 6,
-                        background: BAND[segment.band],
+                        background: BAND_ON_DARK[segment.band],
                       }}
                     />
                   ))}
@@ -214,7 +209,7 @@ export default async function OpengraphImage({
         >
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             {cost !== undefined && (
-              <div style={{ display: 'flex', fontSize: 42, color: BAND.morning }}>
+              <div style={{ display: 'flex', fontSize: 42, color: BAND_ON_DARK.morning }}>
                 ~{formatCurrency(cost, itinerary.request.currency)}
               </div>
             )}

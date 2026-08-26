@@ -9,9 +9,10 @@ import { expect, test, type Page } from '@playwright/test';
  * or labelling mistake is trivial the day it is introduced and awful a hundred
  * components later.
  *
- * Violations are reported with their target selectors, because "3 violations"
- * is not actionable and the whole point is that a failure tells you where to
- * look.
+ * Violations are reported with their target selectors and axe's own reason,
+ * because "3 violations" is not actionable and the whole point is that a
+ * failure tells you where to look and what it measured — a blended foreground
+ * colour in that reason, for instance, means something was caught mid-fade.
  */
 async function scan(page: Page, disable: string[] = []) {
   /*

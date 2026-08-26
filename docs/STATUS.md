@@ -221,6 +221,8 @@ lib/         ai/  google/  itinerary/  images/  native/  db/  auth/
 app/         Routes. /t/[slug] is the canonical public trip page.
              app/actions/ holds every server action.
 components/  ui/  trip/  wizard/  explore/  profile/  auth/  legal/
+             marketing/ (landing-page surfaces built from real product
+             components, so a mock cannot drift out of date)
 supabase/    migrations/  tests/ (pgTAP)  seed.sql
 tests/       unit/  integration/  e2e/  fixtures/
 ios/ android/  Capacitor shells. Generated, but carry real edits.
@@ -282,8 +284,27 @@ copy). Current state:
 | Ownership validation on user-owned resources | Clean — pinned by pgTAP and by an integration suite |
 | No N+1 patterns | Clean |
 | Dead code removed | Clean |
+| No `any` | **17 remain**, all at the database boundary — see below |
 | Centralised API calls | Clean — `lib/api/client.ts` |
 | Passwords hashed | N/A — no passwords exist; magic link and OAuth only |
+
+### The remaining `any`s
+
+Seventeen, in eight files, all where a Supabase result meets our own types, and
+of two kinds:
+
+- **Untyped rows.** `assemble(row: any)` in `lib/itinerary/hydrate.ts` and its
+  callees account for eight; `destination.ts`, `cache.ts` and `images/index.ts`
+  each take one row or one stored JSON blob the same way.
+- **Embedded-relation narrowing.** The generated type for a joined row is
+  `T | T[] | null`, and five places immediately narrow it by hand —
+  `alternatives.ts`, `edit.ts`, `trip-card.tsx`, `me/saved/page.tsx`.
+
+They are contained: every one is turned into a real domain type within a few
+lines, and nothing typed `any` leaves the module it appears in. They are still a
+gap against the standard rather than an exception to it. The fix is a small set
+of row types in `lib/db/` plus one `unwrapOne()` helper for the join case — a
+contained change, and the right next piece of housekeeping.
 
 Two deliberate exceptions:
 

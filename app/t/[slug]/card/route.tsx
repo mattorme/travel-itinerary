@@ -1,5 +1,6 @@
 import { ImageResponse } from 'next/og';
 import { loadTripBySlug } from '@/lib/itinerary/hydrate';
+import { brandGradient } from '@/lib/brand';
 import { formatCurrency } from '@/lib/utils/format';
 
 /**
@@ -43,7 +44,7 @@ export async function GET(
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
-          backgroundImage: 'linear-gradient(150deg, #4f46e5 0%, #7c3aed 100%)',
+          backgroundImage: brandGradient(150),
           color: '#ffffff',
           padding: 96,
           fontFamily: 'sans-serif',

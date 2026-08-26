@@ -1,4 +1,5 @@
 import type { MetadataRoute } from 'next';
+import { BRAND_FROM } from '@/lib/brand';
 
 /**
  * Web app manifest.
@@ -22,7 +23,7 @@ export default function manifest(): MetadataRoute.Manifest {
     display: 'standalone',
     orientation: 'portrait',
     background_color: '#f6f7fb',
-    theme_color: '#4f46e5',
+    theme_color: BRAND_FROM,
     categories: ['travel', 'lifestyle', 'navigation'],
     icons: [
       { src: '/icon', sizes: '512x512', type: 'image/png', purpose: 'any' },
