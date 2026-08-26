@@ -3,8 +3,8 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/db/supabase/server';
-import { getOrCreateSessionUser, requireUser } from '@/lib/auth/session';
-import { assertCanEditTrip, ForbiddenError, NotFoundError } from '@/lib/auth/authorization';
+import { getOrCreateSessionUser } from '@/lib/auth/session';
+import { guardTripEditor } from '@/lib/auth/guards';
 import { checkLimit } from '@/lib/ratelimit';
 import { recordTripEvent } from '@/lib/itinerary/events';
 import { asTripId, type TripId } from '@/domain/types/ids';
@@ -66,12 +66,8 @@ export async function setTripVisibility(
   tripId: string,
   visibility: 'private' | 'unlisted' | 'public',
 ): Promise<ActionResult<{ visibility: string }>> {
-  try {
-    const user = await requireUser();
-    await assertCanEditTrip(asTripId(tripId), user);
-  } catch (error) {
-    return { ok: false, error: messageFor(error) };
-  }
+  const guard = await guardTripEditor(tripId);
+  if (!guard.ok) return guard;
 
   const supabase = await createClient();
   const { error } = await supabase.from('trips').update({ visibility }).eq('id', tripId);
@@ -110,12 +106,8 @@ export async function recordShare(tripId: string, channel: string): Promise<void
 }
 
 export async function deleteTrip(tripId: string): Promise<ActionResult | void> {
-  try {
-    const user = await requireUser();
-    await assertCanEditTrip(asTripId(tripId), user);
-  } catch (error) {
-    return { ok: false, error: messageFor(error) };
-  }
+  const guard = await guardTripEditor(tripId);
+  if (!guard.ok) return guard;
 
   const supabase = await createClient();
   // Soft delete: existing clones keep their attribution, and the row stays
@@ -129,8 +121,3 @@ export async function deleteTrip(tripId: string): Promise<ActionResult | void> {
   redirect('/me');
 }
 
-function messageFor(error: unknown): string {
-  if (error instanceof ForbiddenError) return 'This is not your trip.';
-  if (error instanceof NotFoundError) return 'We could not find that trip.';
-  return 'Something went wrong.';
-}

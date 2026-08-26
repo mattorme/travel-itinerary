@@ -2,6 +2,7 @@ import type { TripRequestParsed } from '@/domain/schemas/trip-request';
 import type { PlannedDay } from '../wire/plan-shape';
 import { describeParty, fenceUserText, INJECTION_GUARD } from './shared';
 import { formatMinute } from '@/domain/sequencing/schedule';
+import { compactNumber, priceLevelLabel } from '@/lib/utils/format';
 
 /**
  * Stage 4. The model sees only what it needs to choose well: a shortlist per
@@ -92,25 +93,12 @@ Return one assignment per slot you can fill, and list the rest under "unfilled".
 
 function formatCandidate(c: CandidateLine): string {
   const bits = [`  [${c.id}] ${c.name}`];
-  if (c.rating !== null) bits.push(`${c.rating.toFixed(1)}★${c.reviews ? ` (${compact(c.reviews)})` : ''}`);
-  if (c.priceLevel) bits.push(priceGlyph(c.priceLevel));
+  if (c.rating !== null) bits.push(`${c.rating.toFixed(1)}★${c.reviews ? ` (${compactNumber(c.reviews)})` : ''}`);
+  if (c.priceLevel) bits.push(priceLevelLabel(c.priceLevel));
   if (c.distanceFromDayCentre !== null) bits.push(`${(c.distanceFromDayCentre / 1000).toFixed(1)}km from day centre`);
   if (!c.openWhenNeeded) bits.push('CLOSED at the planned time');
   const head = bits.join(' · ');
   return c.summary ? `${head}\n      ${c.summary}` : head;
 }
 
-function priceGlyph(level: string): string {
-  switch (level) {
-    case 'PRICE_LEVEL_FREE': return 'free';
-    case 'PRICE_LEVEL_INEXPENSIVE': return '$';
-    case 'PRICE_LEVEL_MODERATE': return '$$';
-    case 'PRICE_LEVEL_EXPENSIVE': return '$$$';
-    case 'PRICE_LEVEL_VERY_EXPENSIVE': return '$$$$';
-    default: return '';
-  }
-}
 
-function compact(n: number): string {
-  return n >= 1000 ? `${Math.round(n / 100) / 10}k` : String(n);
-}

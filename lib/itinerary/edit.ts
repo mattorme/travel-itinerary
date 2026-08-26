@@ -4,6 +4,7 @@ import { scheduleDay, type ScheduleItem } from '@/domain/sequencing/schedule';
 import { estimateTravelSeconds, haversineMeters, inferMode } from '@/domain/types/geo';
 import type { Pace, TransportMode } from '@/domain/types/taxonomy';
 import type { OpeningHours, TravelLeg } from '@/domain/types/itinerary';
+import { minuteToSqlTime, sqlTimeToMinute } from '@/lib/utils/time';
 
 /**
  * Re-time a day after an edit.
@@ -84,7 +85,7 @@ export async function reflowDay(tripDayId: string): Promise<void> {
     openingHours: geo.get(activity.place_id ?? '')?.hours ?? null,
     window: null,
     isLocked: activity.is_locked,
-    lockedStart: activity.is_locked && activity.start_time ? toMinute(activity.start_time) : null,
+    lockedStart: activity.is_locked && activity.start_time ? sqlTimeToMinute(activity.start_time) : null,
   }));
 
   const { scheduled } = scheduleDay(items, trip.pace, 2);
@@ -96,23 +97,15 @@ export async function reflowDay(tripDayId: string): Promise<void> {
     await admin
       .from('activities')
       .update({
-        start_time: time ? toTime(time.startMinute) : null,
-        end_time: time ? toTime(time.endMinute) : null,
+        start_time: time ? minuteToSqlTime(time.startMinute) : null,
+        end_time: time ? minuteToSqlTime(time.endMinute) : null,
         inbound_travel: leg ? JSON.parse(JSON.stringify(leg)) : null,
       })
       .eq('id', activity.id);
   }
 }
 
-function toMinute(time: string): number {
-  const [h = '0', m = '0'] = time.split(':');
-  return Number(h) * 60 + Number(m);
-}
 
-function toTime(minute: number): string {
-  const wrapped = ((minute % 1440) + 1440) % 1440;
-  return `${String(Math.floor(wrapped / 60)).padStart(2, '0')}:${String(wrapped % 60).padStart(2, '0')}:00`;
-}
 
 /**
  * Point an activity at a different place.

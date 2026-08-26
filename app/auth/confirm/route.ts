@@ -1,13 +1,14 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import type { EmailOtpType } from '@supabase/supabase-js';
 import { createClient } from '@/lib/db/supabase/server';
+import { safeRedirectPath } from '@/lib/auth/redirect';
 
 /** Magic-link / email-change return leg. */
 export async function GET(request: NextRequest): Promise<NextResponse> {
   const params = request.nextUrl.searchParams;
   const tokenHash = params.get('token_hash');
   const type = params.get('type') as EmailOtpType | null;
-  const next = safeNext(params.get('next'));
+  const next = safeRedirectPath(params.get('next'));
 
   if (!tokenHash || !type) {
     return NextResponse.redirect(new URL('/signin?error=invalid_link', request.url));
@@ -22,7 +23,3 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   return NextResponse.redirect(new URL(next, request.url));
 }
 
-function safeNext(next: string | null): string {
-  if (!next || !next.startsWith('/') || next.startsWith('//')) return '/me';
-  return next;
-}

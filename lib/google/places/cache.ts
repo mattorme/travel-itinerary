@@ -8,6 +8,7 @@ import { placeDetails } from './client';
 import { tagsForGoogleTypes } from './taxonomy';
 import { recordApiUsage } from '@/lib/observability/usage';
 import type { GooglePlace } from './types';
+import { mapWithConcurrency } from '@/lib/utils/async';
 import type { Json } from '@/lib/db/database.types';
 
 /**
@@ -212,22 +213,3 @@ function rowToHydration(row: any): PlaceHydration {
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
-export async function mapWithConcurrency<T, R>(
-  items: readonly T[],
-  limit: number,
-  fn: (item: T) => Promise<R>,
-): Promise<R[]> {
-  const results: R[] = new Array(items.length);
-  let cursor = 0;
-
-  const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
-    while (true) {
-      const index = cursor++;
-      if (index >= items.length) return;
-      results[index] = await fn(items[index] as T);
-    }
-  });
-
-  await Promise.all(workers);
-  return results;
-}

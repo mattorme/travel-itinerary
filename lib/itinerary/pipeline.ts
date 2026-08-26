@@ -34,7 +34,7 @@ import { NARRATIVE_SYSTEM, buildNarrativeInput } from '@/lib/ai/prompts/narrativ
 import { resolveDestination, type ResolvedDestination } from './destination';
 import { resolveCandidates, type Candidate } from './candidates';
 import { resolveDayLegs } from './routing';
-import { mapWithConcurrency } from '@/lib/google/places/cache';
+import { mapWithConcurrency } from '@/lib/utils/async';
 import type { DraftActivity, DraftDay, DraftItinerary } from './draft';
 import { validateAndRepair } from './repair';
 import { ServiceError } from '@/lib/observability/errors';

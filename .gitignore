@@ -28,3 +28,6 @@ supabase/.branches/
 /android/build/
 /android/app/src/main/assets/public/
 /android/local.properties
+
+# Local assistant instructions — personal to this working copy.
+CLAUDE.md

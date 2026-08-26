@@ -21,6 +21,7 @@ import type {
   TripDestination,
 } from '@/domain/types/itinerary';
 import type { ExperienceTag } from '@/domain/types/taxonomy';
+import { sqlTimeToMinute } from '@/lib/utils/time';
 
 /**
  * Database -> domain model.
@@ -215,8 +216,8 @@ function toActivity(a: any, hydrated: ReadonlyMap<PlaceId, PlaceHydration>): Act
     title: a.title,
     description: a.description,
     reason: a.reason,
-    startMinute: a.start_time ? timeToMinute(a.start_time) : null,
-    endMinute: a.end_time ? timeToMinute(a.end_time) : null,
+    startMinute: a.start_time ? sqlTimeToMinute(a.start_time) : null,
+    endMinute: a.end_time ? sqlTimeToMinute(a.end_time) : null,
     durationMinutes: a.duration_minutes,
     estimatedCost: a.estimated_cost !== null ? Number(a.estimated_cost) : null,
     costBasis: a.cost_basis,
@@ -277,7 +278,3 @@ async function hydrateForRead(
   return live;
 }
 
-function timeToMinute(time: string): number {
-  const [h = '0', m = '0'] = time.split(':');
-  return Number(h) * 60 + Number(m);
-}

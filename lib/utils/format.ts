@@ -55,3 +55,25 @@ export function formatDuration(minutes: number): string {
   const m = minutes % 60;
   return m === 0 ? `${h} hr` : `${h} hr ${m} min`;
 }
+
+/**
+ * Google's price level as something a person reads.
+ *
+ * Shared by the itinerary UI and the prompt that shows candidates to the model,
+ * so both describe a venue's price the same way.
+ */
+export function priceLevelLabel(level: string | null | undefined): string {
+  switch (level) {
+    case 'PRICE_LEVEL_FREE': return 'free';
+    case 'PRICE_LEVEL_INEXPENSIVE': return '$';
+    case 'PRICE_LEVEL_MODERATE': return '$$';
+    case 'PRICE_LEVEL_EXPENSIVE': return '$$$';
+    case 'PRICE_LEVEL_VERY_EXPENSIVE': return '$$$$';
+    default: return '';
+  }
+}
+
+/** `1240` -> `"1.2k"`. Review counts, follower counts, anything with a long tail. */
+export function compactNumber(n: number): string {
+  return n >= 1000 ? `${Math.round(n / 100) / 10}k` : String(n);
+}

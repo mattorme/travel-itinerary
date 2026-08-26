@@ -1,8 +1,6 @@
 'use server';
 
-import { requireUser } from '@/lib/auth/session';
-import { assertCanEditTrip } from '@/lib/auth/authorization';
-import { checkLimit } from '@/lib/ratelimit';
+import { guardTripEditor } from '@/lib/auth/guards';
 import { asTripId } from '@/domain/types/ids';
 import { findAlternatives, searchTripPlaces, type Alternative } from '@/lib/itinerary/alternatives';
 
@@ -18,15 +16,14 @@ export async function alternativesFor(
   tripId: string,
   activityId: string,
 ): Promise<readonly Alternative[]> {
+  // A denial renders as "nothing else nearby", which is the right thing to show
+  // whether the cause is no results, no access or too many requests.
+  const guard = await guardTripEditor(tripId);
+  if (!guard.ok) return [];
+
   try {
-    const user = await requireUser();
-    await assertCanEditTrip(asTripId(tripId), user);
-    const limit = await checkLimit('mutation', user.id);
-    if (!limit.allowed) return [];
     return await findAlternatives({ tripId: asTripId(tripId), activityId });
   } catch {
-    // An empty list renders as "nothing else nearby", which is the right thing
-    // to show whether the cause is no results or no access.
     return [];
   }
 }
@@ -35,11 +32,10 @@ export async function placeSearch(
   tripId: string,
   query: string,
 ): Promise<readonly Alternative[]> {
+  const guard = await guardTripEditor(tripId);
+  if (!guard.ok) return [];
+
   try {
-    const user = await requireUser();
-    await assertCanEditTrip(asTripId(tripId), user);
-    const limit = await checkLimit('mutation', user.id);
-    if (!limit.allowed) return [];
     return await searchTripPlaces({ tripId: asTripId(tripId), query });
   } catch {
     return [];

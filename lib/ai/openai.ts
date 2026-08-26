@@ -2,6 +2,7 @@ import 'server-only';
 import OpenAI from 'openai';
 import { serverEnv } from '@/lib/env';
 import { computeCostUsd } from './pricing';
+import { sleep } from '@/lib/utils/async';
 import { LlmError, type LlmClient, type StructuredRequest, type StructuredResult } from './client';
 
 /**
@@ -119,6 +120,3 @@ function isRetryable(error: unknown): boolean {
   return false;
 }
 
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}

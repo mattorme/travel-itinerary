@@ -5,6 +5,7 @@ import { Loader2, MapPin, Search, Star, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/field';
 import { cn } from '@/lib/utils/cn';
+import { compactNumber, priceLevelLabel } from '@/lib/utils/format';
 import type { Alternative } from '@/lib/itinerary/alternatives';
 
 /**
@@ -170,10 +171,10 @@ export function PlacePicker({
                         <span className="flex items-center gap-1">
                           <Star className="size-3.5 fill-current" aria-hidden />
                           {option.rating.toFixed(1)}
-                          {option.reviewCount !== null && ` (${compact(option.reviewCount)})`}
+                          {option.reviewCount !== null && ` (${compactNumber(option.reviewCount)})`}
                         </span>
                       )}
-                      {option.priceLevel && <span>{priceGlyph(option.priceLevel)}</span>}
+                      {option.priceLevel && <span>{priceLevelLabel(option.priceLevel)}</span>}
                     </span>
 
                     {option.summary && (
@@ -220,17 +221,4 @@ function formatDistance(meters: number): string {
   return `${(meters / 1000).toFixed(1)} km`;
 }
 
-function compact(n: number): string {
-  return n >= 1000 ? `${Math.round(n / 100) / 10}k` : String(n);
-}
 
-function priceGlyph(level: string): string {
-  switch (level) {
-    case 'PRICE_LEVEL_FREE': return 'free';
-    case 'PRICE_LEVEL_INEXPENSIVE': return '$';
-    case 'PRICE_LEVEL_MODERATE': return '$$';
-    case 'PRICE_LEVEL_EXPENSIVE': return '$$$';
-    case 'PRICE_LEVEL_VERY_EXPENSIVE': return '$$$$';
-    default: return '';
-  }
-}

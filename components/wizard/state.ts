@@ -1,4 +1,4 @@
-import type { TripRequestInput } from '@/domain/schemas/trip-request';
+import { inclusiveDays, type TripRequestInput } from '@/domain/schemas/trip-request';
 import type {
   AccommodationKind,
   FoodPref,
@@ -131,8 +131,3 @@ export function toTripRequest(state: WizardState): TripRequestInput {
   } satisfies TripRequestInput & { dates: unknown } as TripRequestInput;
 }
 
-function inclusiveDays(start: string, end: string): number {
-  return Math.round(
-    (Date.parse(`${end}T00:00:00Z`) - Date.parse(`${start}T00:00:00Z`)) / 86_400_000,
-  ) + 1;
-}

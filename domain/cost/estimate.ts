@@ -55,10 +55,10 @@ export function estimateTripCost(
 
     perDay.push({
       dayIndex: day.dayIndex,
-      food: round2(dayFood),
-      activities: round2(dayActivities),
-      localTransport: round2(dayTransport),
-      total: round2(dayFood + dayActivities + dayTransport),
+      food: roundMoney(dayFood),
+      activities: roundMoney(dayActivities),
+      localTransport: roundMoney(dayTransport),
+      total: roundMoney(dayFood + dayActivities + dayTransport),
     });
   }
 
@@ -68,12 +68,12 @@ export function estimateTripCost(
 
   return {
     breakdown: {
-      accommodation: round2(accommodation),
-      food: round2(food),
-      activities: round2(activities),
-      localTransport: round2(localTransport),
-      buffer: round2(buffer),
-      total: round2(subtotal + buffer),
+      accommodation: roundMoney(accommodation),
+      food: roundMoney(food),
+      activities: roundMoney(activities),
+      localTransport: roundMoney(localTransport),
+      buffer: roundMoney(buffer),
+      total: roundMoney(subtotal + buffer),
       excludesFlights: true,
     },
     perDay,
@@ -93,6 +93,7 @@ export function budgetDelta(
   return { absolute: estimate - budget, ratio: (estimate - budget) / budget };
 }
 
-function round2(n: number): number {
+/** Money is stored to the cent; every figure in the product goes through here. */
+export function roundMoney(n: number): number {
   return Math.round(n * 100) / 100;
 }

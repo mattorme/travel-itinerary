@@ -2,8 +2,8 @@
 
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/db/supabase/server';
-import { getOrCreateSessionUser, getSessionUser } from '@/lib/auth/session';
-import { checkLimit } from '@/lib/ratelimit';
+import { getOrCreateSessionUser } from '@/lib/auth/session';
+import { guardRealAccount } from '@/lib/auth/guards';
 import { moderateText } from '@/lib/moderation';
 import type { ActionResult } from './trip-actions';
 
@@ -18,15 +18,9 @@ import type { ActionResult } from './trip-actions';
  */
 
 export async function toggleFollow(username: string): Promise<ActionResult<{ following: boolean }>> {
-  // No session and an anonymous session are the same situation from the
-  // traveller's point of view, so they get the same sentence.
-  const user = await getSessionUser();
-  if (!user || user.isAnonymous) {
-    return { ok: false, error: 'Create an account to follow people.' };
-  }
-
-  const limit = await checkLimit('mutation', user.id);
-  if (!limit.allowed) return { ok: false, error: 'Slow down a moment.' };
+  const guard = await guardRealAccount('follow people');
+  if (!guard.ok) return guard;
+  const user = guard.user;
 
   const supabase = await createClient();
   const { data: target } = await supabase
@@ -75,19 +69,14 @@ export async function postComment(
   tripSlug: string,
   body: string,
 ): Promise<ActionResult<{ pending: boolean }>> {
-  const user = await getSessionUser();
-  if (!user || user.isAnonymous) {
-    return { ok: false, error: 'Create an account to leave a comment.' };
-  }
+  const guard = await guardRealAccount('leave a comment', 'comment');
+  if (!guard.ok) return guard;
+  const user = guard.user;
 
   const text = body.trim();
   if (text.length < 2) return { ok: false, error: 'Say a little more than that.' };
   if (text.length > 2000) return { ok: false, error: 'That is a bit long — 2000 characters max.' };
 
-  const limit = await checkLimit('comment', user.id);
-  if (!limit.allowed) {
-    return { ok: false, error: 'You are commenting very quickly. Try again shortly.' };
-  }
 
   // Comments land on a page that can be indexed, so nothing is published until
   // it has been through moderation.
@@ -116,8 +105,9 @@ export async function deleteComment(
   commentId: string,
   tripSlug: string,
 ): Promise<ActionResult> {
-  const user = await getSessionUser();
-  if (!user) return { ok: false, error: 'Create an account first.' };
+  const guard = await guardRealAccount('do that');
+  if (!guard.ok) return guard;
+  const user = guard.user;
 
   const supabase = await createClient();
   // RLS already restricts updates to the author; this is the readable error.

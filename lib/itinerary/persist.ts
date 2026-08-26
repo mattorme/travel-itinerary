@@ -1,7 +1,8 @@
 import 'server-only';
 import { createAdminClient } from '@/lib/db/supabase/admin';
 import type { TripRequestParsed } from '@/domain/schemas/trip-request';
-import { estimateTripCost } from '@/domain/cost/estimate';
+import { estimateTripCost, roundMoney } from '@/domain/cost/estimate';
+import { minuteToSqlTime } from '@/lib/utils/time';
 import type { TripDay } from '@/domain/types/itinerary';
 import { asActivityId, asTripDayId, type TripId } from '@/domain/types/ids';
 import type { DraftItinerary } from './draft';
@@ -26,6 +27,14 @@ export async function persistItinerary(
   // Clear any partial output from a previous attempt so a retry is idempotent.
   await admin.from('trip_days').delete().eq('trip_id', tripId);
 
+  // Costs are derived from the draft, not from the inserted rows, so they can
+  // be computed before the insert and written with it. Doing it afterwards
+  // meant one UPDATE per day — twelve extra round trips on a twelve-day trip,
+  // for a value that was already known.
+  const daysForCost = toDomainDays(draft, fx);
+  const { breakdown, perDay } = estimateTripCost(daysForCost, draft.costInputs, fx);
+  const costByDayIndex = new Map(perDay.map((day) => [day.dayIndex, day.total]));
+
   const dayRows = draft.days.map((day) => ({
     trip_id: tripId,
     day_index: day.dayIndex,
@@ -33,6 +42,7 @@ export async function persistItinerary(
     title: day.title,
     summary: day.summary,
     destination_id: day.destinationId,
+    estimated_cost: costByDayIndex.get(day.dayIndex) ?? null,
     notes: day.unfilledSlots.length > 0 ? formatUnfilled(day.unfilledSlots) : null,
   }));
 
@@ -59,10 +69,10 @@ export async function persistItinerary(
       title: activity.title,
       description: activity.description,
       reason: activity.reason,
-      start_time: activity.startMinute !== null ? toTime(activity.startMinute) : null,
-      end_time: activity.endMinute !== null ? toTime(activity.endMinute) : null,
+      start_time: activity.startMinute !== null ? minuteToSqlTime(activity.startMinute) : null,
+      end_time: activity.endMinute !== null ? minuteToSqlTime(activity.endMinute) : null,
       duration_minutes: activity.durationMinutes,
-      estimated_cost: round2(activity.estimatedCostUsd * fx),
+      estimated_cost: roundMoney(activity.estimatedCostUsd * fx),
       cost_basis: 'modelled' as const,
       inbound_travel: activity.inboundTravel
         ? JSON.parse(JSON.stringify(activity.inboundTravel))
@@ -75,47 +85,6 @@ export async function persistItinerary(
   if (activityRows.length > 0) {
     const { error } = await admin.from('activities').insert(activityRows);
     if (error) throw new Error(`Failed to persist activities: ${error.message}`);
-  }
-
-  // Cost is computed from the persisted shape, not the draft, so the number the
-  // user sees always matches the itinerary that was actually stored.
-  const daysForCost: TripDay[] = draft.days.map((day) => ({
-    id: asTripDayId(dayIdByIndex.get(day.dayIndex) ?? day.dayIndex.toString()),
-    dayIndex: day.dayIndex,
-    date: day.date,
-    title: day.title,
-    summary: day.summary,
-    destinationId: day.destinationId,
-    estimatedCost: null,
-    notes: null,
-    activities: day.activities.map((a) => ({
-      id: asActivityId(a.slotId),
-      orderIndex: a.orderIndex,
-      kind: a.kind,
-      place: null,
-      customName: null,
-      title: a.title,
-      description: a.description,
-      reason: a.reason,
-      startMinute: a.startMinute,
-      endMinute: a.endMinute,
-      durationMinutes: a.durationMinutes,
-      estimatedCost: round2(a.estimatedCostUsd * fx),
-      costBasis: 'modelled',
-      inboundTravel: a.inboundTravel,
-      bookingUrl: null,
-      isLocked: false,
-      source: 'generated',
-    })),
-  }));
-
-  const { breakdown, perDay } = estimateTripCost(daysForCost, draft.costInputs, fx);
-
-  for (const day of perDay) {
-    const dayId = dayIdByIndex.get(day.dayIndex);
-    if (dayId) {
-      await admin.from('trip_days').update({ estimated_cost: day.total }).eq('id', dayId);
-    }
   }
 
   const { error: tripError } = await admin
@@ -155,17 +124,46 @@ export async function persistItinerary(
   );
 }
 
+/**
+ * The draft as the pure cost model expects it.
+ *
+ * Ids are placeholders: `estimateTripCost` only reads durations, kinds, costs
+ * and travel legs, none of which depend on what the database assigned.
+ */
+function toDomainDays(draft: DraftItinerary, fx: number): TripDay[] {
+  return draft.days.map((day) => ({
+    id: asTripDayId(`draft-${day.dayIndex}`),
+    dayIndex: day.dayIndex,
+    date: day.date,
+    title: day.title,
+    summary: day.summary,
+    destinationId: day.destinationId,
+    estimatedCost: null,
+    notes: null,
+    activities: day.activities.map((a) => ({
+      id: asActivityId(a.slotId),
+      orderIndex: a.orderIndex,
+      kind: a.kind,
+      place: null,
+      customName: null,
+      title: a.title,
+      description: a.description,
+      reason: a.reason,
+      startMinute: a.startMinute,
+      endMinute: a.endMinute,
+      durationMinutes: a.durationMinutes,
+      estimatedCost: roundMoney(a.estimatedCostUsd * fx),
+      costBasis: 'modelled' as const,
+      inboundTravel: a.inboundTravel,
+      bookingUrl: null,
+      isLocked: false,
+      source: 'generated' as const,
+    })),
+  }));
+}
+
 function formatUnfilled(slots: readonly { slotId: string; why: string }[]): string {
   return slots.map((s) => s.why).join(' ');
 }
 
-function toTime(minute: number): string {
-  const wrapped = ((minute % 1440) + 1440) % 1440;
-  const h = String(Math.floor(wrapped / 60)).padStart(2, '0');
-  const m = String(wrapped % 60).padStart(2, '0');
-  return `${h}:${m}:00`;
-}
 
-function round2(n: number): number {
-  return Math.round(n * 100) / 100;
-}

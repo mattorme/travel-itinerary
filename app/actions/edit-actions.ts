@@ -2,10 +2,8 @@
 
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/db/supabase/server';
-import { requireUser } from '@/lib/auth/session';
-import { assertCanEditTrip, ForbiddenError, NotFoundError } from '@/lib/auth/authorization';
-import { checkLimit } from '@/lib/ratelimit';
 import { asPlaceId, asTripId } from '@/domain/types/ids';
+import { guardTripEditor } from '@/lib/auth/guards';
 import { appendActivity, reflowDay, swapActivityPlace } from '@/lib/itinerary/edit';
 import type { ActionResult } from './trip-actions';
 
@@ -20,21 +18,6 @@ import type { ActionResult } from './trip-actions';
  * generated one. See docs/ARCHITECTURE.md §2.
  */
 
-async function authorise(tripId: string): Promise<ActionResult<void> | null> {
-  try {
-    const user = await requireUser();
-    await assertCanEditTrip(asTripId(tripId), user);
-    const limit = await checkLimit('mutation', user.id);
-    if (!limit.allowed) {
-      return { ok: false, error: 'Slow down a moment, then try again.' };
-    }
-    return null;
-  } catch (error) {
-    if (error instanceof ForbiddenError) return { ok: false, error: 'This is not your trip.' };
-    if (error instanceof NotFoundError) return { ok: false, error: 'We could not find that trip.' };
-    return { ok: false, error: 'You need to be signed in to edit this.' };
-  }
-}
 
 /** Move an activity within its day. Everything after it re-times. */
 export async function moveActivity(
@@ -42,8 +25,8 @@ export async function moveActivity(
   activityId: string,
   toIndex: number,
 ): Promise<ActionResult> {
-  const denied = await authorise(tripId);
-  if (denied) return denied;
+  const guard = await guardTripEditor(tripId);
+  if (!guard.ok) return guard;
 
   const supabase = await createClient();
   const { data: activity } = await supabase
@@ -87,8 +70,8 @@ export async function removeActivity(
   tripId: string,
   activityId: string,
 ): Promise<ActionResult> {
-  const denied = await authorise(tripId);
-  if (denied) return denied;
+  const guard = await guardTripEditor(tripId);
+  if (!guard.ok) return guard;
 
   const supabase = await createClient();
   const { data: activity } = await supabase
@@ -119,8 +102,8 @@ export async function replaceActivity(
   activityId: string,
   placeId: string,
 ): Promise<ActionResult> {
-  const denied = await authorise(tripId);
-  if (denied) return denied;
+  const guard = await guardTripEditor(tripId);
+  if (!guard.ok) return guard;
 
   const supabase = await createClient();
   const { data: activity } = await supabase
@@ -150,8 +133,8 @@ export async function addActivity(
   dayId: string,
   input: { placeId: string } | { customName: string },
 ): Promise<ActionResult> {
-  const denied = await authorise(tripId);
-  if (denied) return denied;
+  const guard = await guardTripEditor(tripId);
+  if (!guard.ok) return guard;
 
   const added = await appendActivity(dayId, input);
   if (!added.ok) return { ok: false, error: added.error };
@@ -170,8 +153,8 @@ export async function lockActivity(
   activityId: string,
   locked: boolean,
 ): Promise<ActionResult> {
-  const denied = await authorise(tripId);
-  if (denied) return denied;
+  const guard = await guardTripEditor(tripId);
+  if (!guard.ok) return guard;
 
   const supabase = await createClient();
   const { error } = await supabase
@@ -190,8 +173,8 @@ export async function editActivityText(
   activityId: string,
   fields: { title?: string; description?: string },
 ): Promise<ActionResult> {
-  const denied = await authorise(tripId);
-  if (denied) return denied;
+  const guard = await guardTripEditor(tripId);
+  if (!guard.ok) return guard;
 
   // Typed literal rather than Record<string, string>: the generated row types
   // reject an index signature, and that rejection is doing real work — it is
@@ -215,8 +198,8 @@ export async function setActivityCost(
   activityId: string,
   cost: number | null,
 ): Promise<ActionResult> {
-  const denied = await authorise(tripId);
-  if (denied) return denied;
+  const guard = await guardTripEditor(tripId);
+  if (!guard.ok) return guard;
 
   const supabase = await createClient();
   const { error } = await supabase
@@ -239,8 +222,8 @@ export async function editDay(
   dayId: string,
   fields: { title?: string; notes?: string },
 ): Promise<ActionResult> {
-  const denied = await authorise(tripId);
-  if (denied) return denied;
+  const guard = await guardTripEditor(tripId);
+  if (!guard.ok) return guard;
 
   const patch: { title?: string; notes?: string } = {};
   if (fields.title !== undefined) patch.title = fields.title.trim().slice(0, 120);

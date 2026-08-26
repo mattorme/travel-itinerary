@@ -16,7 +16,7 @@ const isoDate = z
   .refine((v) => !Number.isNaN(Date.parse(`${v}T00:00:00Z`)), 'Not a real date');
 
 /** Days between two ISO dates, inclusive of both endpoints. */
-function inclusiveDays(start: string, end: string): number {
+export function inclusiveDays(start: string, end: string): number {
   const a = Date.parse(`${start}T00:00:00Z`);
   const b = Date.parse(`${end}T00:00:00Z`);
   return Math.round((b - a) / 86_400_000) + 1;

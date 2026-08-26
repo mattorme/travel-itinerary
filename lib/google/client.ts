@@ -1,6 +1,7 @@
 import 'server-only';
 import { serverEnv } from '@/lib/env';
 import { ServiceError } from '@/lib/observability/errors';
+import { sleep } from '@/lib/utils/async';
 
 /**
  * Shared transport for Google Maps Platform.
@@ -103,6 +104,3 @@ function mapStatus(status: number, provider: GoogleRequest['provider'], detail: 
   return new ServiceError({ ...base, kind: 'unknown' });
 }
 
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
