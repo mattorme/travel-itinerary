@@ -102,7 +102,7 @@ export function ActivityEditor({
           });
         }}
       >
-        <Pin className={cn('size-4', locked && 'fill-current text-signal')} />
+        <Pin className={cn('size-4', locked && 'fill-current text-morning-ink')} />
         {locked ? 'Pinned' : 'Pin'}
       </Button>
 

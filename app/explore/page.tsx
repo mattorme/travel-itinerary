@@ -126,14 +126,14 @@ export default async function ExplorePage({
               {query && (
                 <Link
                   href="/explore"
-                  className="rounded-full border border-rule-2 px-6 py-3 text-sm"
+                  className="rounded-full border border-rule-2 bg-surface px-6 py-3 text-sm"
                 >
                   Clear search
                 </Link>
               )}
               <Link
                 href={query ? { pathname: '/plan', query: { q: query } } : '/plan'}
-                className="rounded-full bg-signal px-6 py-3 text-sm text-white"
+                className="rounded-full bg-signal px-6 py-3 text-sm font-semibold text-ink"
               >
                 {query ? `Plan a trip to ${query}` : 'Plan a trip'}
               </Link>

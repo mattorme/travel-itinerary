@@ -92,7 +92,7 @@ export function PublicTripActions({
           aria-pressed={liked}
           aria-label={liked ? 'Remove like' : 'Like this trip'}
         >
-          <Heart className={`size-4 ${liked ? 'fill-signal text-signal' : ''}`} />
+          <Heart className={`size-4 ${liked ? 'fill-evening-ink text-evening-ink' : ''}`} />
           {likes > 0 && formatCompact(likes)}
         </Button>
       </div>

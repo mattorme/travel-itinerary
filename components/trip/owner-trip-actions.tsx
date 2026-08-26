@@ -68,7 +68,7 @@ export function OwnerTripActions({ itinerary }: { itinerary: Itinerary }) {
             <label
               key={option.value}
               className={cn(
-                'flex cursor-pointer items-start gap-3 rounded-xl px-3 py-2.5 transition-colors',
+                'flex cursor-pointer items-start gap-3 rounded-panel px-3 py-2.5 transition-colors',
                 visibility === option.value ? 'bg-sunk' : 'hover:bg-sunk/60',
               )}
             >

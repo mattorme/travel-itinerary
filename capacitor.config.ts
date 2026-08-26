@@ -34,25 +34,25 @@ const config: CapacitorConfig = {
   ios: {
     contentInset: 'never',
     // The web app paints its own background; a white webview flashes on push.
-    backgroundColor: '#fcfcfa',
+    backgroundColor: '#ebeef3',
     limitsNavigationsToAppBoundDomains: false,
   },
 
   android: {
-    backgroundColor: '#fcfcfa',
+    backgroundColor: '#ebeef3',
     allowMixedContent: false,
   },
 
   plugins: {
     SplashScreen: {
       launchShowDuration: 600,
-      backgroundColor: '#fcfcfa',
+      backgroundColor: '#ebeef3',
       showSpinner: false,
       launchAutoHide: false, // the web app hides it once it has painted
     },
     StatusBar: {
       style: 'LIGHT', // dark text on our light background
-      backgroundColor: '#fcfcfa',
+      backgroundColor: '#ebeef3',
     },
     PushNotifications: {
       presentationOptions: ['badge', 'sound', 'alert'],

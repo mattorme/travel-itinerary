@@ -47,7 +47,7 @@ export function TravellersStep({ state, patch }: { state: WizardState; patch: Pa
                     next[index] = Math.max(0, Math.min(17, Number(e.target.value)));
                     patch({ children: next });
                   }}
-                  className="w-16 rounded-lg border border-rule-2 bg-surface px-2 py-1.5 text-center text-[16px]"
+                  className="w-16 rounded-edge border border-rule-2 bg-surface px-2 py-1.5 text-center text-[16px]"
                 />
               </label>
             ))}

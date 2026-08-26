@@ -229,6 +229,20 @@ ios/ android/  Capacitor shells. Generated, but carry real edits.
 The `domain/` boundary is the one architectural rule worth defending: it is what
 makes the itinerary logic testable without a network, a database, or a key.
 
+### The visual system
+
+`app/globals.css` is the whole of it: a token block, a handful of `.type-*`
+utilities, and nothing else. The identity is **time of day** — the day arc in
+`components/trip/day-arc.tsx`, drawn from `domain/schedule/time-of-day.ts`,
+places each stop at its real hour and colours it morning / afternoon / evening.
+It is the trip hero, every day heading, the share card and the app icon, all
+from the same data the timeline renders, so the two can never disagree.
+
+Two rules keep it coherent: colour means an hour (never decoration), and amber
+is the one action colour and always takes ink text — white on amber is 2:1. The
+day-index palette in `components/trip/map/types.ts` exists only to tell
+overlapping routes apart on the Google map; it is not page chrome.
+
 ### The other documents
 - **[ARCHITECTURE.md](./ARCHITECTURE.md)** — the decisions and, more usefully,
   *why*. Read §3 (Google's caching terms), §6 (why the model never writes a
@@ -284,6 +298,14 @@ Things that have already bitten once and are easy to reintroduce.
 - **`service_role` bypasses RLS but still needs table grants.** A missing grant
   surfaces as something unrelated failing.
 - **Google returns HTTP 400 for a bad API key**, not 401.
-- **`--color-ink-faint` is pinned at an AA-passing value.** Lightening it fails
-  the accessibility gate.
+- **The muted greys (`--color-steel`, `--color-steel-2`) are pinned at
+  AA-passing values.** Lightening either fails the accessibility gate.
+- **`body` is a flex column, and an `auto` cross-axis margin cancels
+  `align-items: stretch`.** Without `body > * { width: 100% }` in globals.css a
+  `<main class="mx-auto">` shrink-to-fits its widest child and scrolls the whole
+  page sideways on a phone. Invisible on desktop.
+- **The masthead is sticky, so anything scrolled to the top sits under it.**
+  `html { scroll-padding-top }` covers anchors; Playwright's own scrolling does
+  not honour it, so a click test near the top of a page can fail on interception
+  even when the page is fine.
 - **Running `next build` kills a running `next dev`** — they share `.next`.

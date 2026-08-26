@@ -54,7 +54,7 @@ export function DestinationStep({ state, patch }: { state: WizardState; patch: P
       </Field>
 
       {open && suggestions.length > 0 && (
-        <ul className="overflow-hidden rounded-xl border border-rule bg-surface">
+        <ul className="overflow-hidden rounded-panel border border-rule bg-surface">
           {suggestions.map((s) => (
             <li key={s.placeId}>
               <button

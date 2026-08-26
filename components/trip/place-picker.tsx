@@ -100,7 +100,7 @@ export function PlacePicker({
         aria-label={title}
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
-        className="flex max-h-[85dvh] w-full max-w-lg flex-col rounded-t-2xl border border-rule bg-surface sm:max-h-[80dvh] sm:rounded-2xl"
+        className="flex max-h-[85dvh] w-full max-w-lg flex-col rounded-t-sheet border border-rule bg-surface sm:max-h-[80dvh] sm:rounded-sheet"
       >
         <div className="flex items-start justify-between gap-4 border-b border-rule p-5">
           <div>
@@ -146,7 +146,7 @@ export function PlacePicker({
                     disabled={pending}
                     onClick={() => pick({ placeId: option.placeId })}
                     className={cn(
-                      'w-full rounded-xl border p-3.5 text-left transition-colors',
+                      'w-full rounded-panel border p-3.5 text-left transition-colors',
                       chosen === option.placeId
                         ? 'border-ink bg-sunk'
                         : 'border-rule hover:border-ink/30 hover:bg-sunk/60',

@@ -43,14 +43,14 @@ export async function GET(
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
-          background: '#111316',
-          color: '#fcfcfa',
+          background: '#141b34',
+          color: '#ffffff',
           padding: 96,
           fontFamily: 'sans-serif',
         }}
       >
         <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <div style={{ display: 'flex', fontSize: 32, letterSpacing: 6, color: '#a0a1a2' }}>
+          <div style={{ display: 'flex', fontSize: 32, letterSpacing: 6, color: 'rgba(255,255,255,0.6)' }}>
             {country.toUpperCase()}
           </div>
           <div
@@ -89,7 +89,7 @@ export async function GET(
             </div>
           ))}
           {overflow > 0 && (
-            <div style={{ display: 'flex', fontSize: 34, color: '#a0a1a2', marginTop: 8 }}>
+            <div style={{ display: 'flex', fontSize: 34, color: 'rgba(255,255,255,0.6)', marginTop: 8 }}>
               + {overflow} more
             </div>
           )}
@@ -101,7 +101,7 @@ export async function GET(
               ~{formatCurrency(cost, itinerary.request.currency)}
             </div>
           )}
-          <div style={{ display: 'flex', fontSize: 28, color: '#a0a1a2', marginTop: 12 }}>
+          <div style={{ display: 'flex', fontSize: 28, color: 'rgba(255,255,255,0.6)', marginTop: 12 }}>
             estimated, excluding flights
           </div>
           <div

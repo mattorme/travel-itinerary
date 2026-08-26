@@ -133,7 +133,7 @@ export default async function DestinationPage({
         {/* Aggregated from real trips, so the page has something to say the
             moment anyone plans one — and more to say as the corpus grows. */}
         {hasStats && stats && (
-          <dl className="mt-8 grid grid-cols-2 gap-px overflow-hidden rounded-panel border border-rule bg-rule sm:grid-cols-4">
+          <dl className="mt-8 grid grid-cols-2 gap-px overflow-hidden rounded-panel bg-rule shadow-(--shadow-card) sm:grid-cols-4">
             <Stat
               label="itineraries"
               value={String(stats.trip_count)}

@@ -3,67 +3,110 @@
 /* ==========================================================================
    Wayfare — visual system
 
-   An itinerary is a route: an ordered sequence of stops, with times and
-   connections between them. The design tradition that owns that exactly is
-   transit wayfinding — Vignelli's subway diagram, TfL, Swiss rail timetables,
-   airport signage. So that is where this borrows from, rather than from a mood.
+   An itinerary is not a list of places. It is a set of hours: a morning that
+   starts early, an afternoon left open, a dinner that runs late. That is the
+   thing a traveller actually feels, and it is the only thing about this
+   product that no other product's content shares. So the whole visual system
+   is built from time of day.
 
-   Three consequences run through everything below:
+   1. THE ARC IS THE IDENTITY. Every day is drawn as a band across 06:00–24:00
+      with its real stops placed at their real times, coloured morning /
+      afternoon / evening. It is the hero, the day heading, and the card art.
+      One element, generated entirely from data, everywhere. See day-arc.tsx.
+   2. COLOUR MEANS AN HOUR. Amber is morning, teal is afternoon, rose is
+      evening. Nothing is coloured for decoration. The one exception is amber
+      doubling as the accent on the single most important action per screen —
+      because the thing you are being asked to do is start a day.
+   3. THE GROUND IS COOL, THE INK IS INDIGO. Deep indigo rather than black:
+      it is the last band of the arc, so the chrome is part of the same idea.
 
-   1. The route colours ARE the identity. Each day of a trip gets a line
-      colour, and it appears on the timeline rail, the day navigation, the map
-      and the cards. The palette does the personality work so the neutrals do
-      not have to.
-   2. Signage is set in a grotesque, not a serif, and it is tight, wide and
-      loud where it needs to be read at a glance.
-   3. Edges are sharp. Signage does not have rounded corners, and neither does
-      a timetable.
+   Each colour that carries an hour exists twice — once tuned for the indigo
+   ground, once darkened for the light ground — so contrast holds in both
+   without inventing a second palette.
    ========================================================================== */
 @theme {
-  /* Ground. Near-white with a whisper of cool, deliberately not cream. */
-  --color-paper: #fcfcfa;
+  /* Ground. Cool and slightly blue: chosen to sit under indigo, not inherited. */
+  --color-paper: #ebeef3;
   --color-surface: #ffffff;
-  --color-sunk: #f1f2f0;
+  --color-sunk: #dfe4ec;
 
-  /* The dark chrome — a departure board, not a page background. */
-  --color-ink: #111316;
-  --color-ink-2: #1c1f24;
+  /* Indigo, not black. The last hour of the day. */
+  --color-ink: #141b34;
+  --color-ink-2: #243052;
 
-  --color-steel: #5c6067;
-  --color-steel-2: #6a6f77;
+  --color-steel: #4f5a70;
+  --color-steel-2: #5e6a80;
 
-  --color-rule: #e2e4e7;
-  --color-rule-2: #cfd2d7;
+  --color-rule: #dce1ea;
+  --color-rule-2: #c2cad8;
 
-  /* Action only. Never decoration — if it is blue, it does something. */
-  --color-signal: #1b3bd8;
-  --color-signal-deep: #12299b;
-  --color-signal-wash: #eef1fe;
+  /*
+   * The hours. Base values are tuned for the indigo ground; `-ink` variants
+   * are the same three hues taken down far enough to hold their own on white
+   * without going brown, which is what happens to amber if you push it to
+   * body-text contrast. The arc is always accompanied by the times in words,
+   * so these carry emphasis, never meaning on their own.
+   */
+  --color-morning: #f2a65a;
+  --color-morning-ink: #c87316;
+  --color-afternoon: #5fd0c4;
+  --color-afternoon-ink: #12857a;
+  --color-evening: #f2867a;
+  --color-evening-ink: #cc4433;
 
-  --color-positive: #0b6e4f;
+  /*
+   * Action. Morning amber, because the ask is always "start something".
+   * Always paired with ink text, never white — see .btn contrast note.
+   */
+  --color-signal: #f2a65a;
+  --color-signal-deep: #e08e38;
+  --color-signal-wash: #fdf0e1;
+
+  --color-positive: #0f6b53;
   --color-caution: #8a5a00;
-  --color-critical: #b3261e;
+  --color-critical: #a4231c;
 
-  --font-display: var(--font-archivo), 'Helvetica Neue', Arial, sans-serif;
-  --font-sans: var(--font-archivo), 'Helvetica Neue', Arial, sans-serif;
-  --font-mono: var(--font-dm-mono), ui-monospace, 'SF Mono', Menlo, monospace;
+  --font-display: var(--font-bricolage), 'Trebuchet MS', 'Helvetica Neue', sans-serif;
+  --font-sans: var(--font-figtree), 'Helvetica Neue', Arial, sans-serif;
 
-  /* Signage geometry: near-square, never pill-shaped except on true chips. */
-  --radius-edge: 2px;
-  --radius-panel: 3px;
+  /*
+   * Soft, consistent, never sharp — the itinerary is a plan, not a timetable.
+   * Three steps for three scales: a control, a panel, a sheet. Nothing in the
+   * product should reach for a radius outside this scale.
+   */
+  --radius-edge: 8px;
+  --radius-panel: 12px;
+  --radius-sheet: 16px;
 
-  /* The route rail down the left of a day. */
-  --rail-width: 3px;
-  --stop-size: 1.375rem;
+  --shadow-card: 0 1px 2px rgb(20 27 52 / 0.05), 0 10px 28px -14px rgb(20 27 52 / 0.22);
+  --shadow-lift: 0 2px 4px rgb(20 27 52 / 0.06), 0 18px 40px -18px rgb(20 27 52 / 0.3);
+
+  /* Arc geometry. The window every day is drawn against: 06:00 to midnight. */
+  --arc-start-minute: 360;
+  --arc-span-minutes: 1080;
 }
 
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;
     scroll-behavior: smooth;
+    /*
+     * The masthead is sticky, so anything scrolled to the top of the viewport
+     * lands underneath it — an anchor link, a focused field, a browser find.
+     * One header's worth of scroll padding fixes all of them at once; sections
+     * that also sit under the day navigation add their own scroll margin.
+     */
+    scroll-padding-top: 3.5rem;
   }
 
   body {
+    /*
+     * Column layout so the footer sits at the bottom of a short page instead of
+     * halfway up it — every page renders header / main / footer as siblings here.
+     */
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
     background-color: var(--color-paper);
     color: var(--color-ink);
     font-family: var(--font-sans);
@@ -72,13 +115,27 @@
     -webkit-font-smoothing: antialiased;
   }
 
+  main {
+    flex: 1 0 auto;
+  }
+
+  /*
+   * An `auto` cross-axis margin cancels `align-items: stretch`, so a `main`
+   * with `mx-auto` would shrink-to-fit its widest child and scroll the whole
+   * page sideways. Giving every direct child a definite width restores the
+   * block-layout behaviour these pages were written against.
+   */
+  body > * {
+    width: 100%;
+  }
+
   ::selection {
-    background: var(--color-ink);
-    color: var(--color-paper);
+    background: var(--color-signal);
+    color: var(--color-ink);
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-signal);
+    outline: 2px solid var(--color-ink);
     outline-offset: 2px;
   }
 
@@ -166,48 +223,55 @@
 
 @layer utilities {
   /*
-   * Display type. Archivo's width axis pushed wide and heavy — this is the
-   * voice of a station name board, and it is the single most recognisable
-   * thing about the product's type.
+   * Display type: Bricolage Grotesque, narrowed and tightened.
+   *
+   * A grotesque with irregular, slightly hand-cut terminals — warm where a
+   * neutral sans would be anonymous. The width axis is pulled in at large
+   * sizes so headlines set dense rather than airy, which is what makes a
+   * two-line title feel composed instead of merely large.
    */
   .type-display {
     font-family: var(--font-display);
-    font-variation-settings: 'wdth' 112;
+    font-variation-settings: 'wdth' 92;
     font-weight: 700;
-    letter-spacing: -0.03em;
-    line-height: 0.94;
+    letter-spacing: -0.025em;
+    line-height: 1.02;
     text-wrap: balance;
   }
 
   .type-hero {
-    font-size: clamp(2.5rem, 9vw, 5rem);
+    font-size: clamp(2.75rem, 8.5vw, 5.25rem);
   }
   .type-title {
-    font-size: clamp(1.75rem, 5vw, 2.75rem);
+    font-size: clamp(1.875rem, 5vw, 2.875rem);
   }
   .type-section {
     font-size: clamp(1.25rem, 3vw, 1.5rem);
   }
 
-  /*
-   * The signage label. Small, wide-tracked, upper case — the vernacular of
-   * platform indicators and timetable column heads. Used for every eyebrow and
-   * field label in the product, which is what makes them read as one system.
-   */
+  /* Small, tracked, upper case. Every eyebrow and field label in the product. */
   .type-label {
     font-family: var(--font-sans);
     font-size: 0.6875rem;
     font-weight: 600;
-    letter-spacing: 0.14em;
+    letter-spacing: 0.11em;
     text-transform: uppercase;
     line-height: 1.2;
   }
 
-  /* Times, distances, prices. A timetable sets its numbers in mono. */
+  /*
+   * Times, distances, prices.
+   *
+   * Deliberately not a monospace. A mono face here would be the third typeface
+   * on the page and would make a departure time look like a log line; Figtree's
+   * tabular figures already align down a column, which is the only thing the
+   * mono was ever doing.
+   */
   .type-data {
-    font-family: var(--font-mono);
+    font-family: var(--font-sans);
     font-variant-numeric: tabular-nums;
-    letter-spacing: -0.02em;
+    font-weight: 500;
+    letter-spacing: -0.01em;
   }
 
   .hide-scrollbar {
@@ -223,5 +287,27 @@
    */
   .rule-top {
     box-shadow: inset 0 1px 0 var(--color-rule);
+  }
+
+  /*
+   * The arc draws itself in, left to right, one day after another — the single
+   * orchestrated moment in the product. `--i` is set per segment by the
+   * component. Neutralised wholesale by the reduced-motion block above.
+   */
+  .arc-draw {
+    transform-origin: left center;
+    animation: arc-draw 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: calc(var(--i, 0) * 55ms);
+  }
+
+  @keyframes arc-draw {
+    from {
+      transform: scaleX(0);
+      opacity: 0;
+    }
+    to {
+      transform: scaleX(1);
+      opacity: 1;
+    }
   }
 }

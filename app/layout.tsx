@@ -1,29 +1,29 @@
 import type { Metadata, Viewport } from 'next';
-import { Archivo, DM_Mono } from 'next/font/google';
+import { Bricolage_Grotesque, Figtree } from 'next/font/google';
 import { publicEnv } from '@/lib/public-env';
 import { NativeShell } from '@/components/native-shell';
 import './globals.css';
 
 /**
- * Archivo, with its width axis available.
+ * Bricolage Grotesque — the display face.
  *
- * A grotesque rather than a serif, because the product's visual language is
- * transit signage. The width axis is what makes the display type read as a
- * station board instead of a generic sans — see `.type-display`.
+ * A grotesque with slightly irregular, hand-cut terminals: warm at large sizes
+ * where a neutral sans would read as anonymous. The width axis is what lets
+ * headlines set dense rather than airy — see `.type-display`.
  */
-const archivo = Archivo({
+const bricolage = Bricolage_Grotesque({
   subsets: ['latin'],
   display: 'swap',
-  variable: '--font-archivo',
-  axes: ['wdth'],
+  variable: '--font-bricolage',
+  axes: ['opsz', 'wdth'],
 });
 
-/** Timetable numerals: times, distances, prices. */
-const dmMono = DM_Mono({
+/** Figtree — body, interface, and every figure. Its tabular numerals are why
+ *  the product needs no monospace at all. */
+const figtree = Figtree({
   subsets: ['latin'],
-  weight: ['400', '500'],
   display: 'swap',
-  variable: '--font-dm-mono',
+  variable: '--font-figtree',
 });
 
 export const metadata: Metadata = {
@@ -51,7 +51,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#111316',
+  themeColor: '#141b34',
   width: 'device-width',
   initialScale: 1,
   // Required for env(safe-area-inset-*) to report real values inside the app.
@@ -63,7 +63,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${archivo.variable} ${dmMono.variable}`}>
+    <html lang="en" className={`${bricolage.variable} ${figtree.variable}`}>
       <body className="min-h-dvh antialiased">
         <NativeShell />
         {children}

@@ -10,7 +10,9 @@ import { expect, test } from '@playwright/test';
 test.describe('trip wizard', () => {
   test('a visitor can complete every step without an account', async ({ page }) => {
     await page.goto('/');
-    await expect(page.getByRole('heading', { level: 1 })).toContainText('Itineraries worth');
+    // Deliberately not asserting the headline copy: this is a flow test, and
+    // pinning it to marketing wording breaks the flow every time the pitch changes.
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
 
     await page.getByRole('link', { name: 'Plan my trip' }).click();
     await expect(page.getByRole('heading', { name: 'Where are you going?' })).toBeVisible();

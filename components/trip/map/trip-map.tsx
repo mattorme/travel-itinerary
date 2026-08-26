@@ -155,7 +155,7 @@ function DayChip({
       aria-pressed={active}
       className={cn(
         'flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-sm whitespace-nowrap transition-colors',
-        active ? 'bg-ink text-paper' : 'text-steel hover:bg-sunk hover:text-ink',
+        active ? 'bg-ink text-white' : 'text-steel hover:bg-sunk hover:text-ink',
       )}
     >
       {colour && (

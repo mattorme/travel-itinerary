@@ -5,7 +5,9 @@ import { createClient } from '@/lib/db/supabase/server';
 import { TripCard } from '@/components/trip/trip-card';
 import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
-import { DAY_COLOURS } from '@/components/trip/map/types';
+import { DayArc, ArcLegend } from '@/components/trip/day-arc';
+import { bandOf, type TimeBand } from '@/domain/schedule/time-of-day';
+import { formatMinute } from '@/domain/sequencing/schedule';
 
 export const revalidate = 300;
 
@@ -19,10 +21,10 @@ const SAMPLE_PROMPTS = [
 /**
  * The landing page.
  *
- * Opens on the product's actual thesis rather than a decorative hero: a day
- * laid out as a route, with times, connections and the geography holding
- * together. That is the thing a generic itinerary generator cannot show, so it
- * is what the page leads with.
+ * Opens on the product's actual thesis: a day you can read the shape of before
+ * you read a word of it. Every other itinerary tool hands you a list; this one
+ * hands you the hours, and the hero is that claim demonstrated rather than
+ * described.
  */
 export default async function LandingPage() {
   const supabase = await createClient();
@@ -40,18 +42,19 @@ export default async function LandingPage() {
       <SiteHeader />
 
       <main>
-        <section className="mx-auto max-w-6xl px-4 pt-12 pb-16 sm:px-6 sm:pt-20 lg:grid lg:grid-cols-[1.1fr_1fr] lg:gap-16">
+        <section className="mx-auto max-w-6xl px-4 pt-12 pb-16 sm:px-6 sm:pt-20 lg:grid lg:grid-cols-[1fr_1.05fr] lg:items-center lg:gap-14">
           <div>
-            <p className="type-label text-steel">Real places · Real routes</p>
+            <p className="type-label text-steel">Real places · Real hours</p>
 
-            <h1 className="type-display type-hero mt-4 max-w-[14ch]">
-              Itineraries worth actually sharing.
+            <h1 className="type-display type-hero mt-4 max-w-[13ch]">
+              See the shape of a day.
             </h1>
 
             <p className="mt-6 max-w-[46ch] text-[1.125rem] leading-relaxed text-steel">
-              Tell us where you&apos;re going and how you like to travel. You get a day-by-day
-              plan built from places that genuinely exist, ordered so you&apos;re not crossing the
-              city four times.
+              Tell us where you&apos;re going and how you like to travel. You get a plan with real
+              times on it — early mornings, a free afternoon, dinner that runs late — built from
+              places that genuinely exist and ordered so you&apos;re not crossing the city four
+              times.
             </p>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -71,8 +74,7 @@ export default async function LandingPage() {
             <p className="type-label mt-5 text-steel-2">No account needed · Free</p>
           </div>
 
-          {/* The thesis, drawn: a day is a line with stops on it. */}
-          <SampleRoute />
+          <SampleDay />
         </section>
 
         <section className="mx-auto max-w-6xl px-4 pb-16 sm:px-6">
@@ -82,7 +84,7 @@ export default async function LandingPage() {
               <li key={prompt}>
                 <Link
                   href={{ pathname: '/plan', query: { q: prompt } }}
-                  className="inline-block rounded-edge border border-rule-2 px-3.5 py-2 text-[0.875rem] text-steel transition-colors hover:border-ink hover:text-ink"
+                  className="inline-block rounded-full border border-rule-2 bg-surface px-4 py-2 text-[0.875rem] text-steel transition-colors hover:border-ink hover:text-ink"
                 >
                   {prompt}
                 </Link>
@@ -92,29 +94,25 @@ export default async function LandingPage() {
         </section>
 
         {/* Three claims, each one a thing a generic AI wrapper cannot say. */}
-        <section className="border-y border-ink bg-sunk">
-          <div className="mx-auto grid max-w-6xl gap-px bg-rule sm:grid-cols-3">
+        <section className="bg-ink py-16 text-white sm:py-20">
+          <div className="mx-auto grid max-w-6xl gap-10 px-4 sm:px-6 md:grid-cols-3 md:gap-8">
             {[
               {
-                n: '01',
                 title: 'Places that exist',
                 body: 'Every stop is a real, current listing with real opening hours. The model chooses between verified options — it never invents a restaurant.',
               },
               {
-                n: '02',
                 title: 'Days that hold together',
                 body: 'Stops are ordered by actual travel time, so a day is one part of a city rather than famous names scattered across a map.',
               },
               {
-                n: '03',
                 title: 'Built to pass on',
                 body: 'Every trip gets a link that looks right in a group chat. Anyone can open it, and make it theirs in one tap.',
               },
             ].map((item) => (
-              <div key={item.n} className="bg-paper px-5 py-8 sm:px-6 sm:py-10">
-                <p className="type-data text-[0.8125rem] text-signal">{item.n}</p>
-                <h2 className="type-display mt-3 text-[1.375rem] leading-tight">{item.title}</h2>
-                <p className="mt-3 text-[0.9375rem] leading-relaxed text-steel">{item.body}</p>
+              <div key={item.title}>
+                <h2 className="type-display text-[1.5rem]">{item.title}</h2>
+                <p className="mt-3 text-[0.9375rem] leading-relaxed text-white/70">{item.body}</p>
               </div>
             ))}
           </div>
@@ -122,9 +120,12 @@ export default async function LandingPage() {
 
         {featured && featured.length > 0 && (
           <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-            <div className="mb-8 flex items-end justify-between gap-4 border-b-2 border-ink pb-3">
+            <div className="mb-8 flex items-end justify-between gap-4">
               <h2 className="type-display type-title">Trips people are copying</h2>
-              <Link href="/explore" className="type-label shrink-0 pb-1 text-steel hover:text-ink">
+              <Link
+                href="/explore"
+                className="type-label shrink-0 pb-1.5 text-steel hover:text-ink"
+              >
                 See all →
               </Link>
             </div>
@@ -143,69 +144,65 @@ export default async function LandingPage() {
 }
 
 /**
- * A day, drawn as a line diagram.
+ * One day of a real itinerary, drawn the way the product draws every day.
  *
- * Static and hand-specified rather than pulled from a real trip: it is the
- * page's argument, and it needs to be legible before anything has loaded.
+ * Hand-specified rather than pulled from the database: it is the page's
+ * argument, and it has to be legible before anything has loaded. The times are
+ * the point — the arc across the top is generated from them by the same
+ * function the trip page uses, so what the landing page promises is literally
+ * what the product renders.
  */
-function SampleRoute() {
-  const colour = DAY_COLOURS[0] as string;
-  const stops = [
-    { time: '9:30am', name: 'Yanaka Cemetery walk', note: 'Before anything opens' },
-    { leg: '12 min walk · 0.9 km' },
-    { time: '10:50am', name: 'Yanaka Ginza', note: 'One sloping street of small shops' },
-    { leg: '14 min walk · 1.1 km' },
-    { time: '12:20pm', name: 'Soba lunch in Nezu', note: 'Counter seating, cash only' },
-    { leg: '8 min walk · 0.6 km' },
-    { time: '1:50pm', name: 'Nezu Shrine', note: 'Early 1700s, original buildings' },
-  ];
+const SAMPLE_STOPS = [
+  { start: 570, minutes: 75, name: 'Yanaka Cemetery', note: 'Before anything opens' },
+  { start: 660, minutes: 80, name: 'Yanaka Ginza', note: 'One sloping street of small shops' },
+  { start: 800, minutes: 60, name: 'Soba lunch in Nezu', note: 'Counter seating, cash only' },
+  { start: 890, minutes: 70, name: 'Nezu Shrine', note: 'Early 1700s, original buildings' },
+  { start: 1140, minutes: 120, name: 'Izakaya on Kototoi-dori', note: 'Booked for four' },
+] as const;
+
+const BAND_DOT: Record<TimeBand, string> = {
+  morning: 'bg-morning-ink',
+  afternoon: 'bg-afternoon-ink',
+  evening: 'bg-evening-ink',
+};
+
+function SampleDay() {
+  const activities = SAMPLE_STOPS.map((stop) => ({
+    startMinute: stop.start,
+    durationMinutes: stop.minutes,
+  }));
 
   return (
-    <div className="mt-14 border border-rule bg-surface p-5 sm:p-6 lg:mt-0" aria-hidden>
-      <div className="flex items-center gap-3 border-b border-rule pb-3">
-        <span className="type-label px-2 py-1 text-white" style={{ backgroundColor: colour }}>
-          Day 1
-        </span>
-        <span className="type-label text-steel-2">The old east side</span>
+    <div className="mt-14 rounded-panel bg-surface p-5 shadow-(--shadow-card) sm:p-7 lg:mt-0">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <p className="type-label text-ink">Day 1 · Tokyo</p>
+        <p className="type-label text-steel-2">The old east side</p>
       </div>
 
-      <ol className="mt-5 list-none">
-        {stops.map((stop, i) =>
-          'leg' in stop ? (
-            <li key={i} className="grid grid-cols-[3.5rem_auto_1fr] gap-x-3 pb-4">
-              <span />
-              <span className="flex justify-center">
-                <span
-                  className="w-[var(--rail-width)]"
-                  style={{ backgroundColor: colour, opacity: 0.4 }}
-                />
-              </span>
-              <span className="type-data text-[0.75rem] text-steel-2">{stop.leg}</span>
-            </li>
-          ) : (
-            <li key={i} className="grid grid-cols-[3.5rem_auto_1fr] gap-x-3">
-              <span className="type-data pt-0.5 text-[0.75rem] text-steel">{stop.time}</span>
-              <span className="flex flex-col items-center">
-                <span
-                  className="type-data grid size-5 shrink-0 place-items-center rounded-full border-[3px] bg-surface text-[0.625rem]"
-                  style={{ borderColor: colour, color: colour }}
-                >
-                  {Math.floor(i / 2) + 1}
-                </span>
-                {i < stops.length - 1 && (
-                  <span
-                    className="mt-1 w-[var(--rail-width)] flex-1"
-                    style={{ backgroundColor: colour, opacity: 0.4 }}
-                  />
-                )}
-              </span>
-              <span className="pb-4">
-                <span className="type-display block text-[1rem] leading-tight">{stop.name}</span>
-                <span className="block text-[0.8125rem] text-steel">{stop.note}</span>
-              </span>
-            </li>
-          ),
-        )}
+      <DayArc activities={activities} label="Sample day in Tokyo" animate className="mt-4" />
+      <div className="type-label mt-2 flex justify-between text-steel-2">
+        <span>6 am</span>
+        <span>Midnight</span>
+      </div>
+
+      <div className="mt-4">
+        <ArcLegend />
+      </div>
+
+      <ol className="mt-6 space-y-4 border-t border-rule pt-5">
+        {SAMPLE_STOPS.map((stop) => (
+          <li key={stop.name} className="flex gap-3.5">
+            <span
+              aria-hidden
+              className={`mt-2 size-2 shrink-0 rounded-full ${BAND_DOT[bandOf(stop.start)]}`}
+            />
+            <div className="min-w-0">
+              <p className="type-data text-[0.8125rem] text-steel-2">{formatMinute(stop.start)}</p>
+              <p className="type-display text-[1.0625rem]">{stop.name}</p>
+              <p className="text-[0.875rem] leading-snug text-steel">{stop.note}</p>
+            </div>
+          </li>
+        ))}
       </ol>
     </div>
   );

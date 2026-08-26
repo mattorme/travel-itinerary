@@ -69,14 +69,14 @@ export function OptionCard({
       onClick={onSelect}
       aria-pressed={selected}
       className={cn(
-        'rounded-xl border p-4 text-left transition-colors',
+        'rounded-panel border p-4 text-left transition-colors',
         selected
-          ? 'border-ink bg-ink text-paper'
+          ? 'border-ink bg-ink text-white'
           : 'border-rule-2 bg-surface hover:border-ink/40',
       )}
     >
       <span className="block font-medium capitalize">{title}</span>
-      <span className={cn('mt-1 block text-sm', selected ? 'text-paper/70' : 'text-steel')}>
+      <span className={cn('mt-1 block text-sm', selected ? 'text-white/70' : 'text-steel')}>
         {blurb}
       </span>
     </button>

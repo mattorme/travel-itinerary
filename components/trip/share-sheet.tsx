@@ -92,7 +92,7 @@ export function ShareSheet({
         aria-label="Share this trip"
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-md rounded-t-2xl border border-rule bg-surface p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:rounded-2xl"
+        className="w-full max-w-md rounded-t-sheet border border-rule bg-surface p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:rounded-sheet"
       >
         <div className="mb-5 flex items-start justify-between gap-4">
           <div>
@@ -106,7 +106,7 @@ export function ShareSheet({
           </Button>
         </div>
 
-        <div className="flex items-center gap-2 rounded-xl border border-rule bg-sunk px-4 py-3">
+        <div className="flex items-center gap-2 rounded-panel border border-rule bg-sunk px-4 py-3">
           <span className="min-w-0 flex-1 truncate text-sm text-steel">{url}</span>
           <Button variant="ghost" size="sm" onClick={copyLink}>
             {copied ? <Check className="size-4 text-positive" /> : <Copy className="size-4" />}

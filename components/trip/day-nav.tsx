@@ -2,15 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils/cn';
-import { dayColour } from './map/types';
 
 /**
- * Day navigation, as a line index.
+ * Day navigation.
  *
  * A horizontal scroller rather than a sidebar: the primary viewport is a phone,
- * and a twelve-day trip has to be skimmable with a thumb. Each entry carries
- * its route colour, so the strip doubles as the legend for the timeline and the
- * map below it.
+ * and a twelve-day trip has to be skimmable with a thumb. Deliberately carries
+ * no colour of its own — the map below runs its own day colours, and a third
+ * colour system on one page is one too many.
  */
 export function DayNav({ days }: { days: readonly { dayIndex: number; title: string }[] }) {
   const [active, setActive] = useState(days[0]?.dayIndex ?? 1);
@@ -44,11 +43,10 @@ export function DayNav({ days }: { days: readonly { dayIndex: number; title: str
     <nav
       aria-label="Days"
       data-print-hide
-      className="sticky top-14 z-30 -mx-4 border-b border-rule bg-paper/95 px-4 backdrop-blur-sm sm:mx-0 sm:px-0"
+      className="sticky top-14 z-30 -mx-4 border-b border-rule bg-paper/90 px-4 backdrop-blur-md sm:mx-0 sm:px-0"
     >
-      <ul className="hide-scrollbar flex gap-4 overflow-x-auto py-3">
+      <ul className="hide-scrollbar flex gap-2 overflow-x-auto py-2.5">
         {days.map((day) => {
-          const colour = dayColour(day.dayIndex);
           const isActive = active === day.dayIndex;
           return (
             <li key={day.dayIndex}>
@@ -56,15 +54,12 @@ export function DayNav({ days }: { days: readonly { dayIndex: number; title: str
                 href={`#day-${day.dayIndex}`}
                 aria-current={isActive ? 'true' : undefined}
                 className={cn(
-                  'type-label flex shrink-0 items-center gap-2 whitespace-nowrap py-1 transition-colors',
-                  isActive ? 'text-ink' : 'text-steel-2 hover:text-ink',
+                  'type-label flex shrink-0 items-center rounded-full px-3 py-2 whitespace-nowrap transition-colors',
+                  isActive
+                    ? 'bg-ink text-white'
+                    : 'text-steel-2 hover:bg-sunk hover:text-ink',
                 )}
               >
-                <span
-                  className="h-2.5 w-6 shrink-0"
-                  style={{ backgroundColor: colour, opacity: isActive ? 1 : 0.35 }}
-                  aria-hidden
-                />
                 Day {day.dayIndex}
               </a>
             </li>

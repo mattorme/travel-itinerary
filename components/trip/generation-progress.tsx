@@ -116,7 +116,7 @@ export function GenerationProgress({
       <div className="mt-10">
         <div className="h-1 overflow-hidden rounded-full bg-rule">
           <div
-            className="h-1 rounded-full bg-signal transition-[width] duration-700 ease-out"
+            className="h-1 rounded-full bg-ink transition-[width] duration-700 ease-out"
             style={{ width: `${percent}%` }}
           />
         </div>

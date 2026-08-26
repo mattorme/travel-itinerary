@@ -1,11 +1,12 @@
 import { ImageResponse } from 'next/og';
 
 /**
- * The app icon, generated rather than a checked-in PNG.
+ * The app icon.
  *
- * One source of truth with the rest of the brand: the same ink and accent as
- * the product, and the same irregular contour motif the generated trip covers
- * use — perfect circles read as a bullseye, which says nothing about travel.
+ * The day arc, at its smallest useful size: three bars, morning through
+ * evening, on the same indigo as the masthead. It is the product's one graphic
+ * idea reduced until only the idea is left — and unlike a contour or a pin, it
+ * is not something every other travel app already uses.
  *
  * Everything sits inside the middle 80% because the manifest also declares this
  * maskable, and Android crops to a shape it chooses. Content outside the safe
@@ -14,26 +15,14 @@ import { ImageResponse } from 'next/og';
 export const size = { width: 512, height: 512 };
 export const contentType = 'image/png';
 
-const CENTRE = 256;
-
-/** Same wobble as components/ui/cover-art.tsx, so the two read as one family. */
-function contour(radius: number, phase: number): string {
-  const points: string[] = [];
-  for (let step = 0; step <= 64; step++) {
-    const angle = (step / 64) * Math.PI * 2;
-    const wobble =
-      1 + Math.sin(angle * 3 + phase) * 0.1 + Math.sin(angle * 5 + phase * 1.6) * 0.05;
-    const x = CENTRE + Math.cos(angle) * radius * wobble;
-    const y = CENTRE + Math.sin(angle) * radius * wobble * 0.94;
-    points.push(`${x.toFixed(1)},${y.toFixed(1)}`);
-  }
-  return points.join(' ');
-}
+/** Widths in the same 3 : 2 : 2 proportion the wordmark's mark uses. */
+const BARS = [
+  { colour: '#f2a65a', flex: 3 },
+  { colour: '#5fd0c4', flex: 2 },
+  { colour: '#f2867a', flex: 2 },
+];
 
 export default function Icon() {
-  // Outermost ring stays within the maskable safe zone.
-  const rings = [190, 152, 114, 76, 40];
-
   return new ImageResponse(
     (
       <div
@@ -41,23 +30,24 @@ export default function Icon() {
           width: '100%',
           height: '100%',
           display: 'flex',
-          background: '#17150f',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: '#141b34',
         }}
       >
-        <svg width={512} height={512} viewBox="0 0 512 512">
-          {rings.map((radius, i) => (
-            <polyline
-              key={radius}
-              points={contour(radius, i * 0.9)}
-              fill="none"
-              stroke="#c2410c"
-              strokeWidth={i === rings.length - 1 ? 16 : 8}
-              strokeLinejoin="round"
-              opacity={0.4 + i * 0.15}
+        <div style={{ display: 'flex', width: 320, height: 76, gap: 22 }}>
+          {BARS.map((bar) => (
+            <div
+              key={bar.colour}
+              style={{
+                display: 'flex',
+                flex: bar.flex,
+                borderRadius: 38,
+                background: bar.colour,
+              }}
             />
           ))}
-          <circle cx={CENTRE} cy={CENTRE} r={20} fill="#fdfbf7" />
-        </svg>
+        </div>
       </div>
     ),
     size,

@@ -1,15 +1,16 @@
 import type { TripDay } from '@/domain/types/itinerary';
 import { formatCurrency } from '@/lib/utils/format';
-import { dayColour } from './map/types';
 import { ActivityCard } from './activity-card';
+import { DayArc } from './day-arc';
 
 /**
- * One day, as one line on the diagram.
+ * One day.
  *
- * The day's route colour is the same value the map uses for its markers and
- * polyline, so a day is recognisable at a glance in either view. That shared
- * palette is the product's identity, which is why it lives in one module rather
- * than being restated here.
+ * The heading carries the day's own arc, so the shape you picked out of the
+ * stack in the hero is the same shape you land on when you scroll to it. Stops
+ * below are cards in time order; the hours down the left are the thread that
+ * holds them together, which is why no numbering is added — the order is
+ * already in the times, and numbering it twice says nothing new.
  */
 export function DaySection({
   day,
@@ -30,7 +31,6 @@ export function DaySection({
     canSwap: boolean,
   ) => React.ReactNode;
 }) {
-  const colour = dayColour(day.dayIndex);
   const date = day.date
     ? new Date(`${day.date}T00:00:00Z`).toLocaleDateString('en-AU', {
         weekday: 'long',
@@ -39,31 +39,32 @@ export function DaySection({
         timeZone: 'UTC',
       })
     : null;
+  const scheduled = day.activities.some((a) => a.startMinute !== null);
 
   return (
     <section id={`day-${day.dayIndex}`} className="scroll-mt-32">
-      <header className="mb-8">
-        {/* The line badge: how a route identifies itself on a diagram. */}
-        <div className="flex flex-wrap items-center gap-3">
-          <span
-            className="type-label inline-flex h-6 items-center px-2 text-white"
-            style={{ backgroundColor: colour }}
-          >
-            Day {day.dayIndex}
-          </span>
+      <header className="mb-6">
+        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          <span className="type-label text-ink">Day {day.dayIndex}</span>
           {date && <span className="type-label text-steel-2">{date}</span>}
         </div>
 
-        <h2 className="type-display type-title mt-3">{day.title}</h2>
+        <h2 className="type-display type-title mt-2">{day.title}</h2>
+
+        {scheduled && (
+          <DayArc
+            activities={day.activities}
+            label={`Day ${day.dayIndex}, ${day.title}`}
+            className="mt-4"
+          />
+        )}
 
         {day.summary && (
-          <p className="mt-3 max-w-[62ch] text-[1.0625rem] leading-relaxed text-steel">
+          <p className="mt-4 max-w-[62ch] text-[1.0625rem] leading-relaxed text-steel">
             {day.summary}
           </p>
         )}
 
-        {/* Mono for the figure, sans for the sentence — a whole line set in
-            mono reads as a code sample, not a price. */}
         {day.estimatedCost !== null && day.estimatedCost > 0 && (
           <p className="mt-3 text-[0.8125rem] text-steel-2">
             <span className="type-data">{formatCurrency(day.estimatedCost, currency)}</span> for the
@@ -73,15 +74,12 @@ export function DaySection({
       </header>
 
       {day.activities.length > 0 ? (
-        <ol className="list-none">
+        <ol className="list-none space-y-3">
           {day.activities.map((activity, index) => (
             <ActivityCard
               key={activity.id}
               activity={activity}
               currency={currency}
-              routeColour={colour}
-              stopNumber={index + 1}
-              isLast={index === day.activities.length - 1}
               editor={renderEditor?.(
                 activity.id,
                 index,
@@ -93,14 +91,14 @@ export function DaySection({
           ))}
         </ol>
       ) : (
-        <p className="text-steel-2">Nothing planned for this day yet.</p>
+        <p className="text-steel-2">Nothing planned for this day yet. Add the first stop below.</p>
       )}
 
       {dayFooter}
 
       {/* Honest about what we couldn't fit, rather than silently dropping it. */}
       {day.notes && (
-        <p className="mt-3 border-l-2 border-rule-2 bg-sunk px-4 py-3 text-[0.875rem] text-steel">
+        <p className="mt-4 rounded-edge border-l-3 border-caution bg-signal-wash px-4 py-3 text-[0.875rem] text-steel">
           {day.notes}
         </p>
       )}

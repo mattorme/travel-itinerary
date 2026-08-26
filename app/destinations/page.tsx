@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { createClient } from '@/lib/db/supabase/server';
 import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
+import { Button } from '@/components/ui/button';
 
 export const metadata: Metadata = {
   title: 'Destinations',
@@ -35,7 +36,7 @@ export default async function DestinationsPage() {
               <li key={destination.slug}>
                 <Link
                   href={`/destinations/${destination.slug}`}
-                  className="flex items-baseline justify-between gap-4 border-b border-rule py-3.5 transition-colors hover:text-signal"
+                  className="flex items-baseline justify-between gap-4 border-b border-rule py-3.5 transition-colors hover:text-ink"
                 >
                   <span>
                     <span className="type-display text-lg">{destination.name}</span>
@@ -49,7 +50,17 @@ export default async function DestinationsPage() {
             ))}
           </ul>
         ) : (
-          <p className="mt-12 text-steel">No destinations yet — plan the first trip.</p>
+          // An empty screen is an invitation, not a notice.
+          <div className="mt-12 rounded-panel bg-surface p-8 shadow-(--shadow-card)">
+            <h2 className="type-display text-[1.5rem]">Nothing here yet</h2>
+            <p className="mt-2 max-w-md text-steel">
+              Destinations appear once trips have been planned to them. Plan the first one and it
+              will show up here.
+            </p>
+            <Link href="/plan" className="mt-5 inline-block">
+              <Button variant="signal">Plan a trip</Button>
+            </Link>
+          </div>
         )}
       </main>
       <SiteFooter />

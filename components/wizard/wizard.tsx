@@ -83,9 +83,11 @@ export function Wizard({ initialQuery }: { initialQuery: string | null }) {
         </div>
       </div>
 
-      <h1 className="type-display type-title mt-8 mb-8 text-balance">{STEP_TITLES[step]}</h1>
-
-      <div className="flex-1">
+      {/* Question and answer stay together, and the pair sits in the middle of
+          the screen — a short step pinned to the top of a tall viewport reads
+          as a page that failed to load the rest of itself. */}
+      <div className="flex flex-1 flex-col justify-center py-8">
+        <h1 className="type-display type-title mb-8 text-balance">{STEP_TITLES[step]}</h1>
         {step === 'destination' && <DestinationStep state={state} patch={patch} />}
         {step === 'dates' && <DatesStep state={state} patch={patch} />}
         {step === 'travellers' && <TravellersStep state={state} patch={patch} />}
@@ -96,7 +98,7 @@ export function Wizard({ initialQuery }: { initialQuery: string | null }) {
       </div>
 
       {error && (
-        <p role="alert" className="mt-6 rounded-xl border border-critical/30 bg-critical/5 px-4 py-3 text-sm text-critical">
+        <p role="alert" className="mt-6 rounded-edge border border-critical/30 bg-critical/5 px-4 py-3 text-sm text-critical">
           {error}
         </p>
       )}
