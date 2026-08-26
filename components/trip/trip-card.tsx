@@ -22,6 +22,13 @@ export interface TripCardData {
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
+/**
+ * A trip in a listing.
+ *
+ * Square-edged and hard-ruled rather than a floating rounded card — the grid
+ * should read as a departures board, and rounded cards with drop shadows are
+ * the single most templated thing a listing can do.
+ */
 export function TripCard({ trip }: { trip: TripCardData }) {
   const creator = Array.isArray(trip.profiles) ? trip.profiles[0] : trip.profiles;
   const cost = trip.estimated_cost_total !== null ? Number(trip.estimated_cost_total) : null;
@@ -29,33 +36,37 @@ export function TripCard({ trip }: { trip: TripCardData }) {
   return (
     <Link
       href={`/t/${trip.slug}`}
-      className="group block overflow-hidden rounded-card border border-line bg-paper-raised transition-colors hover:border-line-strong"
+      // Exposed as data so filtering can be asserted without reading text that
+      // CSS has upper-cased.
+      data-duration={trip.duration_days}
+      className="group flex flex-col border border-rule bg-surface transition-colors hover:border-ink"
     >
-      <div className="relative aspect-[4/3] overflow-hidden bg-paper-sunk">
+      <div className="relative aspect-[3/2] overflow-hidden bg-sunk">
         <Cover
           imageUrl={trip.hero_image_url}
           credit={trip.hero_credit as never}
           seed={trip.slug}
           label={trip.title}
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          className="transition-transform duration-500 group-hover:scale-[1.03]"
         />
-        <div className="absolute top-3 left-3 rounded-full bg-ink/80 px-2.5 py-1 text-xs font-medium text-paper backdrop-blur-sm">
+        <span className="type-label absolute top-0 left-0 bg-ink px-2 py-1.5 text-paper">
           {trip.duration_days} {trip.duration_days === 1 ? 'day' : 'days'}
-        </div>
+        </span>
       </div>
 
-      <div className="p-4">
-        <h3 className="font-display text-lg leading-snug text-balance">{trip.title}</h3>
+      <div className="flex flex-1 flex-col p-4">
+        <h3 className="type-display text-[1.25rem] leading-[1.1]">{trip.title}</h3>
         {trip.subtitle && (
-          <p className="mt-1.5 line-clamp-2 text-sm text-ink-muted">{trip.subtitle}</p>
+          <p className="mt-2 line-clamp-2 text-[0.875rem] leading-relaxed text-steel">
+            {trip.subtitle}
+          </p>
         )}
 
-        <div className="mt-4 flex items-center justify-between gap-3 text-sm">
-          <span className="text-ink-muted">
-            {cost !== null ? `~${formatCurrency(cost, trip.currency)}` : 'Budget varies'}
+        <div className="mt-auto flex items-baseline justify-between gap-3 pt-4">
+          <span className="type-data text-[0.875rem]">
+            {cost !== null ? formatCurrency(cost, trip.currency) : '—'}
           </span>
-          <span className="flex items-center gap-3 text-ink-faint">
+          <span className="type-data flex items-center gap-3 text-[0.75rem] text-steel-2">
             {trip.clone_count > 0 && (
               <span className="flex items-center gap-1">
                 <Copy className="size-3.5" aria-hidden />
@@ -72,8 +83,8 @@ export function TripCard({ trip }: { trip: TripCardData }) {
         </div>
 
         {creator?.username && (
-          <p className="mt-3 border-t border-line pt-3 text-xs text-ink-faint">
-            by @{creator.username}
+          <p className="mt-3 border-t border-rule pt-3 text-[0.75rem] text-steel-2">
+            @{creator.username}
           </p>
         )}
       </div>

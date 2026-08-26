@@ -108,7 +108,7 @@ export default async function DestinationPage({
     <>
       <SiteHeader />
       <main className="mx-auto max-w-5xl px-5 pb-16">
-        <div className="relative -mx-5 aspect-[3/2] overflow-hidden bg-paper-sunk sm:mx-0 sm:mt-6 sm:aspect-[21/9] sm:rounded-card">
+        <div className="relative -mx-5 aspect-[3/2] overflow-hidden bg-sunk sm:mx-0 sm:mt-6 sm:aspect-[21/9] sm:rounded-panel">
           <Cover
             imageUrl={cover?.url ?? destination.hero_image_url}
             credit={(cover ?? destination.hero_credit) as never}
@@ -120,12 +120,12 @@ export default async function DestinationPage({
           />
         </div>
 
-        <p className="mt-8 text-xs font-medium tracking-widest text-ink-faint uppercase">
+        <p className="mt-8 text-xs font-medium tracking-widest text-steel-2 uppercase">
           {destination.country_name}
         </p>
-        <h1 className="mt-3 font-display text-display">{destination.name}</h1>
+        <h1 className="mt-3 type-display type-hero">{destination.name}</h1>
         {destination.blurb && (
-          <p className="mt-5 max-w-2xl text-lg leading-relaxed text-ink-muted">
+          <p className="mt-5 max-w-2xl text-lg leading-relaxed text-steel">
             {destination.blurb}
           </p>
         )}
@@ -133,7 +133,7 @@ export default async function DestinationPage({
         {/* Aggregated from real trips, so the page has something to say the
             moment anyone plans one — and more to say as the corpus grows. */}
         {hasStats && stats && (
-          <dl className="mt-8 grid grid-cols-2 gap-px overflow-hidden rounded-card border border-line bg-line sm:grid-cols-4">
+          <dl className="mt-8 grid grid-cols-2 gap-px overflow-hidden rounded-panel border border-rule bg-rule sm:grid-cols-4">
             <Stat
               label="itineraries"
               value={String(stats.trip_count)}
@@ -159,7 +159,7 @@ export default async function DestinationPage({
         )}
 
         {hasStats && stats?.top_interests && stats.top_interests.length > 0 && (
-          <p className="mt-4 text-sm text-ink-muted">
+          <p className="mt-4 text-sm text-steel">
             People come here for{' '}
             <strong className="font-normal text-ink">
               {stats.top_interests.slice(0, 3).map(humanise).join(', ')}
@@ -170,7 +170,7 @@ export default async function DestinationPage({
 
         <div className="mt-8">
           <Link href={{ pathname: '/plan', query: { q: destination.name } }}>
-            <Button variant="accent" size="lg">
+            <Button variant="signal" size="lg">
               Plan a trip to {destination.name}
             </Button>
           </Link>
@@ -181,23 +181,23 @@ export default async function DestinationPage({
             nobody acted on. */}
         {places && places.length > 0 && (
           <section className="mt-16">
-            <h2 className="font-display text-display-sm">Where people actually go</h2>
-            <p className="mt-2 text-ink-muted">
+            <h2 className="type-display type-title">Where people actually go</h2>
+            <p className="mt-2 text-steel">
               The places that turn up most often in {destination.name} itineraries.
             </p>
             <ul className="mt-8 grid gap-x-8 gap-y-1 sm:grid-cols-2">
               {places.map((place) => (
-                <li key={place.place_id} className="border-b border-line py-3.5">
+                <li key={place.place_id} className="border-b border-rule py-3.5">
                   <div className="flex items-baseline justify-between gap-4">
                     <span className="min-w-0">
-                      <span className="font-display text-lg">{place.name}</span>
+                      <span className="type-display text-lg">{place.name}</span>
                       {place.tags?.[0] && (
-                        <span className="ml-2 text-sm text-ink-faint">
+                        <span className="ml-2 text-sm text-steel-2">
                           {humanise(place.tags[0])}
                         </span>
                       )}
                     </span>
-                    <span className="flex shrink-0 items-center gap-3 text-sm text-ink-faint">
+                    <span className="flex shrink-0 items-center gap-3 text-sm text-steel-2">
                       {place.rating !== null && (
                         <span className="flex items-center gap-1">
                           <Star className="size-3.5 fill-current" aria-hidden />
@@ -220,13 +220,13 @@ export default async function DestinationPage({
                 </li>
               ))}
             </ul>
-            <p className="mt-4 text-xs text-ink-faint">Place information from Google Maps.</p>
+            <p className="mt-4 text-xs text-steel-2">Place information from Google Maps.</p>
           </section>
         )}
 
         {trips.length > 0 ? (
           <section className="mt-16">
-            <h2 className="font-display text-display-sm">Itineraries</h2>
+            <h2 className="type-display type-title">Itineraries</h2>
             <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {trips.map((trip) => (
                 <TripCard key={trip.id} trip={trip} />
@@ -234,7 +234,7 @@ export default async function DestinationPage({
             </div>
           </section>
         ) : (
-          <p className="mt-16 text-ink-muted">
+          <p className="mt-16 text-steel">
             No public trips here yet. Plan one and it will be the first.
           </p>
         )}
@@ -246,9 +246,9 @@ export default async function DestinationPage({
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bg-paper-raised px-4 py-4">
-      <dt className="text-xs text-ink-faint">{label}</dt>
-      <dd className="mt-1 font-display text-2xl tabular-nums">{value}</dd>
+    <div className="bg-surface px-4 py-4">
+      <dt className="text-xs text-steel-2">{label}</dt>
+      <dd className="mt-1 type-display text-2xl tabular-nums">{value}</dd>
     </div>
   );
 }

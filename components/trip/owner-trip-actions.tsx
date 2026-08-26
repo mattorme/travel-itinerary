@@ -51,7 +51,7 @@ export function OwnerTripActions({ itinerary }: { itinerary: Itinerary }) {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
-        <Button variant="accent" size="lg" onClick={share} disabled={pending}>
+        <Button variant="signal" size="lg" onClick={share} disabled={pending}>
           <Share2 className="size-4" />
           Share
         </Button>
@@ -61,7 +61,7 @@ export function OwnerTripActions({ itinerary }: { itinerary: Itinerary }) {
 
       <TakeWithYou itinerary={itinerary} />
 
-      <fieldset className="rounded-card border border-line bg-paper-raised p-4" data-print-hide>
+      <fieldset className="rounded-panel border border-rule bg-surface p-4" data-print-hide>
         <legend className="px-1 text-sm font-medium">Who can see this</legend>
         <div className="mt-2 space-y-1">
           {OPTIONS.map((option) => (
@@ -69,7 +69,7 @@ export function OwnerTripActions({ itinerary }: { itinerary: Itinerary }) {
               key={option.value}
               className={cn(
                 'flex cursor-pointer items-start gap-3 rounded-xl px-3 py-2.5 transition-colors',
-                visibility === option.value ? 'bg-paper-sunk' : 'hover:bg-paper-sunk/60',
+                visibility === option.value ? 'bg-sunk' : 'hover:bg-sunk/60',
               )}
             >
               <input
@@ -85,7 +85,7 @@ export function OwnerTripActions({ itinerary }: { itinerary: Itinerary }) {
                   <option.icon className="size-3.5" aria-hidden />
                   {option.label}
                 </span>
-                <span className="mt-0.5 block text-sm text-ink-faint">{option.blurb}</span>
+                <span className="mt-0.5 block text-sm text-steel-2">{option.blurb}</span>
               </span>
             </label>
           ))}

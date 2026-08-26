@@ -70,7 +70,7 @@ export function TripMap({
   // development; say nothing at all in production.
   if (!apiKey) {
     return process.env.NODE_ENV === 'development' ? (
-      <div className="rounded-card border border-dashed border-line-strong bg-paper-sunk p-5 text-sm text-ink-muted">
+      <div className="rounded-panel border border-dashed border-rule-2 bg-sunk p-5 text-sm text-steel">
         <p className="font-medium text-ink">Map hidden</p>
         <p className="mt-1.5 leading-relaxed">
           Set <code className="rounded bg-paper px-1">NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_KEY</code> to
@@ -87,12 +87,12 @@ export function TripMap({
     <section
       aria-label={`Map of ${title}`}
       className={cn(
-        'overflow-hidden rounded-card border border-line bg-paper-sunk',
+        'overflow-hidden rounded-panel border border-rule bg-sunk',
         expanded && 'fixed inset-0 z-50 rounded-none border-0',
       )}
     >
-      <div className="flex items-center gap-1.5 border-b border-line bg-paper-raised px-3 py-2">
-        <Layers className="size-3.5 shrink-0 text-ink-faint" aria-hidden />
+      <div className="flex items-center gap-1.5 border-b border-rule bg-surface px-3 py-2">
+        <Layers className="size-3.5 shrink-0 text-steel-2" aria-hidden />
         <div className="hide-scrollbar flex flex-1 gap-1 overflow-x-auto">
           <DayChip active={activeDay === null} onClick={() => setActiveDay(null)}>
             All days
@@ -112,7 +112,7 @@ export function TripMap({
           type="button"
           onClick={() => setExpanded((value) => !value)}
           aria-label={expanded ? 'Close full screen map' : 'Expand map'}
-          className="shrink-0 rounded-full p-2 text-ink-muted hover:bg-paper-sunk hover:text-ink"
+          className="shrink-0 rounded-full p-2 text-steel hover:bg-sunk hover:text-ink"
         >
           {expanded ? <X className="size-4" /> : <Maximize2 className="size-4" />}
         </button>
@@ -120,15 +120,15 @@ export function TripMap({
 
       <div
         ref={containerRef}
-        className={cn('w-full bg-paper-sunk', expanded ? 'h-[calc(100dvh-3rem)]' : 'h-72 sm:h-96')}
+        className={cn('w-full bg-sunk', expanded ? 'h-[calc(100dvh-3rem)]' : 'h-72 sm:h-96')}
       >
         {!handle.ready && !handle.failed && (
-          <div className="flex h-full items-center justify-center text-sm text-ink-faint">
+          <div className="flex h-full items-center justify-center text-sm text-steel-2">
             Loading map…
           </div>
         )}
         {handle.failed && (
-          <div className="flex h-full items-center justify-center px-6 text-center text-sm text-ink-muted">
+          <div className="flex h-full items-center justify-center px-6 text-center text-sm text-steel">
             The map could not load. The itinerary below is unaffected.
           </div>
         )}
@@ -155,7 +155,7 @@ function DayChip({
       aria-pressed={active}
       className={cn(
         'flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-sm whitespace-nowrap transition-colors',
-        active ? 'bg-ink text-paper' : 'text-ink-muted hover:bg-paper-sunk hover:text-ink',
+        active ? 'bg-ink text-paper' : 'text-steel hover:bg-sunk hover:text-ink',
       )}
     >
       {colour && (

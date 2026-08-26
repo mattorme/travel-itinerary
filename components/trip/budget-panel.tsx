@@ -28,11 +28,11 @@ export function BudgetPanel({
   const overBudget = budgetTotal !== null && breakdown.total > budgetTotal;
 
   return (
-    <section className="rounded-card border border-line bg-paper-raised p-6">
+    <section className="rounded-panel border border-rule bg-surface p-6">
       <div className="flex items-baseline justify-between gap-4">
-        <h2 className="font-display text-xl">Estimated cost</h2>
+        <h2 className="type-display text-xl">Estimated cost</h2>
         <p className="text-right">
-          <span className="font-display text-2xl">
+          <span className="type-display text-2xl">
             ~{formatCurrency(breakdown.total, currency)}
           </span>
         </p>
@@ -46,11 +46,11 @@ export function BudgetPanel({
             /* dt and dd must be the only children of a div inside a dl, so the
                bar lives inside the dd rather than in a layout wrapper. */
             <div key={row.key} className="grid grid-cols-[1fr_auto] items-baseline gap-3">
-              <dt className="min-w-0 text-sm text-ink-muted">{row.label}</dt>
+              <dt className="min-w-0 text-sm text-steel">{row.label}</dt>
               <dd className="text-sm tabular-nums">
                 {formatCurrency(value, currency)}
                 <span
-                  className="mt-1 block h-1 rounded-full bg-paper-sunk"
+                  className="mt-1 block h-1 rounded-full bg-sunk"
                   aria-hidden
                 >
                   <span
@@ -72,7 +72,7 @@ export function BudgetPanel({
         </p>
       )}
 
-      <p className="mt-4 border-t border-line pt-4 text-xs leading-relaxed text-ink-faint">
+      <p className="mt-4 border-t border-rule pt-4 text-xs leading-relaxed text-steel-2">
         Estimates based on typical prices for this destination and how you said you like to
         travel. Excludes flights. Actual costs will vary.
       </p>

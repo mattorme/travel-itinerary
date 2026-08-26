@@ -50,10 +50,11 @@ test.describe('searching trips', () => {
     const cards = page.locator('a[href^="/t/"]');
     const count = await cards.count();
     expect(count).toBeGreaterThan(0);
-    // Every result must actually be in the band.
+
+    // Read the duration from data, not from rendered text: the badge is
+    // upper-cased in CSS, so a regex over innerText tests the stylesheet.
     for (let i = 0; i < count; i++) {
-      const label = await cards.nth(i).innerText();
-      const days = Number(/(\d+)\s+days?/.exec(label)?.[1] ?? 0);
+      const days = Number(await cards.nth(i).getAttribute('data-duration'));
       expect(days).toBeGreaterThanOrEqual(5);
       expect(days).toBeLessThanOrEqual(9);
     }

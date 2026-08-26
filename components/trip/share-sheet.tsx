@@ -92,12 +92,12 @@ export function ShareSheet({
         aria-label="Share this trip"
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-md rounded-t-2xl border border-line bg-paper-raised p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:rounded-2xl"
+        className="w-full max-w-md rounded-t-2xl border border-rule bg-surface p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:rounded-2xl"
       >
         <div className="mb-5 flex items-start justify-between gap-4">
           <div>
-            <h2 className="font-display text-xl">Share this trip</h2>
-            <p className="mt-1 text-sm text-ink-muted">
+            <h2 className="type-display text-xl">Share this trip</h2>
+            <p className="mt-1 text-sm text-steel">
               Anyone with the link can open it — no account needed.
             </p>
           </div>
@@ -106,8 +106,8 @@ export function ShareSheet({
           </Button>
         </div>
 
-        <div className="flex items-center gap-2 rounded-xl border border-line bg-paper-sunk px-4 py-3">
-          <span className="min-w-0 flex-1 truncate text-sm text-ink-muted">{url}</span>
+        <div className="flex items-center gap-2 rounded-xl border border-rule bg-sunk px-4 py-3">
+          <span className="min-w-0 flex-1 truncate text-sm text-steel">{url}</span>
           <Button variant="ghost" size="sm" onClick={copyLink}>
             {copied ? <Check className="size-4 text-positive" /> : <Copy className="size-4" />}
             {copied ? 'Copied' : 'Copy'}
@@ -127,7 +127,7 @@ export function ShareSheet({
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => void recordShare(itinerary.id, channel.id)}
-              className="flex items-center justify-center gap-2 rounded-full border border-line-strong px-4 py-2.5 text-sm transition-colors hover:bg-paper-sunk"
+              className="flex items-center justify-center gap-2 rounded-full border border-rule-2 px-4 py-2.5 text-sm transition-colors hover:bg-sunk"
             >
               <channel.icon className="size-4" />
               {channel.label}
@@ -138,7 +138,7 @@ export function ShareSheet({
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => void recordShare(itinerary.id, 'story_card')}
-            className="col-span-2 flex items-center justify-center gap-2 rounded-full border border-line-strong px-4 py-2.5 text-sm transition-colors hover:bg-paper-sunk"
+            className="col-span-2 flex items-center justify-center gap-2 rounded-full border border-rule-2 px-4 py-2.5 text-sm transition-colors hover:bg-sunk"
           >
             <ImageIcon className="size-4" />
             Get a story graphic

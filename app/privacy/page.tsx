@@ -23,7 +23,7 @@ export default function PrivacyPage() {
       </Section>
 
       <Section title="What we store">
-        <ul className="list-disc space-y-2 pl-5 text-ink-muted">
+        <ul className="list-disc space-y-2 pl-5 text-steel">
           <li>
             <strong className="text-ink">Your account.</strong> An email address, and a username
             and display name you choose. If you sign in with Google we receive your name and
@@ -48,20 +48,20 @@ export default function PrivacyPage() {
       </Section>
 
       <Section title="What we deliberately do not store">
-        <p className="text-ink-muted">
+        <p className="text-steel">
           We record that a trip was viewed, but not who viewed it. The identifier attached to a
           view is a one-way hash of your IP address, browser and the day, salted per trip. It
           cannot be reversed into an IP address, and it cannot be used to link your visits across
           different trips or across days. It exists only so that refreshing a page does not count
           as ten views.
         </p>
-        <p className="text-ink-muted">
+        <p className="text-steel">
           We do not store raw IP addresses, precise location, or payment details.
         </p>
       </Section>
 
       <Section title="Who else sees it">
-        <ul className="list-disc space-y-2 pl-5 text-ink-muted">
+        <ul className="list-disc space-y-2 pl-5 text-steel">
           <li>
             <strong className="text-ink">Google Maps Platform</strong> — we send the destination
             and the kinds of places you are interested in so we can find real venues, opening
@@ -87,19 +87,19 @@ export default function PrivacyPage() {
       </Section>
 
       <Section title="What other people see">
-        <p className="text-ink-muted">
+        <p className="text-steel">
           A trip is private when you create it. Sharing makes it reachable by anyone with the
           link, and only a further, deliberate choice makes it public and listed. On a shared or
           public trip, other people see the itinerary, your username and your avatar — never your
           email.
         </p>
-        <p className="text-ink-muted">
+        <p className="text-steel">
           Your free-text notes shape the itinerary but are not shown on the trip page.
         </p>
       </Section>
 
       <Section title="Copies of your trip">
-        <p className="text-ink-muted">
+        <p className="text-steel">
           When someone copies a public trip they get their own independent copy, taken at that
           moment. Editing your original afterwards does not change their copy, and deleting yours
           does not remove theirs — their copy keeps a credit to your username. If you make a trip
@@ -108,7 +108,7 @@ export default function PrivacyPage() {
       </Section>
 
       <Section title="Deleting things">
-        <p className="text-ink-muted">
+        <p className="text-steel">
           Deleting a trip removes it from the site immediately. Deleting your account removes your
           profile and your trips. Copies other people already made are theirs and stay with them,
           as above.
@@ -116,7 +116,7 @@ export default function PrivacyPage() {
       </Section>
 
       <Section title="Contact">
-        <p className="text-ink-muted">
+        <p className="text-steel">
           For anything about your data, email us. This section needs a real address before launch.
         </p>
       </Section>

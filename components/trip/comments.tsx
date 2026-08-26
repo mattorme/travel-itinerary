@@ -79,8 +79,8 @@ export function Comments({
   }
 
   return (
-    <section className="mt-16 border-t border-line pt-10">
-      <h2 className="font-display text-display-sm">
+    <section className="mt-16 border-t border-rule pt-10">
+      <h2 className="type-display type-title">
         {optimistic.length > 0 ? `${optimistic.length} ` : ''}
         {optimistic.length === 1 ? 'Comment' : 'Comments'}
       </h2>
@@ -102,7 +102,7 @@ export function Comments({
               {pending && <Loader2 className="size-4 animate-spin" />}
               Post
             </Button>
-            {notice && <span className="text-sm text-ink-muted">{notice}</span>}
+            {notice && <span className="text-sm text-steel">{notice}</span>}
             {error && (
               <span role="alert" className="text-sm text-critical">
                 {error}
@@ -111,7 +111,7 @@ export function Comments({
           </div>
         </form>
       ) : (
-        <p className="mt-6 rounded-card border border-line bg-paper-raised px-5 py-4 text-sm text-ink-muted">
+        <p className="mt-6 rounded-panel border border-rule bg-surface px-5 py-4 text-sm text-steel">
           <Link href="/signin" className="underline underline-offset-4 hover:text-ink">
             Create an account
           </Link>{' '}
@@ -125,7 +125,7 @@ export function Comments({
             <li key={comment.id} className="flex gap-3">
               <span
                 aria-hidden
-                className="mt-1 flex size-8 shrink-0 items-center justify-center rounded-full bg-paper-sunk text-sm text-ink-muted"
+                className="mt-1 flex size-8 shrink-0 items-center justify-center rounded-full bg-sunk text-sm text-steel"
               >
                 {(comment.displayName ?? comment.username).charAt(0).toUpperCase()}
               </span>
@@ -141,7 +141,7 @@ export function Comments({
                       {comment.displayName ?? `@${comment.username}`}
                     </Link>
                   )}
-                  <time className="text-ink-faint" dateTime={comment.createdAt}>
+                  <time className="text-steel-2" dateTime={comment.createdAt}>
                     {relativeTime(comment.createdAt)}
                   </time>
                 </p>
@@ -156,7 +156,7 @@ export function Comments({
                   >
                     <button
                       type="submit"
-                      className="mt-1.5 flex items-center gap-1 text-xs text-ink-faint hover:text-critical"
+                      className="mt-1.5 flex items-center gap-1 text-xs text-steel-2 hover:text-critical"
                     >
                       <Trash2 className="size-3" />
                       Delete
@@ -168,7 +168,7 @@ export function Comments({
           ))}
         </ul>
       ) : (
-        <p className="mt-8 text-ink-faint">No comments yet.</p>
+        <p className="mt-8 text-steel-2">No comments yet.</p>
       )}
     </section>
   );

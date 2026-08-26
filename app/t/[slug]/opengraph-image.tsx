@@ -36,7 +36,7 @@ export default async function OpengraphImage({
           style={{
             width: '100%', height: '100%', display: 'flex',
             alignItems: 'center', justifyContent: 'center',
-            background: '#fdfbf7', color: '#17150f', fontSize: 48,
+            background: '#fcfcfa', color: '#111316', fontSize: 48,
           }}
         >
           Wayfare
@@ -52,10 +52,10 @@ export default async function OpengraphImage({
   const hero = itinerary.heroImageUrl;
 
   // On a photograph the palette inverts, and a scrim carries the text.
-  const ink = hero ? '#ffffff' : '#17150f';
-  const muted = hero ? 'rgba(255,255,255,0.72)' : '#8a857a';
-  const accent = hero ? '#ffb37a' : '#c2410c';
-  const rule = hero ? 'rgba(255,255,255,0.28)' : '#e6e0d4';
+  const ink = hero ? '#ffffff' : '#111316';
+  const muted = hero ? 'rgba(255,255,255,0.72)' : '#5c6067';
+  const accent = hero ? '#8ca4ff' : '#1b3bd8';
+  const rule = hero ? 'rgba(255,255,255,0.28)' : '#111316';
 
   return new ImageResponse(
     (
@@ -66,7 +66,7 @@ export default async function OpengraphImage({
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
-          background: '#fdfbf7',
+          background: '#fcfcfa',
           padding: 72,
           fontFamily: 'sans-serif',
           color: ink,
@@ -98,7 +98,7 @@ export default async function OpengraphImage({
             style={{
               display: 'flex',
               fontSize: 24,
-              letterSpacing: 4,
+              letterSpacing: 5,
               textTransform: 'uppercase',
               color: muted,
             }}
@@ -140,7 +140,7 @@ export default async function OpengraphImage({
             display: 'flex',
             alignItems: 'flex-end',
             justifyContent: 'space-between',
-            borderTop: `2px solid ${rule}`,
+            borderTop: `3px solid ${rule}`,
             paddingTop: 32,
             position: 'relative',
           }}

@@ -76,14 +76,14 @@ export function Wizard({ initialQuery }: { initialQuery: string | null }) {
               key={s}
               className={cn(
                 'h-1 flex-1 rounded-full transition-colors',
-                i <= stepIndex ? 'bg-ink' : 'bg-line',
+                i <= stepIndex ? 'bg-ink' : 'bg-rule',
               )}
             />
           ))}
         </div>
       </div>
 
-      <h1 className="font-display text-display-sm mt-8 mb-8 text-balance">{STEP_TITLES[step]}</h1>
+      <h1 className="type-display type-title mt-8 mb-8 text-balance">{STEP_TITLES[step]}</h1>
 
       <div className="flex-1">
         {step === 'destination' && <DestinationStep state={state} patch={patch} />}
@@ -105,7 +105,7 @@ export function Wizard({ initialQuery }: { initialQuery: string | null }) {
 
       {/* Fixed footer: on a phone the primary action must be reachable with a
           thumb without scrolling to the bottom of a long step. */}
-      <div className="fixed inset-x-0 bottom-0 border-t border-line bg-paper/95 backdrop-blur-md">
+      <div className="fixed inset-x-0 bottom-0 border-t border-rule bg-paper/95 backdrop-blur-md">
         <div className="mx-auto flex max-w-2xl items-center gap-3 px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
           {stepIndex > 0 && (
             <Button variant="ghost" size="lg" onClick={() => setStepIndex((i) => i - 1)} aria-label="Back">
@@ -113,7 +113,7 @@ export function Wizard({ initialQuery }: { initialQuery: string | null }) {
             </Button>
           )}
           <Button
-            variant="accent"
+            variant="signal"
             size="lg"
             block
             disabled={!ready || submitting}

@@ -47,20 +47,20 @@ export function TripInsights({ itinerary }: { itinerary: Itinerary }) {
 
   return (
     <section aria-label="At a glance" className="mt-8">
-      <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-card border border-line bg-line sm:grid-cols-4">
+      <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-panel border border-rule bg-rule sm:grid-cols-4">
         {stats.map((stat) => (
-          <div key={stat.label} className="bg-paper-raised px-4 py-4">
-            <dt className="flex items-center gap-1.5 text-xs text-ink-faint">
+          <div key={stat.label} className="bg-surface px-4 py-4">
+            <dt className="flex items-center gap-1.5 text-xs text-steel-2">
               <stat.icon className="size-3.5" aria-hidden />
               {stat.label}
             </dt>
-            <dd className="mt-1 font-display text-2xl tabular-nums">{stat.value}</dd>
+            <dd className="mt-1 type-display text-2xl tabular-nums">{stat.value}</dd>
           </div>
         ))}
       </dl>
 
       {insights.busiestDay && insights.lightestDay && (
-        <p className="mt-3 text-sm text-ink-faint">
+        <p className="mt-3 text-sm text-steel-2">
           Day {insights.busiestDay.dayIndex} is the heaviest —{' '}
           {formatDuration(insights.busiestDay.activeMinutes + insights.busiestDay.travelMinutes)}{' '}
           accounted for. Day {insights.lightestDay.dayIndex} is the easiest.

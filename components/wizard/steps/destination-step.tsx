@@ -37,7 +37,7 @@ export function DestinationStep({ state, patch }: { state: WizardState; patch: P
     <div className="space-y-5">
       <Field label="Destination" hint="A city, a region, or a country." htmlFor="destination">
         <div className="relative">
-          <Search className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-ink-faint" aria-hidden />
+          <Search className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-steel-2" aria-hidden />
           <input
             id="destination"
             className={cn(inputClass, 'pl-11')}
@@ -54,19 +54,19 @@ export function DestinationStep({ state, patch }: { state: WizardState; patch: P
       </Field>
 
       {open && suggestions.length > 0 && (
-        <ul className="overflow-hidden rounded-xl border border-line bg-paper-raised">
+        <ul className="overflow-hidden rounded-xl border border-rule bg-surface">
           {suggestions.map((s) => (
             <li key={s.placeId}>
               <button
                 type="button"
-                className="w-full px-4 py-3 text-left transition-colors hover:bg-paper-sunk"
+                className="w-full px-4 py-3 text-left transition-colors hover:bg-sunk"
                 onClick={() => {
                   patch({ destinationQuery: s.primary, destinationPlaceId: s.placeId });
                   setOpen(false);
                 }}
               >
                 <span className="block text-[0.9375rem]">{s.primary}</span>
-                {s.secondary && <span className="block text-sm text-ink-faint">{s.secondary}</span>}
+                {s.secondary && <span className="block text-sm text-steel-2">{s.secondary}</span>}
               </button>
             </li>
           ))}

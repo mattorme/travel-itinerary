@@ -24,8 +24,8 @@ export default async function DestinationsPage() {
     <>
       <SiteHeader />
       <main className="mx-auto max-w-4xl px-5 py-12">
-        <h1 className="font-display text-display-sm">Destinations</h1>
-        <p className="mt-3 max-w-xl text-ink-muted">
+        <h1 className="type-display type-title">Destinations</h1>
+        <p className="mt-3 max-w-xl text-steel">
           Places people are planning trips to right now.
         </p>
 
@@ -35,13 +35,13 @@ export default async function DestinationsPage() {
               <li key={destination.slug}>
                 <Link
                   href={`/destinations/${destination.slug}`}
-                  className="flex items-baseline justify-between gap-4 border-b border-line py-3.5 transition-colors hover:text-accent"
+                  className="flex items-baseline justify-between gap-4 border-b border-rule py-3.5 transition-colors hover:text-signal"
                 >
                   <span>
-                    <span className="font-display text-lg">{destination.name}</span>
-                    <span className="ml-2 text-sm text-ink-faint">{destination.country_name}</span>
+                    <span className="type-display text-lg">{destination.name}</span>
+                    <span className="ml-2 text-sm text-steel-2">{destination.country_name}</span>
                   </span>
-                  <span className="shrink-0 text-sm tabular-nums text-ink-faint">
+                  <span className="shrink-0 text-sm tabular-nums text-steel-2">
                     {destination.trip_count}
                   </span>
                 </Link>
@@ -49,7 +49,7 @@ export default async function DestinationsPage() {
             ))}
           </ul>
         ) : (
-          <p className="mt-12 text-ink-muted">No destinations yet — plan the first trip.</p>
+          <p className="mt-12 text-steel">No destinations yet — plan the first trip.</p>
         )}
       </main>
       <SiteFooter />

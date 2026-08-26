@@ -46,7 +46,7 @@ export function ExploreSearch({ initialQuery }: { initialQuery: string }) {
       </label>
       <div className="relative">
         <Search
-          className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-ink-faint"
+          className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-steel-2"
           aria-hidden
         />
         <input
@@ -68,7 +68,7 @@ export function ExploreSearch({ initialQuery }: { initialQuery: string }) {
               submit('');
               inputRef.current?.focus();
             }}
-            className="absolute top-1/2 right-3 -translate-y-1/2 rounded-full p-1.5 text-ink-faint hover:bg-paper-sunk hover:text-ink"
+            className="absolute top-1/2 right-3 -translate-y-1/2 rounded-full p-1.5 text-steel-2 hover:bg-sunk hover:text-ink"
           >
             <X className="size-4" />
           </button>

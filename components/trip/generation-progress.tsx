@@ -88,12 +88,12 @@ export function GenerationProgress({
     return (
       <div className="mx-auto flex min-h-[70dvh] max-w-md flex-col justify-center px-5 text-center">
         <AlertCircle className="mx-auto size-8 text-caution" />
-        <h1 className="mt-5 font-display text-display-sm">That didn&apos;t work</h1>
-        <p className="mt-4 text-ink-muted">
+        <h1 className="mt-5 type-display type-title">That didn&apos;t work</h1>
+        <p className="mt-4 text-steel">
           {error ?? 'Something went wrong while building your trip.'}
         </p>
         <div className="mt-8 flex flex-col gap-3">
-          <Button variant="accent" size="lg" block onClick={() => router.push('/plan')}>
+          <Button variant="signal" size="lg" block onClick={() => router.push('/plan')}>
             Try again
           </Button>
           <Button variant="ghost" size="lg" block onClick={() => router.push('/')}>
@@ -108,25 +108,25 @@ export function GenerationProgress({
 
   return (
     <div className="mx-auto flex min-h-[70dvh] max-w-md flex-col justify-center px-5">
-      <p className="text-xs font-medium tracking-widest text-ink-faint uppercase">
+      <p className="text-xs font-medium tracking-widest text-steel-2 uppercase">
         Building your trip
       </p>
-      <h1 className="mt-3 font-display text-display-sm text-balance">{destination}</h1>
+      <h1 className="mt-3 type-display type-title text-balance">{destination}</h1>
 
       <div className="mt-10">
-        <div className="h-1 overflow-hidden rounded-full bg-line">
+        <div className="h-1 overflow-hidden rounded-full bg-rule">
           <div
-            className="h-1 rounded-full bg-accent transition-[width] duration-700 ease-out"
+            className="h-1 rounded-full bg-signal transition-[width] duration-700 ease-out"
             style={{ width: `${percent}%` }}
           />
         </div>
-        <p className="mt-4 flex items-center gap-2 text-[0.9375rem] text-ink-muted">
+        <p className="mt-4 flex items-center gap-2 text-[0.9375rem] text-steel">
           <Loader2 className="size-4 animate-spin" aria-hidden />
           {stageCopyClient(stage)}
         </p>
       </div>
 
-      <p className="mt-10 text-sm leading-relaxed text-ink-faint">
+      <p className="mt-10 text-sm leading-relaxed text-steel-2">
         This usually takes under a minute. We&apos;re checking real places, their opening
         hours, and how long it actually takes to get between them — you can leave this page
         and come back.

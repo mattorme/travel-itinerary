@@ -103,7 +103,7 @@ export function TripView({
 
       {/* Required when Places content is shown without a Google map. Rendered
           here so it cannot be forgotten on a page that shows place data. */}
-      <p className="mt-8 text-xs text-ink-faint">
+      <p className="mt-8 text-xs text-steel-2">
         Place information and photos from Google Maps.
       </p>
     </article>

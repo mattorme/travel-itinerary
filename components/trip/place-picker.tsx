@@ -100,12 +100,12 @@ export function PlacePicker({
         aria-label={title}
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
-        className="flex max-h-[85dvh] w-full max-w-lg flex-col rounded-t-2xl border border-line bg-paper-raised sm:max-h-[80dvh] sm:rounded-2xl"
+        className="flex max-h-[85dvh] w-full max-w-lg flex-col rounded-t-2xl border border-rule bg-surface sm:max-h-[80dvh] sm:rounded-2xl"
       >
-        <div className="flex items-start justify-between gap-4 border-b border-line p-5">
+        <div className="flex items-start justify-between gap-4 border-b border-rule p-5">
           <div>
-            <h2 className="font-display text-xl">{title}</h2>
-            <p className="mt-1 text-sm text-ink-muted">{subtitle}</p>
+            <h2 className="type-display text-xl">{title}</h2>
+            <p className="mt-1 text-sm text-steel">{subtitle}</p>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose} aria-label="Close">
             <X className="size-4" />
@@ -113,10 +113,10 @@ export function PlacePicker({
         </div>
 
         {onSearch && (
-          <div className="border-b border-line p-4">
+          <div className="border-b border-rule p-4">
             <div className="relative">
               <Search
-                className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-ink-faint"
+                className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-steel-2"
                 aria-hidden
               />
               <Input
@@ -133,7 +133,7 @@ export function PlacePicker({
 
         <div className="min-h-0 flex-1 overflow-y-auto p-4">
           {loading ? (
-            <p className="flex items-center gap-2 px-1 py-6 text-sm text-ink-muted">
+            <p className="flex items-center gap-2 px-1 py-6 text-sm text-steel">
               <Loader2 className="size-4 animate-spin" aria-hidden />
               Looking…
             </p>
@@ -148,21 +148,21 @@ export function PlacePicker({
                     className={cn(
                       'w-full rounded-xl border p-3.5 text-left transition-colors',
                       chosen === option.placeId
-                        ? 'border-ink bg-paper-sunk'
-                        : 'border-line hover:border-ink/30 hover:bg-paper-sunk/60',
+                        ? 'border-ink bg-sunk'
+                        : 'border-rule hover:border-ink/30 hover:bg-sunk/60',
                       pending && chosen !== option.placeId && 'opacity-50',
                     )}
                   >
                     <span className="flex items-baseline justify-between gap-3">
-                      <span className="font-display text-lg leading-snug">{option.name}</span>
+                      <span className="type-display text-lg leading-snug">{option.name}</span>
                       {chosen === option.placeId && pending && (
                         <Loader2 className="size-4 shrink-0 animate-spin" aria-hidden />
                       )}
                     </span>
 
-                    <span className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-ink-faint">
+                    <span className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-steel-2">
                       {option.metersFromDay !== null && (
-                        <span className="flex items-center gap-1 text-ink-muted">
+                        <span className="flex items-center gap-1 text-steel">
                           <MapPin className="size-3.5" aria-hidden />
                           {formatDistance(option.metersFromDay)} from the rest of the day
                         </span>
@@ -178,7 +178,7 @@ export function PlacePicker({
                     </span>
 
                     {option.summary && (
-                      <span className="mt-2 block text-sm leading-relaxed text-ink-muted">
+                      <span className="mt-2 block text-sm leading-relaxed text-steel">
                         {option.summary}
                       </span>
                     )}
@@ -187,7 +187,7 @@ export function PlacePicker({
               ))}
             </ul>
           ) : (
-            <p className="px-1 py-6 text-sm text-ink-muted">
+            <p className="px-1 py-6 text-sm text-steel">
               {onSearch && query.trim().length < 2
                 ? 'Start typing to find somewhere.'
                 : 'Nothing else nearby that fits this slot.'}
@@ -196,7 +196,7 @@ export function PlacePicker({
         </div>
 
         {allowFreeText && query.trim().length >= 2 && (
-          <div className="border-t border-line p-4">
+          <div className="border-t border-rule p-4">
             {/* The corpus only holds places somebody has planned around. When it
                 does not have what they want, a free-text stop is better than a
                 dead end. */}

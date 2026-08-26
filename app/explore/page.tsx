@@ -78,10 +78,10 @@ export default async function ExplorePage({
     <>
       <SiteHeader />
       <main className="mx-auto max-w-5xl px-5 py-12">
-        <h1 className="font-display text-display-sm">
+        <h1 className="type-display type-title">
           {query ? `Trips matching “${query}”` : 'Trips worth copying'}
         </h1>
-        <p className="mt-3 max-w-xl text-ink-muted">
+        <p className="mt-3 max-w-xl text-steel">
           {query
             ? `${trips.length}${trips.length === 24 ? '+' : ''} ${trips.length === 1 ? 'trip' : 'trips'} found.`
             : 'Every one of these was built from real places and shared by the person who planned it.'}
@@ -113,11 +113,11 @@ export default async function ExplorePage({
             ))}
           </div>
         ) : (
-          <div className="mt-16 rounded-card border border-line bg-paper-raised p-10 text-center">
-            <p className="font-display text-xl">
+          <div className="mt-16 rounded-panel border border-rule bg-surface p-10 text-center">
+            <p className="type-display text-xl">
               {query ? 'Nothing matched that' : 'Nothing here yet'}
             </p>
-            <p className="mt-2 text-ink-muted">
+            <p className="mt-2 text-steel">
               {query
                 ? 'Try a destination, or something you want to do there.'
                 : 'Be the first — build a trip and share it.'}
@@ -126,14 +126,14 @@ export default async function ExplorePage({
               {query && (
                 <Link
                   href="/explore"
-                  className="rounded-full border border-line-strong px-6 py-3 text-sm"
+                  className="rounded-full border border-rule-2 px-6 py-3 text-sm"
                 >
                   Clear search
                 </Link>
               )}
               <Link
                 href={query ? { pathname: '/plan', query: { q: query } } : '/plan'}
-                className="rounded-full bg-accent px-6 py-3 text-sm text-white"
+                className="rounded-full bg-signal px-6 py-3 text-sm text-white"
               >
                 {query ? `Plan a trip to ${query}` : 'Plan a trip'}
               </Link>

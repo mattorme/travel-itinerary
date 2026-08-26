@@ -37,7 +37,7 @@ export function Stepper({
         <Minus className="size-4" />
       </Button>
       <span className="min-w-28 text-center text-lg tabular-nums">
-        {value} <span className="text-ink-muted">{suffix}</span>
+        {value} <span className="text-steel">{suffix}</span>
       </span>
       <Button
         variant="outline"
@@ -72,11 +72,11 @@ export function OptionCard({
         'rounded-xl border p-4 text-left transition-colors',
         selected
           ? 'border-ink bg-ink text-paper'
-          : 'border-line-strong bg-paper-raised hover:border-ink/40',
+          : 'border-rule-2 bg-surface hover:border-ink/40',
       )}
     >
       <span className="block font-medium capitalize">{title}</span>
-      <span className={cn('mt-1 block text-sm', selected ? 'text-paper/70' : 'text-ink-muted')}>
+      <span className={cn('mt-1 block text-sm', selected ? 'text-paper/70' : 'text-steel')}>
         {blurb}
       </span>
     </button>

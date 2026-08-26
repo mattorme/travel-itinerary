@@ -2,6 +2,9 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  // The floating dev indicator overlays the bottom-left of the viewport, which
+  // is where the wizard's Back button lives — it intercepts real clicks.
+  devIndicators: false,
   typedRoutes: true,
   images: {
     remotePatterns: [

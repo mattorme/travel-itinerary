@@ -22,7 +22,7 @@ export function NotesStep({ state, patch }: { state: WizardState; patch: Patch }
           onChange={(e) => patch({ notes: e.target.value })}
         />
       </Field>
-      <p className="text-right text-xs text-ink-faint">{state.notes.length} / 2000</p>
+      <p className="text-right text-xs text-steel-2">{state.notes.length} / 2000</p>
     </div>
   );
 }

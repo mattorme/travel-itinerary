@@ -43,14 +43,14 @@ export async function GET(
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
-          background: '#17150f',
-          color: '#fdfbf7',
+          background: '#111316',
+          color: '#fcfcfa',
           padding: 96,
           fontFamily: 'sans-serif',
         }}
       >
         <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <div style={{ display: 'flex', fontSize: 32, letterSpacing: 6, color: '#8a857a' }}>
+          <div style={{ display: 'flex', fontSize: 32, letterSpacing: 6, color: '#a0a1a2' }}>
             {country.toUpperCase()}
           </div>
           <div
@@ -64,7 +64,7 @@ export async function GET(
           >
             {days} DAYS
           </div>
-          <div style={{ display: 'flex', fontSize: 44, marginTop: 32, color: '#d4ccbb', maxWidth: 860 }}>
+          <div style={{ display: 'flex', fontSize: 44, marginTop: 32, color: '#c9cbcd', maxWidth: 860 }}>
             {itinerary.title}
           </div>
         </div>
@@ -73,7 +73,7 @@ export async function GET(
           {shown.map((entry, index) => (
             <div key={`${entry}-${index}`} style={{ display: 'flex', flexDirection: 'column' }}>
               {index > 0 && (
-                <div style={{ display: 'flex', fontSize: 36, color: '#57534a', marginLeft: 6 }}>↓</div>
+                <div style={{ display: 'flex', fontSize: 36, color: '#6a6f77', marginLeft: 6 }}>↓</div>
               )}
               <div
                 style={{
@@ -89,7 +89,7 @@ export async function GET(
             </div>
           ))}
           {overflow > 0 && (
-            <div style={{ display: 'flex', fontSize: 34, color: '#8a857a', marginTop: 8 }}>
+            <div style={{ display: 'flex', fontSize: 34, color: '#a0a1a2', marginTop: 8 }}>
               + {overflow} more
             </div>
           )}
@@ -97,11 +97,11 @@ export async function GET(
 
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           {cost !== undefined && (
-            <div style={{ display: 'flex', fontSize: 76, color: '#e8813f', letterSpacing: -2 }}>
+            <div style={{ display: 'flex', fontSize: 76, color: '#8ca4ff', letterSpacing: -2 }}>
               ~{formatCurrency(cost, itinerary.request.currency)}
             </div>
           )}
-          <div style={{ display: 'flex', fontSize: 28, color: '#8a857a', marginTop: 12 }}>
+          <div style={{ display: 'flex', fontSize: 28, color: '#a0a1a2', marginTop: 12 }}>
             estimated, excluding flights
           </div>
           <div
@@ -110,11 +110,11 @@ export async function GET(
               justifyContent: 'space-between',
               alignItems: 'flex-end',
               marginTop: 48,
-              borderTop: '3px solid #57534a',
+              borderTop: '3px solid #34383f',
               paddingTop: 32,
             }}
           >
-            <div style={{ display: 'flex', fontSize: 34, color: '#d4ccbb' }}>
+            <div style={{ display: 'flex', fontSize: 34, color: '#c9cbcd' }}>
               {itinerary.creator?.username ? `@${itinerary.creator.username}` : ''}
             </div>
             <div style={{ display: 'flex', fontSize: 38, letterSpacing: -1 }}>Wayfare</div>

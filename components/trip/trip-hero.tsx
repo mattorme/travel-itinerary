@@ -1,87 +1,115 @@
 import Link from 'next/link';
-import { Cover } from '@/components/ui/cover';
 import type { Itinerary } from '@/domain/types/itinerary';
+import { Cover } from '@/components/ui/cover';
 import { formatCurrency, formatDateRange, humanise } from '@/lib/utils/format';
+import { cn } from '@/lib/utils/cn';
 
 /**
- * The editorial header.
+ * The head of the trip page.
  *
- * This is the first thing someone sees after tapping a shared link, so it has
- * to answer "where, how long, how much, who made it" before any scrolling —
- * and look like a magazine rather than a dashboard.
+ * Built like a service board: the route as a chain of names, the headline at
+ * signage scale, then the facts in a hard-ruled strip. Someone arriving cold
+ * from a link in a group chat should have where, how long and how much before
+ * they scroll.
  */
 export function TripHero({ itinerary }: { itinerary: Itinerary }) {
   const route = itinerary.destinations.map((d) => d.name);
   const dates = formatDateRange(itinerary.request.dates.start, itinerary.request.dates.end);
   const cost = itinerary.estimatedCost?.total ?? null;
+  const days = itinerary.request.dates.durationDays;
+
+  // `numeric` decides the typeface: mono is for figures a reader might compare
+  // down a column. Setting a word like "relaxed" in mono just looks like code.
+  const facts: { label: string; value: string; sub?: string; numeric?: boolean }[] = [
+    { label: 'Duration', value: `${days} ${days === 1 ? 'day' : 'days'}`, numeric: true },
+    ...(cost !== null
+      ? [{
+          label: 'Estimated',
+          value: formatCurrency(cost, itinerary.request.currency),
+          sub: 'excl. flights',
+          numeric: true,
+        }]
+      : []),
+    ...(dates ? [{ label: 'Dates', value: dates, numeric: true }] : []),
+    { label: 'Pace', value: humanise(itinerary.request.pace) },
+    { label: 'Style', value: humanise(itinerary.request.travelStyle) },
+  ];
 
   return (
-    <header className="relative">
-      {/* Always rendered. Generated art when there is no photograph, because a
-          missing hero makes the page that has to make the first impression look
-          broken. */}
-      <div className="relative -mx-5 mb-8 aspect-[3/2] overflow-hidden bg-paper-sunk sm:mx-0 sm:aspect-[21/9] sm:rounded-card">
+    <header>
+      {/* Always rendered: generated art when there is no photograph, because a
+          missing hero makes the page that has to make the first impression
+          look broken. */}
+      <div className="relative -mx-4 aspect-[16/10] overflow-hidden bg-sunk sm:mx-0 sm:aspect-[24/9]">
         <Cover
           imageUrl={itinerary.heroImageUrl}
           credit={itinerary.heroCredit}
           seed={itinerary.slug}
           label={route[0] ?? itinerary.title}
           priority
-          showLabel
           sizes="(max-width: 640px) 100vw, 768px"
         />
       </div>
 
-      <p className="text-xs font-medium tracking-widest text-ink-faint uppercase">
-        {itinerary.request.dates.durationDays}{' '}
-        {itinerary.request.dates.durationDays === 1 ? 'day' : 'days'}
-        {route.length > 0 && ` · ${route.join(' → ')}`}
-      </p>
+      {/* The route, as a chain of station names. */}
+      {route.length > 0 && (
+        <p className="type-label mt-6 flex flex-wrap items-center gap-x-2 gap-y-1 text-steel">
+          {route.map((name, i) => (
+            <span key={name} className="flex items-center gap-2">
+              {i > 0 && <span className="text-rule-2" aria-hidden>→</span>}
+              {name}
+            </span>
+          ))}
+        </p>
+      )}
 
-      <h1 className="font-display text-display mt-3 text-balance">{itinerary.title}</h1>
+      <h1 className="type-display type-hero mt-3">{itinerary.title}</h1>
 
       {itinerary.subtitle && (
-        <p className="mt-4 max-w-2xl text-xl leading-snug text-ink-muted text-balance">
+        <p className="mt-4 max-w-[54ch] text-[1.25rem] leading-[1.35] text-steel text-balance">
           {itinerary.subtitle}
         </p>
       )}
 
-      <dl className="mt-8 flex flex-wrap gap-x-8 gap-y-4 border-y border-line py-5 text-sm">
-        {cost !== null && (
-          <div>
-            <dt className="text-ink-faint">Estimated</dt>
-            <dd className="mt-0.5 text-base">
-              ~{formatCurrency(cost, itinerary.request.currency)}
-              <span className="text-ink-faint"> excl. flights</span>
+      {/*
+        Hard-ruled fact strip — a timetable header, not a card grid.
+
+        Hairlines come from a 1px grid gap over a ruled background rather than
+        per-cell borders: cells wrap from five columns to two on a phone, and
+        nth-child borders get the edges wrong on every layout but the one they
+        were written for.
+      */}
+      <dl className="mt-8 grid grid-cols-2 gap-px border-y-2 border-ink bg-rule sm:grid-cols-3 lg:grid-cols-5">
+        {facts.map((fact) => (
+          <div key={fact.label} className="bg-paper px-3 py-3.5">
+            <dt className="type-label text-steel-2">{fact.label}</dt>
+            <dd
+              className={cn(
+                'mt-1 text-[1.0625rem] leading-tight',
+                fact.numeric ? 'type-data' : 'font-medium',
+              )}
+            >
+              {fact.value}
+              {fact.sub && (
+                <span className="mt-0.5 block text-[0.75rem] font-normal text-steel-2">
+                  {fact.sub}
+                </span>
+              )}
             </dd>
           </div>
-        )}
-        {dates && (
-          <div>
-            <dt className="text-ink-faint">Dates</dt>
-            <dd className="mt-0.5 text-base">{dates}</dd>
-          </div>
-        )}
-        <div>
-          <dt className="text-ink-faint">Pace</dt>
-          <dd className="mt-0.5 text-base capitalize">{humanise(itinerary.request.pace)}</dd>
-        </div>
-        <div>
-          <dt className="text-ink-faint">Style</dt>
-          <dd className="mt-0.5 text-base capitalize">{humanise(itinerary.request.travelStyle)}</dd>
-        </div>
+        ))}
       </dl>
 
       {itinerary.summary && (
-        <p className="mt-8 max-w-2xl text-[1.0625rem] leading-relaxed">{itinerary.summary}</p>
+        <p className="mt-8 max-w-[62ch] text-[1.0625rem] leading-relaxed">{itinerary.summary}</p>
       )}
 
       {itinerary.highlights.length > 0 && (
-        <ul className="mt-6 flex flex-wrap gap-2">
+        <ul className="mt-5 flex flex-wrap gap-2">
           {itinerary.highlights.map((highlight) => (
             <li
               key={highlight}
-              className="rounded-full bg-paper-sunk px-3.5 py-1.5 text-sm text-ink-muted"
+              className="rounded-edge border border-rule-2 px-3 py-1.5 text-[0.8125rem] text-steel"
             >
               {highlight}
             </li>
@@ -89,15 +117,15 @@ export function TripHero({ itinerary }: { itinerary: Itinerary }) {
         </ul>
       )}
 
-      {/* Attribution survives the source being deleted or made private — it just
-          stops linking. Credit is never a 404. */}
+      {/* Attribution survives the source being deleted or made private — it
+          just stops linking. Credit is never a 404. */}
       {itinerary.lineage.originCreatorUsername && (
-        <p className="mt-6 text-sm text-ink-faint">
+        <p className="mt-6 text-[0.875rem] text-steel-2">
           Based on a trip by{' '}
           {itinerary.lineage.forkedFromTripId ? (
             <Link
               href={`/u/${itinerary.lineage.originCreatorUsername}`}
-              className="underline underline-offset-4 hover:text-ink"
+              className="text-signal underline underline-offset-4"
             >
               @{itinerary.lineage.originCreatorUsername}
             </Link>

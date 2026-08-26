@@ -29,7 +29,7 @@ export function PlacePhoto({
   if (failed) return null;
 
   return (
-    <figure className={cn('overflow-hidden rounded-xl bg-paper-sunk', className)}>
+    <figure className={cn('overflow-hidden rounded-xl bg-sunk', className)}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={`/api/place-photo/${placeId}?w=800`}

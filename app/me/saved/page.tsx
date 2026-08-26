@@ -34,8 +34,8 @@ export default async function SavedTripsPage() {
       <SiteHeader />
       <main className="mx-auto max-w-5xl px-5 py-12">
         <div className="flex items-end justify-between gap-4">
-          <h1 className="font-display text-display-sm">Saved</h1>
-          <Link href="/me" className="text-sm text-ink-muted underline underline-offset-4 hover:text-ink">
+          <h1 className="type-display type-title">Saved</h1>
+          <Link href="/me" className="text-sm text-steel underline underline-offset-4 hover:text-ink">
             My trips
           </Link>
         </div>
@@ -47,13 +47,13 @@ export default async function SavedTripsPage() {
             ))}
           </div>
         ) : (
-          <div className="mt-16 rounded-card border border-line bg-paper-raised p-10 text-center">
-            <p className="font-display text-xl">Nothing saved yet</p>
-            <p className="mt-2 text-ink-muted">
+          <div className="mt-16 rounded-panel border border-rule bg-surface p-10 text-center">
+            <p className="type-display text-xl">Nothing saved yet</p>
+            <p className="mt-2 text-steel">
               Bookmark trips you like and they will collect here.
             </p>
             <Link href="/explore" className="mt-6 inline-block">
-              <Button variant="accent">Browse trips</Button>
+              <Button variant="signal">Browse trips</Button>
             </Link>
           </div>
         )}

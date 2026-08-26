@@ -66,10 +66,10 @@ export function SignInForm({ nextPath }: { nextPath: string }) {
 
   if (state === 'sent') {
     return (
-      <div className="mt-8 rounded-card border border-line bg-paper-raised p-6 text-center">
+      <div className="mt-8 rounded-panel border border-rule bg-surface p-6 text-center">
         <Check className="mx-auto size-6 text-positive" />
-        <p className="mt-3 font-display text-lg">Check your email</p>
-        <p className="mt-2 text-sm text-ink-muted">
+        <p className="mt-3 type-display text-lg">Check your email</p>
+        <p className="mt-2 text-sm text-steel">
           We sent a link to {email}. Open it on this device.
         </p>
       </div>
@@ -102,10 +102,10 @@ export function SignInForm({ nextPath }: { nextPath: string }) {
         </p>
       )}
 
-      <div className="flex items-center gap-4 text-sm text-ink-faint">
-        <span className="h-px flex-1 bg-line" />
+      <div className="flex items-center gap-4 text-sm text-steel-2">
+        <span className="h-px flex-1 bg-rule" />
         or
-        <span className="h-px flex-1 bg-line" />
+        <span className="h-px flex-1 bg-rule" />
       </div>
 
       <Button variant="outline" size="lg" block onClick={signInWithGoogle}>

@@ -35,7 +35,7 @@ export function TravellersStep({ state, patch }: { state: WizardState; patch: Pa
         {state.children.length > 0 && (
           <div className="mt-4 flex flex-wrap gap-3">
             {state.children.map((age, index) => (
-              <label key={index} className="flex items-center gap-2 text-sm text-ink-muted">
+              <label key={index} className="flex items-center gap-2 text-sm text-steel">
                 Child {index + 1}
                 <input
                   type="number"
@@ -47,7 +47,7 @@ export function TravellersStep({ state, patch }: { state: WizardState; patch: Pa
                     next[index] = Math.max(0, Math.min(17, Number(e.target.value)));
                     patch({ children: next });
                   }}
-                  className="w-16 rounded-lg border border-line-strong bg-paper-raised px-2 py-1.5 text-center text-[16px]"
+                  className="w-16 rounded-lg border border-rule-2 bg-surface px-2 py-1.5 text-center text-[16px]"
                 />
               </label>
             ))}

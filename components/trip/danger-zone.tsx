@@ -19,16 +19,16 @@ export function DangerZone({ tripId, cloneCount }: { tripId: string; cloneCount:
   const [error, setError] = useState<string | null>(null);
 
   return (
-    <section className="mt-12 border-t border-line pt-6" data-print-hide>
+    <section className="mt-12 border-t border-rule pt-6" data-print-hide>
       {!confirming ? (
         <Button variant="ghost" size="sm" onClick={() => setConfirming(true)}>
           <Trash2 className="size-4" />
           Delete this trip
         </Button>
       ) : (
-        <div className="rounded-card border border-critical/30 bg-critical/5 p-5">
+        <div className="rounded-panel border border-critical/30 bg-critical/5 p-5">
           <p className="font-medium">Delete this trip?</p>
-          <p className="mt-1.5 text-sm text-ink-muted">
+          <p className="mt-1.5 text-sm text-steel">
             It disappears from the site straight away and any shared link stops working.
             {cloneCount > 0 && (
               <>

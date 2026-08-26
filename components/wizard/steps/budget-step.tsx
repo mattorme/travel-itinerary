@@ -13,7 +13,7 @@ const CURRENCIES = ['AUD', 'USD', 'EUR', 'GBP', 'NZD', 'CAD', 'JPY', 'SGD'];
 export function BudgetStep({ state, patch }: { state: WizardState; patch: Patch }) {
   return (
     <div className="space-y-7">
-      <p className="text-[0.9375rem] text-ink-muted">
+      <p className="text-[0.9375rem] text-steel">
         Optional — but it changes what we suggest. Excludes flights.
       </p>
 

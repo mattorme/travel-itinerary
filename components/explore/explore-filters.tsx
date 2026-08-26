@@ -57,7 +57,7 @@ export function ExploreFilters({
             {option.label}
           </Chip>
         ))}
-        <span className="w-px shrink-0 self-stretch bg-line" aria-hidden />
+        <span className="w-px shrink-0 self-stretch bg-rule" aria-hidden />
         {DURATION_BANDS.map((band) => (
           <Chip
             key={band.key}
@@ -70,7 +70,7 @@ export function ExploreFilters({
       </div>
 
       <details className="group">
-        <summary className="inline-flex cursor-pointer list-none items-center gap-1 text-sm text-ink-muted hover:text-ink">
+        <summary className="inline-flex cursor-pointer list-none items-center gap-1 text-sm text-steel hover:text-ink">
           More filters
           <span className="transition-transform group-open:rotate-180" aria-hidden>
             ⌄
@@ -126,7 +126,7 @@ export function ExploreFilters({
 function FilterRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <p className="mb-1.5 text-xs font-medium tracking-widest text-ink-faint uppercase">{label}</p>
+      <p className="mb-1.5 text-xs font-medium tracking-widest text-steel-2 uppercase">{label}</p>
       <div className="flex flex-wrap gap-1.5">{children}</div>
     </div>
   );
@@ -149,7 +149,7 @@ function Chip({
         'shrink-0 rounded-full px-3.5 py-1.5 text-sm whitespace-nowrap transition-colors',
         active
           ? 'bg-ink text-paper'
-          : 'border border-line-strong text-ink-muted hover:text-ink',
+          : 'border border-rule-2 text-steel hover:text-ink',
       )}
     >
       {children}

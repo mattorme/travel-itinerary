@@ -2,12 +2,15 @@
 
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils/cn';
+import { dayColour } from './map/types';
 
 /**
- * Sticky day navigation.
+ * Day navigation, as a line index.
  *
- * A horizontal scroller rather than a sidebar, because the primary viewport is
- * a phone and a 12-day trip needs to be skimmable with a thumb.
+ * A horizontal scroller rather than a sidebar: the primary viewport is a phone,
+ * and a twelve-day trip has to be skimmable with a thumb. Each entry carries
+ * its route colour, so the strip doubles as the legend for the timeline and the
+ * map below it.
  */
 export function DayNav({ days }: { days: readonly { dayIndex: number; title: string }[] }) {
   const [active, setActive] = useState(days[0]?.dayIndex ?? 1);
@@ -28,7 +31,7 @@ export function DayNav({ days }: { days: readonly { dayIndex: number; title: str
           if (!Number.isNaN(index)) setActive(index);
         }
       },
-      { rootMargin: '-96px 0px -60% 0px', threshold: 0 },
+      { rootMargin: '-120px 0px -60% 0px', threshold: 0 },
     );
 
     for (const section of sections) observer.observe(section);
@@ -41,25 +44,32 @@ export function DayNav({ days }: { days: readonly { dayIndex: number; title: str
     <nav
       aria-label="Days"
       data-print-hide
-      className="sticky top-16 z-30 -mx-5 border-b border-line bg-paper/90 px-5 backdrop-blur-md"
+      className="sticky top-14 z-30 -mx-4 border-b border-rule bg-paper/95 px-4 backdrop-blur-sm sm:mx-0 sm:px-0"
     >
-      <ul className="hide-scrollbar flex gap-1 overflow-x-auto py-3">
-        {days.map((day) => (
-          <li key={day.dayIndex}>
-            <a
-              href={`#day-${day.dayIndex}`}
-              aria-current={active === day.dayIndex ? 'true' : undefined}
-              className={cn(
-                'block rounded-full px-3.5 py-1.5 text-sm whitespace-nowrap transition-colors',
-                active === day.dayIndex
-                  ? 'bg-ink text-paper'
-                  : 'text-ink-muted hover:bg-paper-sunk hover:text-ink',
-              )}
-            >
-              Day {day.dayIndex}
-            </a>
-          </li>
-        ))}
+      <ul className="hide-scrollbar flex gap-4 overflow-x-auto py-3">
+        {days.map((day) => {
+          const colour = dayColour(day.dayIndex);
+          const isActive = active === day.dayIndex;
+          return (
+            <li key={day.dayIndex}>
+              <a
+                href={`#day-${day.dayIndex}`}
+                aria-current={isActive ? 'true' : undefined}
+                className={cn(
+                  'type-label flex shrink-0 items-center gap-2 whitespace-nowrap py-1 transition-colors',
+                  isActive ? 'text-ink' : 'text-steel-2 hover:text-ink',
+                )}
+              >
+                <span
+                  className="h-2.5 w-6 shrink-0"
+                  style={{ backgroundColor: colour, opacity: isActive ? 1 : 0.35 }}
+                  aria-hidden
+                />
+                Day {day.dayIndex}
+              </a>
+            </li>
+          );
+        })}
       </ul>
     </nav>
   );

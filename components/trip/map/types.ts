@@ -11,21 +11,23 @@ export interface MapStop {
 }
 
 /**
- * One colour per day, cycling after eight.
+ * The route palette — one line colour per day, cycling after eight.
  *
- * Chosen to stay distinguishable at marker size and to sit against the warm
- * paper background without any of them reading as the accent colour, which
- * belongs to actions.
+ * This is the product's identity, not a decoration: the same value colours a
+ * day's rail on the timeline, its badge in the day index, its markers and
+ * polyline on the map, and its cover art. Every entry clears 4.5:1 on white so
+ * it can carry small text, and none of them is the signal blue, which is
+ * reserved for actions.
  */
 export const DAY_COLOURS: readonly string[] = [
-  '#C2410C',
-  '#2F6B4F',
-  '#2F4A6B',
-  '#8C3F63',
-  '#7A6320',
-  '#3F5F6B',
-  '#6B3F2F',
-  '#4A3F6B',
+  '#D6321F',
+  '#0B6E4F',
+  '#1B3BD8',
+  '#B0187E',
+  '#8A5A00',
+  '#00697A',
+  '#7A2FA8',
+  '#A8431C',
 ];
 
 export function dayColour(dayIndex: number): string {

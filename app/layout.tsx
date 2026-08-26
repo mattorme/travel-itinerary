@@ -1,20 +1,29 @@
 import type { Metadata, Viewport } from 'next';
-import { Fraunces, Inter } from 'next/font/google';
+import { Archivo, DM_Mono } from 'next/font/google';
 import { publicEnv } from '@/lib/public-env';
 import { NativeShell } from '@/components/native-shell';
 import './globals.css';
 
-const fraunces = Fraunces({
+/**
+ * Archivo, with its width axis available.
+ *
+ * A grotesque rather than a serif, because the product's visual language is
+ * transit signage. The width axis is what makes the display type read as a
+ * station board instead of a generic sans — see `.type-display`.
+ */
+const archivo = Archivo({
   subsets: ['latin'],
   display: 'swap',
-  variable: '--font-fraunces',
-  axes: ['SOFT', 'WONK', 'opsz'],
+  variable: '--font-archivo',
+  axes: ['wdth'],
 });
 
-const inter = Inter({
+/** Timetable numerals: times, distances, prices. */
+const dmMono = DM_Mono({
   subsets: ['latin'],
+  weight: ['400', '500'],
   display: 'swap',
-  variable: '--font-inter',
+  variable: '--font-dm-mono',
 });
 
 export const metadata: Metadata = {
@@ -42,7 +51,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#fdfbf7',
+  themeColor: '#111316',
   width: 'device-width',
   initialScale: 1,
   // Required for env(safe-area-inset-*) to report real values inside the app.
@@ -54,7 +63,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${fraunces.variable} ${inter.variable}`}>
+    <html lang="en" className={`${archivo.variable} ${dmMono.variable}`}>
       <body className="min-h-dvh antialiased">
         <NativeShell />
         {children}

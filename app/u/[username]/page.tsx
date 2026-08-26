@@ -68,16 +68,16 @@ export default async function ProfilePage({
       <main className="mx-auto max-w-5xl px-5 py-12">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex items-start gap-4">
-            <span className="relative size-16 shrink-0 overflow-hidden rounded-full bg-paper-sunk">
+            <span className="relative size-16 shrink-0 overflow-hidden rounded-full bg-sunk">
               {/* Generated rather than a grey circle with an initial in it. */}
               <CoverArt seed={profile.username} label={profile.username} />
             </span>
             <div className="min-w-0">
-              <h1 className="font-display text-display-sm">
+              <h1 className="type-display type-title">
                 {profile.display_name ?? `@${profile.username}`}
               </h1>
-              <p className="mt-1 text-ink-faint">@{profile.username}</p>
-              {profile.bio && <p className="mt-3 max-w-xl text-ink-muted">{profile.bio}</p>}
+              <p className="mt-1 text-steel-2">@{profile.username}</p>
+              {profile.bio && <p className="mt-3 max-w-xl text-steel">{profile.bio}</p>}
 
               {/* A div inside a dl may contain only dt and dd, so the unit is
                   the term itself rather than a third element. Reversed so it
@@ -92,7 +92,7 @@ export default async function ProfilePage({
                   { term: 'following', value: profile.following_count },
                 ].map((stat) => (
                   <div key={stat.term} className="flex flex-row-reverse gap-1.5">
-                    <dt className="text-ink-faint">{stat.term}</dt>
+                    <dt className="text-steel-2">{stat.term}</dt>
                     <dd className="font-medium">{formatCompact(stat.value)}</dd>
                   </div>
                 ))}
@@ -114,7 +114,7 @@ export default async function ProfilePage({
             ))}
           </div>
         ) : (
-          <p className="mt-12 text-ink-muted">No public trips yet.</p>
+          <p className="mt-12 text-steel">No public trips yet.</p>
         )}
       </main>
       <SiteFooter />

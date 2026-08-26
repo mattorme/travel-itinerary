@@ -1,46 +1,60 @@
 @import 'tailwindcss';
 
 /* ==========================================================================
-   Design tokens.
+   Wayfare — visual system
 
-   The product is photography-led: the palette is a warm neutral ground that
-   gets out of the way of destination imagery, with a single accent used for
-   action and nothing else. Resisting a second accent is what keeps it from
-   looking like a SaaS dashboard.
+   An itinerary is a route: an ordered sequence of stops, with times and
+   connections between them. The design tradition that owns that exactly is
+   transit wayfinding — Vignelli's subway diagram, TfL, Swiss rail timetables,
+   airport signage. So that is where this borrows from, rather than from a mood.
+
+   Three consequences run through everything below:
+
+   1. The route colours ARE the identity. Each day of a trip gets a line
+      colour, and it appears on the timeline rail, the day navigation, the map
+      and the cards. The palette does the personality work so the neutrals do
+      not have to.
+   2. Signage is set in a grotesque, not a serif, and it is tight, wide and
+      loud where it needs to be read at a glance.
+   3. Edges are sharp. Signage does not have rounded corners, and neither does
+      a timetable.
    ========================================================================== */
 @theme {
-  --color-paper: #fdfbf7;
-  --color-paper-raised: #ffffff;
-  --color-paper-sunk: #f4f0e8;
+  /* Ground. Near-white with a whisper of cool, deliberately not cream. */
+  --color-paper: #fcfcfa;
+  --color-surface: #ffffff;
+  --color-sunk: #f1f2f0;
 
-  --color-ink: #17150f;
-  --color-ink-muted: #57534a;
-  /* 4.99:1 on paper, 5.16:1 on cards, 4.54:1 on sunk — clears AA on every
-     surface it is used against. The previous #8a857a was 3.55:1 and failed on
-     all three. Do not lighten without re-checking all three. */
-  --color-ink-faint: #726d5f;
+  /* The dark chrome — a departure board, not a page background. */
+  --color-ink: #111316;
+  --color-ink-2: #1c1f24;
 
-  --color-line: #e6e0d4;
-  --color-line-strong: #d4ccbb;
+  --color-steel: #5c6067;
+  --color-steel-2: #6a6f77;
 
-  --color-accent: #c2410c;
-  --color-accent-hover: #9a3412;
-  --color-accent-soft: #fff1e7;
+  --color-rule: #e2e4e7;
+  --color-rule-2: #cfd2d7;
 
-  --color-positive: #15803d;
-  --color-caution: #b45309;
-  --color-critical: #b91c1c;
+  /* Action only. Never decoration — if it is blue, it does something. */
+  --color-signal: #1b3bd8;
+  --color-signal-deep: #12299b;
+  --color-signal-wash: #eef1fe;
 
-  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --color-positive: #0b6e4f;
+  --color-caution: #8a5a00;
+  --color-critical: #b3261e;
 
-  --radius-card: 1rem;
-  --radius-pill: 999px;
+  --font-display: var(--font-archivo), 'Helvetica Neue', Arial, sans-serif;
+  --font-sans: var(--font-archivo), 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: var(--font-dm-mono), ui-monospace, 'SF Mono', Menlo, monospace;
 
-  /* Timeline geometry, shared between the rail and the activity cards so they
-     stay aligned when either changes. */
-  --timeline-rail: 1.25rem;
-  --timeline-gap: 1rem;
+  /* Signage geometry: near-square, never pill-shaped except on true chips. */
+  --radius-edge: 2px;
+  --radius-panel: 3px;
+
+  /* The route rail down the left of a day. */
+  --rail-width: 3px;
+  --stop-size: 1.375rem;
 }
 
 @layer base {
@@ -53,20 +67,25 @@
     background-color: var(--color-paper);
     color: var(--color-ink);
     font-family: var(--font-sans);
-    font-feature-settings: 'cv05' 1, 'ss01' 1;
+    font-synthesis-weight: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
   }
 
   ::selection {
-    background: var(--color-accent-soft);
-    color: var(--color-accent-hover);
+    background: var(--color-ink);
+    color: var(--color-paper);
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-accent);
+    outline: 2px solid var(--color-signal);
     outline-offset: 2px;
-    border-radius: 4px;
+  }
+
+  /* Every number that could line up in a column, does. */
+  time,
+  [data-numeric] {
+    font-variant-numeric: tabular-nums;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -79,31 +98,16 @@
       scroll-behavior: auto !important;
     }
   }
-}
 
-@layer base {
   /*
-   * Native shell adjustments.
-   *
-   * Scoped to [data-native] — set by <NativeShell /> — so the browser build is
-   * byte-for-byte unaffected. There is one codebase and one deploy; this is the
-   * only place the two targets differ visually.
+   * Native shell adjustments. Scoped to [data-native] so the browser build is
+   * unaffected — one codebase, one deploy, and this is the only place the two
+   * targets differ visually.
    */
   [data-native] body {
-    /* No browser chrome to hide behind: own the notch and home indicator. */
     padding-top: env(safe-area-inset-top);
     padding-bottom: env(safe-area-inset-bottom);
-    /* A webview that rubber-bands over the page edges looks like a broken app. */
     overscroll-behavior-y: none;
-  }
-
-  /* Sticky elements must sit below the status bar, not under it. */
-  [data-native] .sticky {
-    top: calc(var(--sticky-top, 0px) + env(safe-area-inset-top));
-  }
-
-  /* Text selection on a long-press feels wrong on native; inputs keep it. */
-  [data-native] body {
     -webkit-user-select: none;
     user-select: none;
   }
@@ -113,57 +117,45 @@
     -webkit-user-select: text;
     user-select: text;
   }
-}
+  [data-native] .sticky {
+    top: calc(var(--sticky-top, 0px) + env(safe-area-inset-top));
+  }
 
-@layer base {
   /*
-   * Print.
-   *
-   * A printed itinerary is a real use case — it is what goes in a bag as the
-   * backup when a phone dies. Printing the page as-is wastes the first sheet on
-   * navigation and scatters days across page breaks mid-stop.
+   * Print. A printed itinerary is the backup that goes in a bag when a phone
+   * dies. Chrome is hidden by opting in, never by element type — `header` also
+   * matches the trip hero and every day heading.
    */
   @media print {
-    /*
-     * Hide the site chrome by opting in, not by element type. `header` also
-     * matches the trip hero and every day heading, so a blanket rule prints a
-     * list of activities with no dates, no day titles and no trip name on it.
-     */
     [data-print-hide] {
       display: none !important;
     }
-
     body {
       background: #fff;
       color: #000;
-      font-size: 11pt;
+      font-size: 10.5pt;
     }
-
     main,
     article {
       max-width: none !important;
       padding: 0 !important;
       margin: 0 !important;
     }
-
-    /* Never split a stop or a day header across a page. */
     article,
     section {
       break-inside: avoid;
     }
-    h1, h2, h3 {
+    h1,
+    h2,
+    h3 {
       break-after: avoid;
     }
-
-    /* A printed page cannot be tapped, so show where links actually go. */
     a[href^='http']::after {
       content: ' (' attr(href) ')';
-      font-size: 9pt;
+      font-size: 8.5pt;
       color: #555;
       word-break: break-all;
     }
-
-    /* Imagery burns ink and adds nothing to a reference copy. */
     img,
     svg[role='img'],
     figure {
@@ -173,20 +165,49 @@
 }
 
 @layer utilities {
-  .font-display {
+  /*
+   * Display type. Archivo's width axis pushed wide and heavy — this is the
+   * voice of a station name board, and it is the single most recognisable
+   * thing about the product's type.
+   */
+  .type-display {
     font-family: var(--font-display);
-    font-variation-settings: 'SOFT' 0, 'WONK' 1;
-    letter-spacing: -0.02em;
+    font-variation-settings: 'wdth' 112;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 0.94;
+    text-wrap: balance;
   }
 
-  /* Editorial display sizing: large on mobile too. The hero is the product. */
-  .text-display {
-    font-size: clamp(2.25rem, 8vw, 4.5rem);
-    line-height: 0.98;
+  .type-hero {
+    font-size: clamp(2.5rem, 9vw, 5rem);
   }
-  .text-display-sm {
-    font-size: clamp(1.75rem, 5.5vw, 2.75rem);
-    line-height: 1.05;
+  .type-title {
+    font-size: clamp(1.75rem, 5vw, 2.75rem);
+  }
+  .type-section {
+    font-size: clamp(1.25rem, 3vw, 1.5rem);
+  }
+
+  /*
+   * The signage label. Small, wide-tracked, upper case — the vernacular of
+   * platform indicators and timetable column heads. Used for every eyebrow and
+   * field label in the product, which is what makes them read as one system.
+   */
+  .type-label {
+    font-family: var(--font-sans);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    line-height: 1.2;
+  }
+
+  /* Times, distances, prices. A timetable sets its numbers in mono. */
+  .type-data {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
   }
 
   .hide-scrollbar {
@@ -194,5 +215,13 @@
   }
   .hide-scrollbar::-webkit-scrollbar {
     display: none;
+  }
+
+  /*
+   * A hairline that survives a zoomed-out viewport. A 1px border on a high-DPI
+   * screen at some zoom levels disappears entirely; a shadow does not.
+   */
+  .rule-top {
+    box-shadow: inset 0 1px 0 var(--color-rule);
   }
 }

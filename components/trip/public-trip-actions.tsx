@@ -70,7 +70,7 @@ export function PublicTripActions({
             Edit this trip
           </Button>
         ) : (
-          <Button variant="accent" size="lg" onClick={onClone} disabled={pending}>
+          <Button variant="signal" size="lg" onClick={onClone} disabled={pending}>
             {pending ? <Loader2 className="size-4 animate-spin" /> : <Copy className="size-4" />}
             Make this trip yours
           </Button>
@@ -92,7 +92,7 @@ export function PublicTripActions({
           aria-pressed={liked}
           aria-label={liked ? 'Remove like' : 'Like this trip'}
         >
-          <Heart className={`size-4 ${liked ? 'fill-accent text-accent' : ''}`} />
+          <Heart className={`size-4 ${liked ? 'fill-signal text-signal' : ''}`} />
           {likes > 0 && formatCompact(likes)}
         </Button>
       </div>
@@ -100,7 +100,7 @@ export function PublicTripActions({
       <TakeWithYou itinerary={itinerary} />
 
       {itinerary.counters.clones > 0 && (
-        <p className="text-sm text-ink-faint">
+        <p className="text-sm text-steel-2">
           {formatCompact(itinerary.counters.clones)}{' '}
           {itinerary.counters.clones === 1 ? 'person has' : 'people have'} made this trip theirs.
         </p>

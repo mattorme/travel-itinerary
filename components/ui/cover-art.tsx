@@ -37,17 +37,19 @@ function makeRandom(seed: number): () => number {
 }
 
 /**
- * Warm, low-saturation pairs. Constrained on purpose: a random hue would
- * eventually produce something that clashes with the accent, and the covers
- * need to look like a set when six of them sit in a grid.
+ * Ground and line pairs drawn from the route palette.
+ *
+ * Constrained on purpose: a random hue would eventually clash, and six covers
+ * sitting in a grid need to look like one set. Each pair is a pale ground with
+ * its own line colour taken from the same family the map and timeline use.
  */
 const PALETTES: readonly { bg: string; line: string; wash: string; route: string }[] = [
-  { bg: '#EFE4D2', line: '#A8471A', wash: '#DFCBAA', route: '#7A2E0E' },
-  { bg: '#E3E8DC', line: '#2F5A45', wash: '#CBD6C0', route: '#1E3B2C' },
-  { bg: '#EDDFD8', line: '#7E3A2E', wash: '#DCC2B6', route: '#552218' },
-  { bg: '#DFE6EE', line: '#274465', wash: '#C4D2E1', route: '#17293E' },
-  { bg: '#EDE5CE', line: '#6B561A', wash: '#DCCFA6', route: '#463710' },
-  { bg: '#E8DFE8', line: '#513457', wash: '#D3C2D5', route: '#332037' },
+  { bg: '#DDE3F4', line: '#1B3BD8', wash: '#C3CDEC', route: '#12299B' },
+  { bg: '#D6E6DD', line: '#0B6E4F', wash: '#B7D4C6', route: '#075139' },
+  { bg: '#EFD8D3', line: '#D6321F', wash: '#E1BDB6', route: '#96200F' },
+  { bg: '#E9D5E4', line: '#B0187E', wash: '#D8BAD0', route: '#7B1058' },
+  { bg: '#EBE0C6', line: '#8A5A00', wash: '#DCCBA5', route: '#5E3D00' },
+  { bg: '#D3E5E9', line: '#00697A', wash: '#B7D5DB', route: '#004A56' },
 ];
 
 export function CoverArt({
@@ -131,8 +133,8 @@ export function CoverArt({
           <polyline
             key={index}
             points={points}
-            strokeWidth={index === 0 ? 2.6 : 1.5}
-            opacity={0.72 - index * 0.055}
+            strokeWidth={index === 0 ? 3 : 1.7}
+            opacity={0.85 - index * 0.06}
           />
         ))}
       </g>
