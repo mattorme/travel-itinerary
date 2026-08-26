@@ -1,11 +1,12 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { importLibrary, setOptions } from '@googlemaps/js-api-loader';
 import { Layers, Maximize2, X } from 'lucide-react';
 import { publicEnv } from '@/lib/public-env';
 import { cn } from '@/lib/utils/cn';
 import { dayColour, type MapStop } from './types';
+import { useGoogleMap } from './use-google-map';
+import { useMapStops } from './use-map-stops';
 
 /**
  * The itinerary map.
@@ -16,23 +17,10 @@ import { dayColour, type MapStop } from './types';
  * *no* map, which is why the no-key path renders nothing rather than
  * substituting another provider.
  *
- * Three deliberate constraints:
- *
- *  - Loaded lazily, on scroll. Dynamic Maps is billed per load and this sits on
- *    a public page built to be shared; paying for every visitor who never
- *    scrolls to it would be a poor trade.
- *  - It reinforces the itinerary rather than competing with it: fixed height,
- *    in the flow, with a full-screen mode for when someone actually wants to
- *    explore.
- *  - Selecting a day filters the map and scrolls the itinerary to match, so the
- *    two views never disagree about what you are looking at.
+ * This component is now only the chrome: the day filter, the full-screen
+ * toggle, and the two-way link with the itinerary. Loading the API lives in
+ * useGoogleMap and drawing lives in useMapStops.
  */
-
-interface MarkerFactory {
-  AdvancedMarkerElement: typeof google.maps.marker.AdvancedMarkerElement;
-  PinElement: typeof google.maps.marker.PinElement;
-}
-
 export function TripMap({
   stops,
   dayCount,
@@ -43,83 +31,14 @@ export function TripMap({
   title: string;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<google.maps.Map | null>(null);
-  const factoryRef = useRef<MarkerFactory | null>(null);
-  const markersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
-  const linesRef = useRef<google.maps.Polyline[]>([]);
-  const infoRef = useRef<google.maps.InfoWindow | null>(null);
-
-  const [shouldLoad, setShouldLoad] = useState(false);
-  const [ready, setReady] = useState(false);
-  const [failed, setFailed] = useState(false);
   const [activeDay, setActiveDay] = useState<number | null>(null);
   const [expanded, setExpanded] = useState(false);
 
   const apiKey = publicEnv.mapsBrowserKey;
   const visible = useMemo(
-    () => (activeDay === null ? stops : stops.filter((s) => s.dayIndex === activeDay)),
+    () => (activeDay === null ? stops : stops.filter((stop) => stop.dayIndex === activeDay)),
     [stops, activeDay],
   );
-
-  // Defer the script until the map is nearly on screen.
-  useEffect(() => {
-    if (!apiKey || shouldLoad) return;
-    const node = containerRef.current;
-    if (!node) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((e) => e.isIntersecting)) {
-          setShouldLoad(true);
-          observer.disconnect();
-        }
-      },
-      { rootMargin: '300px' },
-    );
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [apiKey, shouldLoad]);
-
-  useEffect(() => {
-    if (!shouldLoad || !apiKey || mapRef.current) return;
-    let cancelled = false;
-
-    void (async () => {
-      try {
-        // Functional API: `setOptions` must run before the first import, and
-        // the first import is what actually fetches the script.
-        setOptions({ key: apiKey, v: 'weekly' });
-        const [maps, marker] = await Promise.all([
-          importLibrary('maps'),
-          importLibrary('marker'),
-        ]);
-        if (cancelled || !containerRef.current) return;
-
-        mapRef.current = new maps.Map(containerRef.current, {
-          // A Map ID is required for advanced markers. DEMO_MAP_ID works for
-          // development; production should use a styled map from the console.
-          mapId: publicEnv.mapsMapId ?? 'DEMO_MAP_ID',
-          disableDefaultUI: true,
-          zoomControl: true,
-          gestureHandling: 'cooperative', // never hijack page scroll on a phone
-          clickableIcons: false,
-        });
-        factoryRef.current = {
-          AdvancedMarkerElement: marker.AdvancedMarkerElement,
-          PinElement: marker.PinElement,
-        };
-        infoRef.current = new maps.InfoWindow({ disableAutoPan: false });
-        setReady(true);
-      } catch (error) {
-        console.warn('[map] failed to load', error);
-        if (!cancelled) setFailed(true);
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [shouldLoad, apiKey]);
 
   const focusActivity = useCallback((activityId: string) => {
     const node = document.getElementById(`activity-${activityId}`);
@@ -129,102 +48,14 @@ export function TripMap({
     setTimeout(() => node.removeAttribute('data-map-focus'), 2200);
   }, []);
 
-  // Redraw markers and routes whenever the visible set changes.
-  useEffect(() => {
-    const map = mapRef.current;
-    const factory = factoryRef.current;
-    if (!map || !factory || !ready) return;
-
-    for (const existing of markersRef.current) existing.map = null;
-    for (const line of linesRef.current) line.setMap(null);
-    markersRef.current = [];
-    linesRef.current = [];
-
-    const bounds = new google.maps.LatLngBounds();
-
-    for (const stop of visible) {
-      const position = { lat: stop.lat, lng: stop.lng };
-      bounds.extend(position);
-
-      const pin = new factory.PinElement({
-        background: dayColour(stop.dayIndex),
-        borderColor: '#FDFBF7',
-        glyphColor: '#FDFBF7',
-        glyph: String(stop.stopNumber),
-        scale: 1.05,
-      });
-
-      const marker = new factory.AdvancedMarkerElement({
-        map,
-        position,
-        title: stop.title,
-        content: pin.element,
-        gmpClickable: true,
-      });
-
-      marker.addListener('click', () => {
-        infoRef.current?.setContent(
-          `<div style="font-family:system-ui;max-width:220px;line-height:1.35">
-             <div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8a857a">
-               Day ${stop.dayIndex}${stop.startLabel ? ` &middot; ${escapeHtml(stop.startLabel)}` : ''}
-             </div>
-             <div style="font-size:15px;margin-top:4px;color:#17150f">${escapeHtml(stop.title)}</div>
-           </div>`,
-        );
-        infoRef.current?.open({ map, anchor: marker });
-        focusActivity(stop.activityId);
-      });
-
-      markersRef.current.push(marker);
-    }
-
-    // One polyline per day, so the route reads as separate days rather than one
-    // continuous journey that never happened.
-    const byDay = new Map<number, MapStop[]>();
-    for (const stop of visible) {
-      byDay.set(stop.dayIndex, [...(byDay.get(stop.dayIndex) ?? []), stop]);
-    }
-
-    for (const [day, dayStops] of byDay) {
-      if (dayStops.length < 2) continue;
-      linesRef.current.push(
-        new google.maps.Polyline({
-          map,
-          path: [...dayStops]
-            .sort((a, b) => a.stopNumber - b.stopNumber)
-            .map((s) => ({ lat: s.lat, lng: s.lng })),
-          strokeColor: dayColour(day),
-          // Dotted: these are straight lines between stops, not the road you
-          // would actually take. A solid line would imply a precision the map
-          // does not have.
-          strokeOpacity: 0,
-          icons: [
-            {
-              icon: { path: 'M 0,-1 0,1', strokeOpacity: 0.9, scale: 3 },
-              offset: '0',
-              repeat: '12px',
-            },
-          ],
-        }),
-      );
-    }
-
-    if (bounds.isEmpty()) return undefined;
-
-    map.fitBounds(bounds, { top: 48, bottom: 48, left: 32, right: 32 });
-    // A single stop otherwise zooms to maximum, which tells you nothing.
-    const listener = google.maps.event.addListenerOnce(map, 'idle', () => {
-      const zoom = map.getZoom();
-      if (zoom !== undefined && zoom > 16) map.setZoom(16);
-    });
-    return () => google.maps.event.removeListener(listener);
-  }, [visible, ready, focusActivity]);
+  const handle = useGoogleMap(containerRef);
+  useMapStops(handle, visible, focusActivity);
 
   // Escape closes full screen; the body must not scroll behind it.
   useEffect(() => {
     if (!expanded) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setExpanded(false);
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setExpanded(false);
     };
     document.addEventListener('keydown', onKey);
     const previous = document.body.style.overflow;
@@ -279,7 +110,7 @@ export function TripMap({
         </div>
         <button
           type="button"
-          onClick={() => setExpanded((v) => !v)}
+          onClick={() => setExpanded((value) => !value)}
           aria-label={expanded ? 'Close full screen map' : 'Expand map'}
           className="shrink-0 rounded-full p-2 text-ink-muted hover:bg-paper-sunk hover:text-ink"
         >
@@ -291,12 +122,12 @@ export function TripMap({
         ref={containerRef}
         className={cn('w-full bg-paper-sunk', expanded ? 'h-[calc(100dvh-3rem)]' : 'h-72 sm:h-96')}
       >
-        {!ready && !failed && (
+        {!handle.ready && !handle.failed && (
           <div className="flex h-full items-center justify-center text-sm text-ink-faint">
             Loading map…
           </div>
         )}
-        {failed && (
+        {handle.failed && (
           <div className="flex h-full items-center justify-center px-6 text-center text-sm text-ink-muted">
             The map could not load. The itinerary below is unaffected.
           </div>
@@ -337,12 +168,4 @@ function DayChip({
       {children}
     </button>
   );
-}
-
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
 }
