@@ -8,6 +8,7 @@ import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
 import { TripView } from '@/components/trip/trip-view';
 import { OwnerTripActions } from '@/components/trip/owner-trip-actions';
+import { DangerZone } from '@/components/trip/danger-zone';
 import { GenerationProgress } from '@/components/trip/generation-progress';
 
 export const metadata: Metadata = {
@@ -77,6 +78,9 @@ export default async function TripPage({ params }: { params: Promise<{ id: strin
           itinerary={itinerary}
           editable
           actions={<OwnerTripActions itinerary={itinerary} />}
+          footer={
+            <DangerZone tripId={itinerary.id} cloneCount={itinerary.counters.clones} />
+          }
         />
       </main>
       <SiteFooter />

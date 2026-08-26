@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { openOwnedTrip } from './support/trip';
 
 /**
  * Editing, from the traveller's side.
@@ -44,11 +45,7 @@ test.describe('editing an owned trip', () => {
   });
 
   test('an owner can pin a stop so it stays put', async ({ page }) => {
-    await page.goto('/t/three-slow-days-in-tokyo');
-    await page.getByRole('button', { name: 'Make this trip yours' }).click();
-    await page.waitForURL(/\/t\/[a-z0-9-]+/, { timeout: 20_000 });
-    await page.getByRole('button', { name: 'Edit this trip' }).click();
-    await page.waitForURL(/\/trips\/[0-9a-f-]+/, { timeout: 20_000 });
+    await openOwnedTrip(page);
 
     const pin = page.locator('#day-1').getByRole('button', { name: 'Pin' }).first();
     await pin.click();
@@ -60,11 +57,7 @@ test.describe('editing an owned trip', () => {
   });
 
   test('a new clone is private until its owner shares it', async ({ page }) => {
-    await page.goto('/t/three-slow-days-in-tokyo');
-    await page.getByRole('button', { name: 'Make this trip yours' }).click();
-    await page.waitForURL(/\/t\/[a-z0-9-]+/, { timeout: 20_000 });
-    await page.getByRole('button', { name: 'Edit this trip' }).click();
-    await page.waitForURL(/\/trips\/[0-9a-f-]+/, { timeout: 20_000 });
+    await openOwnedTrip(page);
 
     // Nobody should publish a trip by accident.
     await expect(page.getByRole('radio', { name: /Private/ })).toBeChecked();

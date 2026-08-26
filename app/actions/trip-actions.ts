@@ -2,7 +2,6 @@
 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { headers } from 'next/headers';
 import { createClient } from '@/lib/db/supabase/server';
 import { getOrCreateSessionUser, requireUser } from '@/lib/auth/session';
 import { assertCanEditTrip, ForbiddenError, NotFoundError } from '@/lib/auth/authorization';
@@ -106,35 +105,11 @@ export async function toggleLike(tripId: string): Promise<ActionResult<{ liked: 
   return { ok: true, data: { liked: true } };
 }
 
-export async function toggleSave(tripId: string): Promise<ActionResult<{ saved: boolean }>> {
-  const user = await getOrCreateSessionUser();
-  const supabase = await createClient();
-
-  const { data: existing } = await supabase
-    .from('trip_saves')
-    .select('trip_id')
-    .eq('trip_id', tripId)
-    .eq('profile_id', user.id)
-    .maybeSingle();
-
-  if (existing) {
-    await supabase.from('trip_saves').delete().eq('trip_id', tripId).eq('profile_id', user.id);
-    return { ok: true, data: { saved: false } };
-  }
-
-  const { error } = await supabase
-    .from('trip_saves')
-    .insert({ trip_id: tripId, profile_id: user.id });
-
-  if (error) return { ok: false, error: 'We could not save that.' };
-  return { ok: true, data: { saved: true } };
-}
-
 export async function recordShare(tripId: string, channel: string): Promise<void> {
   await recordTripEvent({ tripId: asTripId(tripId), type: 'share', channel });
 }
 
-export async function deleteTrip(tripId: string): Promise<ActionResult> {
+export async function deleteTrip(tripId: string): Promise<ActionResult | void> {
   try {
     const user = await requireUser();
     await assertCanEditTrip(asTripId(tripId), user);
@@ -158,12 +133,4 @@ function messageFor(error: unknown): string {
   if (error instanceof ForbiddenError) return 'This is not your trip.';
   if (error instanceof NotFoundError) return 'We could not find that trip.';
   return 'Something went wrong.';
-}
-
-/** Used by the share sheet to build absolute links without hardcoding a host. */
-export async function currentOrigin(): Promise<string> {
-  const headerList = await headers();
-  const host = headerList.get('host');
-  const proto = headerList.get('x-forwarded-proto') ?? 'https';
-  return host ? `${proto}://${host}` : '';
 }

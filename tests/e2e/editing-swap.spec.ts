@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { openOwnedTrip } from './support/trip';
 
 /**
  * Swapping and adding.
@@ -7,13 +8,6 @@ import { expect, test } from '@playwright/test';
  * disliked but never replace it. That made every generator mistake permanent,
  * which is the fastest way to lose trust in an itinerary.
  */
-async function openOwnedTrip(page: import('@playwright/test').Page) {
-  await page.goto('/t/three-slow-days-in-tokyo');
-  await page.getByRole('button', { name: 'Make this trip yours' }).click();
-  await page.waitForURL(/\/t\/[a-z0-9-]+/, { timeout: 20_000 });
-  await page.getByRole('button', { name: 'Edit this trip' }).click();
-  await page.waitForURL(/\/trips\/[0-9a-f-]+/, { timeout: 20_000 });
-}
 
 test.describe('swapping a stop', () => {
   test('offers alternatives and replaces the stop with the chosen one', async ({ page }) => {

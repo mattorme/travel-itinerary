@@ -1,5 +1,5 @@
 begin;
-select plan(29);
+select plan(33);
 
 -- ---------------------------------------------------------------------------
 -- Test helpers, defined inside the test transaction so they are rolled back
@@ -251,6 +251,38 @@ select throws_ok(
        array['aaaaaaaa-0000-0000-0000-000000000009']::uuid[]) $$,
   '22023', null,
   'reorder_activities refuses an activity belonging to another day');
+
+-- ---------------------------------------------------------------------------
+-- Soft delete.
+--
+-- Postgres applies the SELECT policy to the NEW row of an UPDATE, so a read
+-- policy filtering on `deleted_at is null` makes deletion impossible. This has
+-- already been got wrong twice — once here and once on comments — so it is
+-- pinned by a test.
+-- ---------------------------------------------------------------------------
+reset role;
+select tests.authenticate_as('00000000-0000-0000-0000-0000000000a1');
+
+select lives_ok(
+  $$ update public.trips set deleted_at = now(), visibility = 'private'
+      where slug = 'unlisted-trip' $$,
+  'an owner can soft-delete their own trip');
+
+select is(
+  (select count(*)::int from public.trips
+    where slug = 'unlisted-trip' and deleted_at is not null),
+  1, 'the trip is actually marked deleted');
+
+-- Deleted means gone for everyone else, immediately.
+reset role;
+select tests.authenticate_as('00000000-0000-0000-0000-0000000000a2');
+select is(
+  (select count(*)::int from public.trips where slug = 'unlisted-trip'),
+  0, 'a deleted trip is invisible to everyone else');
+
+select is(
+  (select public.can_read_trip('22222222-2222-2222-2222-222222222222')::int),
+  0, 'children of a deleted trip become unreadable too');
 
 select * from finish();
 rollback;

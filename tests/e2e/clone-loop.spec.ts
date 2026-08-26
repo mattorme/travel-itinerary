@@ -43,8 +43,12 @@ test.describe('the clone loop', () => {
     await cta.click();
 
     // Lands on their own copy, not a sign-up page.
-    await page.waitForURL(/\/t\/[a-z0-9-]+/, { timeout: 20_000 });
-    await expect(page).not.toHaveURL(new RegExp(`${DEMO}$`));
+    // Must be a /t/ URL that is not the one we started on: waiting on the
+    // pattern alone matches the page already open.
+    await page.waitForURL(
+      (url) => url.pathname.startsWith('/t/') && url.pathname !== DEMO,
+      { timeout: 20_000 },
+    );
     await expect(page).not.toHaveURL(/signin/);
 
     // The copy is theirs to edit, and credits the original.
